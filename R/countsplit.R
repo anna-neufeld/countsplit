@@ -3,6 +3,8 @@
 #' Be sure to see the countsplitting tutorial vignette for details of how to use this correctly with existing 
 #' single cell RNA-seq pipelines. 
 #' 
+#' @export
+#' 
 #' @param X A cell-by-gene matrix of integer counts
 #' @param epsilon The thinning parameter for count splitting. Must be between 0 and 1.
 countsplit <- function(X, epsilon=0.5) {
@@ -25,6 +27,8 @@ countsplit <- function(X, epsilon=0.5) {
 #' IDK how much I should plan to do for the user. 
 #' 
 #' @importFrom speedglm speedglm
+#' @importFrom stats poisson quasipoisson rbinom
+#' @export
 #'
 #' @param counts A cell-by-gene matrix of integer counts.
 #' @param latentvar The latent variable that you wish to test for differential expression across. Must have length equal to number of cells
@@ -33,7 +37,7 @@ countsplit <- function(X, epsilon=0.5) {
 #' @param offsets Specify any offsets that you would like in your model. Typically a vector of logged size factors. Must have length equal to the number of cells. 
 fit_glms <- function(counts, latentvar, family="poisson", test="wald", offsets=rep(1, NROW(counts))) {
   if (family=="nb") {
-    pvals_pseudotime <- t(apply(Xtest, 2, function(u) mynbglm(u,clusters)))
+    pvals_pseudotime <- t(apply(counts, 2, function(u) mynbglm(u,latentvar, offsets)))
    } 
   if (family=="quasipoisson") {
     res <- t(apply(counts, 2, function(u) as.numeric(summary(speedglm::speedglm(u~latentvar, family=quasipoisson("log")))$coefficients[2,])))
@@ -44,11 +48,13 @@ fit_glms <- function(counts, latentvar, family="poisson", test="wald", offsets=r
   
   res <- data.frame(res[,c(1,2,4)])
   names(res) <- c("estimate", "se", "pval")
+  #rownames(res) <- rownames(counts)
   return(res)
 }
 
+#' importFrom MASS glm.nb
 mynbglm <- function(u, latent, offset) {
-  try1 <- try(suppressWarnings(MASS::glm.nb(u~latent, offset=offset)))
+  try1 <- try(suppressWarnings(glm.nb(u~latent, offset=offset)))
   if (class(try1)[1]=="try-error") {
     return(c(NA,NA,NA,NA))
   } else {
