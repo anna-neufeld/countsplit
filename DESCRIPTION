@@ -1,0 +1,12 @@
+Package: countsplit
+Title: Implements the count splitting methodology from the paper "Inference after latent variable estimation for single cell RNA sequencing data". 
+Version: 0.0.0.9000
+Authors@R: 
+    person("Anna", "Neufeld", , "aneufeld@uw.edu", role = c("aut", "cre"))
+Description: Implements the count splitting methodology from the paper "Inference after latent variable estimation for single cell RNA sequencing data". 
+License: `use_mit_license()`
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
+Imports:
+  speedglm
