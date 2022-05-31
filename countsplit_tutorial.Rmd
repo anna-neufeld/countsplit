@@ -81,7 +81,11 @@ Yay.
 
 # Example integrated with Seurat
 
-The example above is really everything that you need to know about the ``countsplit`` package. But integrating it with existing pipelines can be kind of hard. Here we try to go through a few illustrative examples to get you to see the logic. We do everything on the cardiomyocite data used in our paper. 
+The example above is really everything that you need to know about the ``countsplit`` package. But integrating it with existing pipelines can be kind of hard. Here we try to go through a few illustrative examples to get you to see the logic. We do everything on the cardiomyocite data used in our paper. It is included in the data section of the R package.
+
+```{r}
+data(cm)
+```
 
 # Example integrated with Monocle3
 
