@@ -12,15 +12,14 @@
 #' data(cm)
 "cm"
 
-
 #' This was downloaded using the instructions at the start of the Seurat clustering tutorial.
 #' It is included here for convenience. 
 #'
 #' @docType data
 #'}
 #' @keywords datasets
-#' @format A RDS object. 
+#' @format A matrix. 
 #' @references 
 #' @examples
-#' data(pbmc.counts)
-"pbmc.counts"
+#' data(pbmc_counts)
+"pbmc_counts"

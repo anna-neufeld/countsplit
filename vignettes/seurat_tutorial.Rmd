@@ -31,7 +31,7 @@ We use the same dataset as in the Seurat [clustering](https://satijalab.org/seur
 library(Seurat)
 library(countsplit)
 library(patchwork)
-data(pbmc.counts, package="countsplit")
+data(pbmc_counts, package="countsplit")
 ```
 
 Seurat objects cannot handle gene names that have underscores in them. To avoid issues later in the tutorial (where we will need to use gene names to map between the training and test sets), we run the following code to replace all underscores with dashes in the gene names of the raw counts matrix. 
@@ -209,7 +209,11 @@ p0+p1+p2+plot_layout(nrow=3)
 
 ### Heat Maps
 
-We return to further up in the Seurat tutorial to see which of the TEST SET genes vary across the TRAINING SET PCs. 
+```{r}
+DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE)
+DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE)
+```
+
 
 
 
