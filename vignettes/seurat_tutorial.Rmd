@@ -133,5 +133,5 @@ pbmc.test <- SetAssayData(object = pbmc.test, slot = "counts", new.data = Xtests
 Ok this is good. The one thing I am worried about is that the findMarkers function uses like scaled or logged data instead of raw counts. But I guess we will just see what happens. 
 
 ```{r}
-cluster2.markers <- FindMarkers(pbmc, ident.1 = 2, min.pct = 0.25)
+cluster2.markers <- FindMarkers(pbmc.test, ident.1 = 2, min.pct = 0.25)
 ```
