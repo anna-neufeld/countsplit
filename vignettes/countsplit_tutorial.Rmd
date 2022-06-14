@@ -84,6 +84,8 @@ We can already see from the summary output that the p-values for the first 6 gen
 ggplot(data=NULL, aes(sample=results.countsplit[,4]))+geom_qq(distribution="qunif")+geom_abline(col="red")
 ```
 
+In summary, count splitting controls the Type 1 error when there is no true signal in the data. 
+
 ## Simulated data with true signal
 
 We now demonstrate the performance of count splitting on a simple simulated dataset that contains two true clusters. We first randomly assign the cells to one of two true clusters. We then generate data such that $X_{ij} \sim \mathrm{Poisson}(\Lambda_{ij})$. Genes $1--10$ are differentially expressed-- for $j=1,\ldots,10$, $\Lambda_{ij} = 5$ for cells in cluster $0$ and $\Lambda_{ij}=10$ for cells in cluster $1$. Genes $11--200$ are not differentially expressed ($\Lambda_{ij}=5$ for all cells). 
@@ -123,7 +125,7 @@ clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
 table(clusters.train, clusters.full)
 ```
 
-We now compare the slopes and intercepts that we estimate via count splitting to those that we would get in the ideal setting where we were able to observe the true clusters. 
+We now compare the slopes and intercepts that we estimate via count splitting to those that we would get in the ideal setting where we were able to observe the true clusters. If we observed the true clusters there would be no double dipping concern and we would be able to use the entire dataset $X$ for inference. 
 
 ```{r}
 intercepts.ideal <- t(apply(X, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[1,1]))
@@ -138,7 +140,7 @@ intercepts.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.tr
 slopes.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[2,1]))
 ```
 
-This plot shows what we get.
+This plot shows what we get. In general, the ideal slopes and the count splitting slopes match up quite well. The count splitting intercepts tend to fall on the line $\log(0.5) + \text{ideal intercept}$. There are a few exceptions where the intercepts are really far from this line. Investigating further, these outliers are cases where XXXXX. 
 ```{r}
 library(ggplot2)
 library(patchwork)
@@ -147,5 +149,4 @@ p2 <- ggplot(data=NULL, aes(x=slopes.ideal, y=slopes.countsplit))+geom_point()+g
 p1 + p2
 ```
 
-
-We see that
+Overall, when there are true clusters in the data, count splitting agrees pretty well with the ideal method. 

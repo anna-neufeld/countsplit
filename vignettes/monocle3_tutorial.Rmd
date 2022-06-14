@@ -10,6 +10,7 @@ vignette: >
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
 Before using this tutorial, we recommend that you read through our ``introduction to count splitting" tutorial to understand our method in a simple package with simulated data. 
@@ -153,7 +154,7 @@ pr_deg_ids <- row.names(subset(ciliated_cds_pr_test_res, q_value < 0.0005))
 
 Here are a couple of interesting genes that score as highly significant according to graph_test():
 
-```{r}
+```{r,results='hide'}
 plot_cells(cds_mix, genes=c("hlh-4", "gcy-8", "dac-1", "oig-8"),
            show_trajectory_graph=FALSE,
            label_cell_groups=FALSE,
