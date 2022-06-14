@@ -145,7 +145,7 @@ The p-values are literally so tiny-- even with count splitting. Huh.
 
 This is gonna be harder but its important. 
 
-```{r}
+```{r, results='hide'}
 cds_mix <- cds_train
 counts(cds_mix) <- Xtest
 ciliated_cds_pr_test_res <- graph_test(cds_mix, neighbor_graph="principal_graph", cores=4)
@@ -154,7 +154,7 @@ pr_deg_ids <- row.names(subset(ciliated_cds_pr_test_res, q_value < 0.0005))
 
 Here are a couple of interesting genes that score as highly significant according to graph_test():
 
-```{r,results='hide'}
+```{r, results='hide'}
 plot_cells(cds_mix, genes=c("hlh-4", "gcy-8", "dac-1", "oig-8"),
            show_trajectory_graph=FALSE,
            label_cell_groups=FALSE,
