@@ -11,7 +11,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
-In this tutorial, we use the same data and follow the same steps as the Seurat [clutering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) tutorial. We use count splitting and we highlight the steps that should be performed on the training set and the test set. We also point out some places where count splitting may lead to confusion. For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
+In this tutorial, we use the same data and follow the same steps as the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) tutorial. We use count splitting and we highlight the steps that should be performed on the training set and the test set. We also point out some places where count splitting may lead to confusion. For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
 
 # Install Seurat
 
@@ -25,7 +25,7 @@ BiocManager::install("Seurat")
 
 # Loading the data
 
-We use the same dataset as in the Seurat [clutering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) vignette. For convenience, we included the `pbmc` dataset raw counts (obtained from 10x genomics) in this package. We just need to load the packages and load the count matrix. 
+We use the same dataset as in the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) vignette. For convenience, we included the `pbmc` dataset raw counts (obtained from 10x genomics) in this package. We just need to load the packages and load the count matrix. 
 
 ```{r}
 library(Seurat)
