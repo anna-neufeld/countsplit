@@ -88,7 +88,7 @@ In summary, count splitting controls the Type 1 error when there is no true sign
 
 ## Simulated data with true signal
 
-We now demonstrate the performance of count splitting on a simple simulated dataset that contains two true clusters. We first randomly assign the cells to one of two true clusters. We then generate data such that $X_{ij} \sim \mathrm{Poisson}(\Lambda_{ij})$. Genes $1--10$ are differentially expressed-- for $j=1,\ldots,10$, $\Lambda_{ij} = 5$ for cells in cluster $0$ and $\Lambda_{ij}=10$ for cells in cluster $1$. Genes $11--200$ are not differentially expressed ($\Lambda_{ij}=5$ for all cells). 
+We now demonstrate the performance of count splitting on a simple simulated dataset that contains two true clusters. We first randomly assign the cells to one of two true clusters. We then generate data such that $X_{ij} \sim \mathrm{Poisson}(\Lambda_{ij})$. Genes 1-10 are differentially expressed-- for $j=1,\ldots,10$, $\Lambda_{ij} = 5$ for cells in cluster $0$ and $\Lambda_{ij}=10$ for cells in cluster $1$. Genes 11-200 are not differentially expressed ($\Lambda_{ij}=5$ for all cells). 
 
 ```{r}
 set.seed(1)
@@ -118,35 +118,43 @@ clusters.full <- kmeans(log(X+1), centers=2)$cluster
 table(clusters.true, clusters.full)
 ```
 
-If instead we use only `Xtrain` to estimate the clusters, we see that we make a few additional errors, but that in general we still get excellent estimates.
+If instead we use only `Xtrain` to estimate the clusters, we see that we make a few additional errors, but that in general we still come very close to estimating the true clusters. 
 
 ```{r}
 clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
-table(clusters.train, clusters.full)
+table(clusters.true, clusters.train)
 ```
 
-We now compare the slopes and intercepts that we estimate via count splitting to those that we would get in the ideal setting where we were able to observe the true clusters. If we observed the true clusters there would be no double dipping concern and we would be able to use the entire dataset $X$ for inference. 
+We now compare what happens when we regress $X_j$ on the true clusters to what happens if we regress $X_j^{\mathrm{test}}$ on the true clusters. We compare both the slope and intercepts. 
 
 ```{r}
-intercepts.ideal <- t(apply(X, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[1,1]))
-slopes.ideal <- t(apply(X, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[2,1]))
+intercepts.X <- t(apply(X, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[1,1]))
+slopes.X <- t(apply(X, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[2,1]))
+intercepts.Xtest <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[1,1]))
+slopes.Xtest <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[2,1]))
 ```
 
-Let's compare these ideal intercepts and slopes to the values that we get if we instead use either $\widehat{L}(X)$ or $\widehat{L}(X^\mathrm{train})$. 
-
-```{r}
-clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
-intercepts.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[1,1]))
-slopes.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[2,1]))
-```
-
-This plot shows what we get. In general, the ideal slopes and the count splitting slopes match up quite well. The count splitting intercepts tend to fall on the line $\log(0.5) + \text{ideal intercept}$. There are a few exceptions where the intercepts are really far from this line. Investigating further, these outliers are cases where XXXXX. 
+The plot below shows that the intercepts tend to fall on the line $\text{intercept from } X^\mathrm{test} = \log(0.5) + \text{intercept from X}$. The slopes tend to fall on the line $\text{slope from } X^\mathrm{test} = \text{slope} from X}$. 
 ```{r}
 library(ggplot2)
 library(patchwork)
-p1 <- ggplot(data=NULL, aes(x=intercepts.ideal, y=intercepts.countsplit))+geom_point()+geom_abline(intercept= log(0.5), slope=1, col="red")
-p2 <- ggplot(data=NULL, aes(x=slopes.ideal, y=slopes.countsplit))+geom_point()+geom_abline(intercept=0, slope=1, col="red")
-p1 + p2
+differentially_expressed = as.factor(c(rep(1,10), rep(0,190)))
+p1 <- ggplot(data=NULL, aes(x=intercepts.X, y=intercepts.Xtest, col=differentially_expressed ))+geom_point()+geom_abline(intercept= log(0.5), slope=1, col="red")
+p2 <- ggplot(data=NULL, aes(x=slopes.X, y=slopes.Xtest, col=differentially_expressed ))+geom_point()+geom_abline(intercept=0, slope=1, col="red")
+p1 + p2 + plot_layout(guides="collect")
 ```
 
-Overall, when there are true clusters in the data, count splitting agrees pretty well with the ideal method. 
+Finally, we compare the overall slope and intercept estimates that we get from count splitting to what we would get in the ideal setting where we got to regress $X_j$ on the true clusters.
+
+```{r}
+intercepts.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~as.factor(clusters.train), family="poisson"))$coefficients[1,1]))
+slopes.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~as.factor(clusters.train), family="poisson"))$coefficients[2,1]))
+p1 <- ggplot(data=NULL, aes(x=intercepts.X, y=intercepts.countsplit, col=differentially_expressed ))+geom_point()+geom_abline(intercept= log(0.5), slope=1, col="red")
+p2 <- ggplot(data=NULL, aes(x=slopes.X, y=slopes.countsplit, col=differentially_expressed ))+geom_point()+geom_abline(intercept=0, slope=1, col="red")
+p1 + p2 + plot_layout(guides="collect")
+```
+
+Overall, we see general agreement between the parameters estimated via countsplitting and those estimated via the ideal method. 
+
+
+

@@ -9,7 +9,7 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
 Before using this tutorial, we recommend that you read through our ``introduction to count splitting" tutorial to understand our method in a simple package with simulated data. 
@@ -34,5 +34,36 @@ library(tidyverse)
 library(countsplit)
 ```
 
-# 
+# Loading the data
 
+For simplicity, we use the same data that is used in the [scran tutorial](https://bioconductor.org/packages/devel/bioc/vignettes/scran/inst/doc/scran.html), which gets loaded from the ``scRNAseq`` package. 
+
+```{r}
+library(scRNAseq)
+sce <- GrunPancreasData()
+sce
+```
+
+The first step is to extract the count matrix and perform count splitting.
+
+```{r}
+X <- counts(sce)
+set.seed(1)
+split <- countsplit(X, epsilon=0.5)
+Xtrain <- split$train
+Xtest <- split$test
+```
+
+The next step is to construct ``SingleCellExperiment`` objects for the training set and the test set. Note that we want to retain the metadata and the colData from the original object, we only want to update the counts. 
+
+```{r}
+sce.train <- sce
+counts(sce.train) <- Xtrain
+sce.test <- sce
+counts(sce.test) <- Xtest
+```
+
+
+We will now highlight throughout this tutorial which steps should be performed on the training object and which should be performed on the test object. 
+
+*This tutorial has been put on hold indefinitely because the Grun Pancreas data contains non integer counts and I am not sure why.*
