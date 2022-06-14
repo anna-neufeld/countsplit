@@ -134,7 +134,7 @@ intercepts.Xtest <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.true, f
 slopes.Xtest <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[2,1]))
 ```
 
-The plot below shows that the intercepts tend to fall on the line $\text{intercept from } X^\mathrm{test} = \log(0.5) + \text{intercept from X}$. The slopes tend to fall on the line $\text{slope from } X^\mathrm{test} = \text{slope} from X}$. 
+The plot below shows that the intercepts tend to fall on the line $\mathrm{intercept from } X^\mathrm{test} = \log(0.5) + \mathrm{intercept from X}$. The slopes tend to fall on the line $\mathrm{slope from } X^\mathrm{test} = \mathrm{slope from X}$. 
 ```{r}
 library(ggplot2)
 library(patchwork)

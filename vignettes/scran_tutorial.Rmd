@@ -16,8 +16,6 @@ Before using this tutorial, we recommend that you read through our ``introductio
 
 In this tutorial, we use a real dataset from @elorbany2022single that is also used in our paper. The dataset contains 10,000 cells collected over 15 days of a directed differentiation protocol from induced pluripotent stem cells (IPSC) to cardiomyocytes (cm). 
 
-We start with a simple example where we use basic k-means clustering and Poisson GLMs on this data. We then move to a more complex example where we use functions that are built into the ``scran`` package. 
-
 # Install scran
 
 If you don't already have ``scran``, you will need to run:
@@ -36,7 +34,7 @@ library(tidyverse)
 library(countsplit)
 ```
 
-# Simple example on real data using scran.
+# Load the data and perform count splitting
 
 This data is included in this package as a SingleCellExperiment object, so it is simple to load. We will use a few steps from the ``scran`` package.
 
@@ -69,7 +67,7 @@ table(cm$individual)
 table(cm$diffday)
 ```
 
-We now extract the counts and perform count splitting. Note that these are all GENE BY CELL matrices- which is different than what we had before. 
+We now extract the counts and perform count splitting. Note that these are all gene-by-cell matrices- which is different than what we use in our paper. 
 
 ```{r}
 set.seed(1)
@@ -80,18 +78,21 @@ Xtest <- split$test
 ```
 
 
+# Run preprocessing and clustering on the training set.
+
 Now we want to compute clusters on the training set. But this time, instead of simply running ``kmeans()`` on ``log(Xtrain+1)``, we will use an existing scRNA-seq pipeline from the ``scran`` package that also involves preprocessing steps such as selecting highly variable genes. In order to do this, we need to do some analysis that expects a ``SingleCellExperiment`` object rather than a simple matrix.
-All we need to make the ``SingleCellExperiment`` training object is the ``Xtrain`` counts matrix. But it might be nice to retain the column data? 
+
+All we need to make the ``SingleCellExperiment`` training object is the ``Xtrain`` counts matrix. But it might be nice to retain the metadata in case we need it later. In this case, we do that by copying the original ``cm`` object and then updating the ``counts`` assay. 
 
 Actually in this case I don't need any metadata for my analysis. So I could also just contruct a new scRNAseq object from the counts only. 
 
 ```{r}
-cm.train <- SingleCellExperiment(list(counts=Xtrain))
-colData(cm.train) <- colData(cm)
+cm.train <- cm
+counts(cm.train) <- Xtrain
 ```
 
-Now we are ready for our analysis! These steps were inspired by the `\textt{scran}``scran`` tutorial, available at \url{https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html}{https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html}.
-
+Now we are ready for our analysis! These steps were inspired by the [`\textt{scran}``scran`` tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html). 
+We first compute sum factors for normalization and then we perform log normalization of the dataset. 
 
 ```{r}
 clusters <- quickCluster(cm.train)
@@ -99,26 +100,30 @@ cm.train <- computeSumFactors(cm.train, clusters=clusters)
 cm.train <- logNormCounts(cm.train)
 ```
 
+We then recide to work only with the top 2000 highly variable features for the remainder of the analysis. As noted in the ``scran`` tutorial, rather than select the top 2000 we could also try to use something like a FDR threshold to select only those that seem significantly variable. 
+
 ```{r}
 top.hvgs <- getTopHVGs(modelGeneVar(cm.train), n=2000)
 ```
+
+Finally, we run scran's ``clusterCells`` function, which is a wrapper function for the graph-based clustering steps carried out in the tutorial. 
 
 ```{r}
 cm.train<- fixedPCA(cm.train, subset.row=top.hvgs)
 clusters.train <- clusterCells(cm.train,use.dimred="PCA")
 ```
 
-
-It turns out that this function returned 11 clusters.
+It turns out that this function returned 11 clusters. We can visualize them below. 
 
 ```{r,out.width="90%"}
 table(clusters.train)
 ggplot(as_tibble(reducedDim(cm.train)), aes(x=PC1, y=PC2, col=as.factor(clusters.train)))+geom_point()+labs(col="Cluster")
 ```
 
+# Differential expression testing with Poisson GLMs
 
-We now consider two ways to check differential expression. The first is Poisson GLMs for differentially expressed genes between 1 and 2. We don't need Xtest to be in a special object for this.For computational efficiency, we don't want to check all 21,000 genes. Let's check 500 randomly selected genes.
-Recall that in Xtest, the genes are the ROWs not the columns. 
+We now consider two ways to check differential expression. The first is Poisson GLMs for differentially expressed genes between clusters 1 and 2. We don't need ``Xtest`` to be in a special object for this. For computational efficiency, we don't want to check all 21,000 genes. Let's check 500 randomly selected genes.
+Recall that in ``Xtest``, the genes are the rows and not the columns. As in our manuscript, we include size factors as offsets here. 
 
 ```{r, warning=FALSE}
 set.seed(1)
@@ -127,11 +132,13 @@ genes <- sample(1:NCOL(Xtest), size=500)
 results <- t(apply(Xtest[genes, indices], 1, function(u) summary(glm(u~clusters.train[indices], offset=sizeFactors(cm.train)[indices], family="poisson"))$coefficients[2,]))
 table(results[,4] < 0.01)
 head(results)
-```
+`````
 
-What if instead we try to use their own find markers function? It works, just need to figure out how to use. 
-I think it does pairwise t-test between all of the things. 
+# Differential expression testing with scran
 
+If instead of using our own ``glm`` code we want to use the ``scoreMarkers`` function from the ``scran`` package, as in the scran tutorial, we need to store our test matrix in a ``SingleCellExperiment`` object. 
+
+We can either construct this from scratch using only the count matrix, or we could make a copy of the original ``cm`` object and add the count matrix after. It depends on if we want to be sure to obtain the metadata or not. 
 
 ```{r}
 cm.test <- SingleCellExperiment(list(counts=Xtest))
@@ -139,11 +146,12 @@ sizeFactors(cm.test) <- sizeFactors(cm.train)
 cm.test <- logNormCounts(cm.test)
 ```
 
-This shows how different cluster 1 is from all of the other clusters. WRite a little paragaph about interpreting results. Ok! There really are important genes! Even without double dipping!!!
+This first element in ``results`` shows marker genes that distinguish cluster 1 from all other clusters. We see that, even with count splitting, there are highly significant marker genes.
+
 ```{r}
 results <- scran::findMarkers(
   cm.test, groups= clusters.train,
   pval.type = "all")
-results [[1]]
+results[[1]]
 ```
 

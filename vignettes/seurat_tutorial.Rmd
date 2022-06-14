@@ -187,7 +187,7 @@ pbmc.test <- NormalizeData(pbmc.test)
 pbmc.test <- ScaleData(pbmc.test, features = all.genes)
 ```
 
-Now we should be ready to do some cool visualization. We first convince ourselves that the Seurat ``FindMarkers`` function returns the same information as the manual differential expression test above!!! We are happy to see this!!! So basically, we can always use the ``FindMarkers`` function instead of doing things manually. 
+Now we should be ready to do some cool visualizations. We first convince ourselves that the Seurat ``FindMarkers`` function returns the same information as the manual differential expression test above!!! We are happy to see this!!! So basically, we can always use the ``FindMarkers`` function instead of doing things manually. 
 
 ```{r}
 cluster2.markers <- FindMarkers(pbmc.test, ident.1 = 2, min.pct = 0)
@@ -195,28 +195,16 @@ head(sort(pvals2), n=10)
 head(cluster2.markers, n = 10)
 ```
 
-## Cool visualizations!
+The main reason it is useful to store the test matrix in a ``Seurat`` object is that it lets us use many cool visualization features. 
 
-### Feature Plots
-
-```{r}
-p0 <- DimPlot(pbmc.train, reduction = "umap")
-p1 <- FeaturePlot(pbmc.train, features = c("RPS12","S100A9"), reduction="umap")
-p2 <- FeaturePlot(pbmc.test, features = c("RPS12", "S100A9"), reduction="umap")
-p0+p1+p2+plot_layout(nrow=3)
-```
-
-
-### Heat Maps
-
+Consider the following heatmaps. 
 ```{r}
 DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE)
 DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE)
 ```
-
-
-
-
+The first 10 or so principal components seem to measure true signal in the data. We can tell that they are measuring true signal because we see the same gene expression patterns on the test set as we do on the training set. If the test set genes are differentially expressed across the training set PCs, it suggests that the PCs are measuring true variation. On the other hand, consider the PCs 11-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. 
+This matches insights from the Seurat tutorial (insights obtained using Jackstraw), where they suggested that somewhere between 7-12 PCs would be the right number to keep, and they chose to keep 10.
+These heatmaps show the utility of count splitting in helping distinguish signal from noise.
 
 
 # References
