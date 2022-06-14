@@ -7,7 +7,7 @@
 #'}
 #' @keywords datasets
 #' @format A RDS object. 
-#' @references 
+#' @export
 #' @examples
 #' data(cm)
 "cm"
@@ -19,7 +19,6 @@
 #'}
 #' @keywords datasets
 #' @format A matrix. 
-#' @references 
 #' @examples
-#' data(pbmc_counts)
-"pbmc_counts"
+#' data(pbmc.counts)
+"pbmc.counts"

@@ -1,0 +1,38 @@
+---
+title: "Tutorial: countsplitting and scran" 
+output: rmarkdown::html_vignette
+bibliography: latent.bib
+vignette: >
+  %\VignetteIndexEntry{"Scran Tutorial: countsplitting and scran"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Before using this tutorial, we recommend that you read through our ``introduction to count splitting" tutorial to understand our method in a simple package with simulated data. 
+
+In this tutorial, we reproduce the analysis from the [scran tutorial](https://bioconductor.org/packages/devel/bioc/vignettes/scran/inst/doc/scran.html). The steps of the analysis include preprocessing, graph-based clustering, and identifying differentially expressed marker genes for the clusters. 
+
+# Install scran
+
+If you don't already have ``scran``, you will need to run:
+
+```{r, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("scran")
+```
+
+Next, you should load the package, along with others that we will use in this tutorial.
+
+```{r, message=FALSE, warning=FALSE}
+library(scran)
+library(tidyverse)
+library(countsplit)
+```
+
+# 
+

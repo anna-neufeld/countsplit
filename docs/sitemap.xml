@@ -25,6 +25,9 @@
     <loc>/articles/scran_tutorial.html</loc>
   </url>
   <url>
+    <loc>/articles/scran_tutorial2.html</loc>
+  </url>
+  <url>
     <loc>/articles/seurat_tutorial.html</loc>
   </url>
   <url>
@@ -41,5 +44,8 @@
   </url>
   <url>
     <loc>/reference/index.html</loc>
+  </url>
+  <url>
+    <loc>/reference/pbmc.counts.html</loc>
   </url>
 </urlset>

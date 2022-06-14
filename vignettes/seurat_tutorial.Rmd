@@ -31,7 +31,7 @@ We use the same dataset as in the Seurat [clustering](https://satijalab.org/seur
 library(Seurat)
 library(countsplit)
 library(patchwork)
-data(pbmc_counts, package="countsplit")
+data(pbmc.counts, package="countsplit")
 ```
 
 Seurat objects cannot handle gene names that have underscores in them. To avoid issues later in the tutorial (where we will need to use gene names to map between the training and test sets), we run the following code to replace all underscores with dashes in the gene names of the raw counts matrix. 
