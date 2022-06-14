@@ -78,7 +78,7 @@
       <h1 data-toc-skip>Tutorial: countsplitting and scran</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/anna-neufeld/countsplit/blob/HEAD/vignettes/scran_tutorial2.Rmd" class="external-link"><code>vignettes/scran_tutorial2.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/anna-neufeld/countsplit/blob/HEAD/vignettes/vignettes/scran_tutorial2.Rmd" class="external-link"><code>vignettes/vignettes/scran_tutorial2.Rmd</code></a></small>
       <div class="hidden name"><code>scran_tutorial2.Rmd</code></div>
 
     </div>
@@ -102,7 +102,40 @@
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/anna-neufeld/countsplit" class="external-link">countsplit</a></span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="section"></h2>
+<h2 id="loading-the-data">Loading the data<a class="anchor" aria-label="anchor" href="#loading-the-data"></a>
+</h2>
+<p>For simplicity, we use the same data that is used in the <a href="https://bioconductor.org/packages/devel/bioc/vignettes/scran/inst/doc/scran.html" class="external-link">scran tutorial</a>, which gets loaded from the <code>scRNAseq</code> package.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va">scRNAseq</span><span class="op">)</span>
+<span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scRNAseq/man/GrunPancreasData.html" class="external-link">GrunPancreasData</a></span><span class="op">(</span><span class="op">)</span>
+<span class="va">sce</span></code></pre></div>
+<pre><code><span class="co">## class: SingleCellExperiment </span>
+<span class="co">## dim: 20064 1728 </span>
+<span class="co">## metadata(0):</span>
+<span class="co">## assays(1): counts</span>
+<span class="co">## rownames(20064): A1BG-AS1__chr19 A1BG__chr19 ... ZZEF1__chr17</span>
+<span class="co">##   ZZZ3__chr1</span>
+<span class="co">## rowData names(2): symbol chr</span>
+<span class="co">## colnames(1728): D2ex_1 D2ex_2 ... D17TGFB_95 D17TGFB_96</span>
+<span class="co">## colData names(2): donor sample</span>
+<span class="co">## reducedDimNames(0):</span>
+<span class="co">## mainExpName: endogenous</span>
+<span class="co">## altExpNames(1): ERCC</span></code></pre>
+<p>The first step is to extract the count matrix and perform count splitting.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
+<span class="va">split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/countsplit.html">countsplit</a></span><span class="op">(</span><span class="va">X</span>, epsilon<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span>
+<span class="va">Xtrain</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">$</span><span class="va">train</span>
+<span class="va">Xtest</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">$</span><span class="va">test</span></code></pre></div>
+<p>The next step is to construct <code>SingleCellExperiment</code> objects for the training set and the test set. Note that we want to retain the metadata and the colData from the original object, we only want to update the counts.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">sce.train</span> <span class="op">&lt;-</span> <span class="va">sce</span>
+<span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce.train</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">Xtrain</span>
+<span class="va">sce.test</span> <span class="op">&lt;-</span> <span class="va">sce</span>
+<span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">sce.test</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">Xtest</span></code></pre></div>
+<p>We will now highlight throughout this tutorial which steps should be performed on the training object and which should be performed on the test object.</p>
+<p><em>This tutorial has been put on hold indefinitely because the Grun Pancreas data contains non integer counts and I am not sure why.</em></p>
 </div>
   </div>
 
