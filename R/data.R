@@ -22,5 +22,5 @@
 #' @format A RDS object. 
 #' @references 
 #' @examples
-#' data(pbmc)
-"pbmc"
+#' data(pbmc.counts)
+"pbmc.counts"

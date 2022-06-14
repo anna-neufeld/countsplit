@@ -145,7 +145,7 @@ The p-values are literally so tiny-- even with count splitting. Huh.
 
 This is gonna be harder but its important. 
 
-```{r, results='hide'}
+```{r, results=FALSE, message=FALSE, warning=FALSE}
 cds_mix <- cds_train
 counts(cds_mix) <- Xtest
 ciliated_cds_pr_test_res <- graph_test(cds_mix, neighbor_graph="principal_graph", cores=4)

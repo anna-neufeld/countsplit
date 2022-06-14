@@ -37,3 +37,4 @@ reference:
   contents:
   - countsplit
   - cm
+  - pbmc.counts
