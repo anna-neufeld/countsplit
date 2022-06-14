@@ -4,7 +4,7 @@ Version: 0.0.0.9000
 Authors@R: 
     person("Anna", "Neufeld", , "aneufeld@uw.edu", role = c("aut", "cre"))
 Description: Implements the count splitting methodology from the paper "Inference after latent variable estimation for single cell RNA sequencing data". 
-License: `use_mit_license()`
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
@@ -14,5 +14,9 @@ Imports:
   MASS
 Suggests:
   knitr,
-  rmarkdown
+  rmarkdown,
+  ggplot2,
+  patchwork,
+  speedglm
 VignetteBuilder: knitr
+URL: https://github.com/anna-neufeld/countsplit

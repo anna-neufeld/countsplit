@@ -16,71 +16,66 @@ p <- 200
 X <- matrix(rpois(n*p, lambda=5), nrow=n)
 
 ## -----------------------------------------------------------------------------
-set.seed(3)
 clusters.full <- kmeans(log(X+1), centers=2)$cluster
-results.naive <- fit_glms(X, clusters.full, family="poisson")
+results.naive <- t(apply(X, 2, function(u) summary(glm(u~clusters.full, family="poisson"))$coefficients[2,]))
 head(results.naive)
 
 ## -----------------------------------------------------------------------------
 library(ggplot2)
-ggplot(data=results.naive, aes(sample=pval))+geom_qq(distribution="qunif")+geom_abline(col="red")
+ggplot(data=NULL, aes(sample=results.naive[,4]))+geom_qq(distribution="qunif")+geom_abline(col="red")
 
 ## -----------------------------------------------------------------------------
 set.seed(2)
 split <- countsplit(X, epsilon=0.5)
+names(split)
 Xtrain <- split$train
 Xtest <- split$test
-clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
-results.countsplit <- fit_glms(Xtest, clusters.train, family="poisson")
-ggplot(data=results.countsplit,aes(sample=pval))+geom_qq(distribution="qunif")+geom_abline(col="red")
-
-## ---- message=FALSE, warning=FALSE--------------------------------------------
-library(scran)
-library(tidyverse)
 
 ## -----------------------------------------------------------------------------
-data(cm)
+clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
+results.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[2,]))
+head(results.countsplit)
+
+## -----------------------------------------------------------------------------
+ggplot(data=NULL, aes(sample=results.countsplit[,4]))+geom_qq(distribution="qunif")+geom_abline(col="red")
 
 ## -----------------------------------------------------------------------------
 set.seed(1)
-X <- t(counts(cm))
+n <- 1000
+p <- 200
+clusters.true <- rbinom(n, size=1, prob=0.5)
+Lambda <- matrix(5, nrow=n, ncol=p)
+Lambda[clusters.true==1, 1:10] <- 10
+X <-apply(Lambda,1:2,rpois,n=1)
+
+## -----------------------------------------------------------------------------
+set.seed(111)
 split <- countsplit(X, epsilon=0.5)
 Xtrain <- split$train
 Xtest <- split$test
 
 ## -----------------------------------------------------------------------------
-cm.train <- cm
-counts(cm.train) <- t(Xtrain)
+set.seed(222)
+clusters.full <- kmeans(log(X+1), centers=2)$cluster
+table(clusters.true, clusters.full)
 
 ## -----------------------------------------------------------------------------
-sizeFactors(cm.train) <- librarySizeFactors(cm.train)
-## Pre-processing
-cm.train <- logNormCounts(cm.train)
-top.hvgs <- getTopHVGs(modelGeneVar(cm.train), fdr.threshold=0.05)
-cm.train <- fixedPCA(cm.train, subset.row=top.hvgs)
+clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
+table(clusters.train, clusters.full)
 
-## Graph clustering
-clusters.train <- clusterCells(cm.train,use.dimred="PCA")
+## -----------------------------------------------------------------------------
+intercepts.ideal <- t(apply(X, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[1,1]))
+slopes.ideal <- t(apply(X, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[2,1]))
 
-## ----out.width="90%"----------------------------------------------------------
-table(clusters.train)
-ggplot(as_tibble(reducedDim(cm.train)), aes(x=PC1, y=PC2, col=as.factor(clusters.train)))+geom_point()+labs(col="Cluster")
+## -----------------------------------------------------------------------------
+clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
+intercepts.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[1,1]))
+slopes.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[2,1]))
 
-## ---- warning=FALSE-----------------------------------------------------------
-set.seed(1)
-indices <- which(clusters.train==1 | clusters.train==2)
-genes <- sample(1:NCOL(Xtest), size=500)
-results <- fit_glms(Xtest[indices,genes], clusters.train[indices], offsets=clusters.train$sizeFactors, family="quasipoisson")
-table(results$pval < 0.01)
-head(results)
-
-## ---- warning=FALSE-----------------------------------------------------------
-library(Seurat)
-
-## ---- eval=FALSE--------------------------------------------------------------
-#  library(scran)
-#  data(cm)
-#  sizeFactors(cm) <- librarySizeFactors(cm)
-#  cm <- logNormCounts(cm)
-#  cm.seurat <- as.Seurat(cm)
+## -----------------------------------------------------------------------------
+library(ggplot2)
+library(patchwork)
+p1 <- ggplot(data=NULL, aes(x=intercepts.ideal, y=intercepts.countsplit))+geom_point()+geom_abline(intercept= log(0.5), slope=1, col="red")
+p2 <- ggplot(data=NULL, aes(x=slopes.ideal, y=slopes.countsplit))+geom_point()+geom_abline(intercept=0, slope=1, col="red")
+p1 + p2
 

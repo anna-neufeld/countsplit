@@ -1,6 +1,7 @@
-#' Cardiomyocite data. 
+#' Cardiomyocyte data. 
 #'
-#' This dataset was collected by Elborany et al., 2021 and used in our paper. 
+#' This is a subset of a dataset that was collected by Elborany et al., 2022 and used in our paper. This 
+#' subset contains 10,000 cells and more than 20,000 genes. 
 #'
 #' @docType data
 #'}

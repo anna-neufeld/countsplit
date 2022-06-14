@@ -1,0 +1,17 @@
+---
+title: "countsplit: TO DO"
+output: rmarkdown::html_vignette
+bibliography: latent.bib
+vignette: >
+  %\VignetteIndexEntry{countsplit-overview}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE
+)
+```
+
+This has not been written yet!!!

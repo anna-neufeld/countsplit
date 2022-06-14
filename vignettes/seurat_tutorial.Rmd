@@ -1,0 +1,41 @@
+---
+title: "Tutorial: countsplitting and Seurat" 
+output: rmarkdown::html_vignette
+bibliography: latent.bib
+vignette: >
+  %\VignetteIndexEntry{"Tutorial: countsplitting and Seurat"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+https://satijalab.org/seurat/articles/de_vignette.html 
+
+# Install Seurat
+
+If you don't already have ``seurat``, you will need to run:
+
+```{r, eval=FALSE}
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("Seurat")
+devtools::install_github('satijalab/seurat-data')
+```
+
+
+ANNA fun activity = can I get this data to work. 
+
+
+```{r}
+library(Seurat)
+library(SeuratData)
+```
+
+
+# Load the data
+
+We load the same ``SingleCellExperiment`` object
+

@@ -2,7 +2,7 @@
 % Please edit documentation in R/countsplit.R
 \name{countsplit}
 \alias{countsplit}
-\title{Takes one matrix of counts and returns two matrices of counts: a training set and a test set.}
+\title{Takes one matrix of counts and returns a list containing two matrices of counts: a training set and a test set.}
 \usage{
 countsplit(X, epsilon = 0.5)
 }

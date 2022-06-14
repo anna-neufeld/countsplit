@@ -1,0 +1,39 @@
+template:
+  params:
+    bootswatch: flatly
+
+navbar:
+  structure:
+    left:
+    - tutorial
+    - scran 
+    - seurat
+    - monocle3
+    - reference
+    right:
+    - github
+  components:
+    tutorial:
+      text: Getting started
+      href: articles/countsplit_tutorial.html
+    scran:
+      text: Tutorial with scran
+      href: articles/scran_tutorial.html
+    seurat:
+      text: Tutorial with Seurat
+      href: articles/seurat_tutorial.html
+    monocle3:
+      text: Tutorial with monocle3
+      href: articles/monocle3_tutorial.html
+    reference:
+      text: Reference
+      href: reference/index.html
+      
+
+
+reference:
+- title: Primary user functions
+  desc: ~
+  contents:
+  - countsplit
+  - cm

@@ -1,30 +1,24 @@
-What is treevalues?
+What is countsplit?
 -----
 
-The ``treevalues`` R package computes confidence intervals and p-values for the mean response within a region or the difference in mean response between two regions in a CART regression tree (built using the package ``rpart``). 
+The ``countsplit`` R package splits an integer-valued matrix into a training matrix and a test matrix using binomial thinning. Under a Poisson assumption, the training and test matrices are independent. 
 
-Because the regions in a regression tree are selected using the data, we cannot naively "double dip" in the same data to do inference on the means within these regions. 
+The motivation for this method is described in XXXXXX OUR PREPRINT XXXXX in the context of inference after latent variable estimation for single cell RNA sequencing data. 
 
-The ``treevalues`` package implements a selective inference approach to conduct inference without double dipping in the data. 
-
-
-How can I get treevalues?
+How can I get countsplit?
 -----
 
 Make sure that ``remotes`` is installed by running ``install.packages("remotes")``, then type
 
-```R
-remotes::install_github("anna-neufeld/treevalues")
+```{r}
+remotes::install_github("anna-neufeld/countsplit")
 ```
 
 Where can I learn more? 
 -----
 
-See the [overview](https://anna-neufeld.github.io/treevalues/articles/overview.html) tab for a more detailed motivation for our framework, and the [tutorial](https://anna-neufeld.github.io/treevalues/articles/inference_tutorial.html) tab for instructions on how to use this package on real data. 
+See the [tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) tab for an introduction to our framework on simple simulated data. See the [scran](https://anna-neufeld.github.io/countsplit/articles/scran_tutorial.html),  [seurat](https://anna-neufeld.github.io/countsplit/articles/seurat_tutorial.html), and [monocle3](https://anna-neufeld.github.io/countsplit/articles/monocle3_tutorial.html) tutorials for examples of how the count splitting package can be integrated with common scRNA-seq analysis pipelines. 
 
-See [https://arxiv.org/abs/2106.07816](https://arxiv.org/abs/2106.07816) for the preprint that describes the selective inference methodology. 
-
-See [https://github.com/anna-neufeld/treevalues-simulations](https://github.com/anna-neufeld/treevalues-simulations) for code to reproduce the experiments and figures in the preprint. 
 
 
 

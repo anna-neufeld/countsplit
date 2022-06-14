@@ -3,7 +3,7 @@ title: "Tutorial: differential expression analysis on single cell RNA-seq data"
 output: rmarkdown::html_vignette
 bibliography: latent.bib
 vignette: >
-  %\VignetteIndexEntry{"Tutorial: differential expression analysis on single cell RNA-seq data"}
+  %\VignetteIndexEntry{"Intro Tutorial: differential expression analysis on single cell RNA-seq data"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-In this tutorial, we demonstrate how to use the ``countsplit`` package to perform inference after latent variable selection for scRNA-seq data. In the first part of this tutorial, we work with simple simulated data and use only the ``countsplit`` package. In the second half of this tutorial, we show how the ``countsplit`` package can be integrated into pipelines with other scRNA-seq packages such as ``scran``, ``monocle3`` and ``seurat``
+In this tutorial, we demonstrate how to use the ``countsplit`` package to perform inference after latent variable selection for scRNA-seq data. In this tutorial, we work with simple simulated data and use only the ``countsplit`` package. In the other tutorials on this site, we show how the ``countsplit`` package can be integrated into pipelines with other scRNA-seq packages such as ``scran``, ``monocle3`` and ``seurat``
 .
 We start by loading the packages we will be working with. Make sure that ``remotes`` is installed by running ``install.packages("remotes")``, then type
 
@@ -26,11 +26,13 @@ remotes::install_github("anna-neufeld/countsplit")
 library(countsplit)
 ```
 
-# Simple example on simulated data
+# Simple example on simulated data 
 
-To get comfortable with the ``countsplit`` package, we start by working with a simple simulated dataset.
+To get comfortable with the ``countsplit`` package, we start by working with simple simulated datasets. For these analyses, we first cluster the cells using k-means clustering with k=2, and then we test for differential expression using Poisson generalized linear models (GLMs). These simple choices keep us from needing external scRNA-seq packages. 
 
-Suppose that we have $n=1000$ cells and $p=200$ genes. Suppose that every count $\textbf{X}_{ij}$ is drawn from a $\text{Poisson}(5)$ distribution. We first generate this data. 
+## Simulated data with no true signal. 
+
+First suppose that we have $n=1000$ cells and $p=200$ genes. Suppose that every count $\textbf{X}_{ij}$ is drawn from a $\text{Poisson}(5)$ distribution. We first generate this data. 
 
 ```{r}
 set.seed(1)
@@ -42,209 +44,107 @@ X <- matrix(rpois(n*p, lambda=5), nrow=n)
 Suppose we are interested in studying differential expression across two clusters, obtained with k-means clustering. First we can see that the naive method does not control the Type 1 error rate. Here is an example of what happens when we cluster the data and then test for differential expression using the naive method:
 
 ```{r}
-set.seed(3)
 clusters.full <- kmeans(log(X+1), centers=2)$cluster
-results.naive <- fit_glms(X, clusters.full, family="poisson")
+results.naive <- t(apply(X, 2, function(u) summary(glm(u~clusters.full, family="poisson"))$coefficients[2,]))
 head(results.naive)
 ```
 
-Even in these first 6 rows of results, we can see that the naive method assigns small p-values to many genes, despite the fact that no genes are truly differentially expressed in this data. We can make a uniform QQ-plot of the p-values for the naive method to see that they are not uniformly distributed and thus do not control the Type 1 error.
+The first line runs k-means with $k=2$ on the logged data (with a pseudocount of 1) and saves the cluster assignments for each cell in the dataset as``clusters.full``. For every column $X_j$ in $X$, the second line fits a Poisson GLM of $X_j$ on ``clusters.full`` and saves the summary of the slope coefficient in ``results.naive``. As shown in the output, we have saved a slope coefficient estimate, a standard error, a z-value, and a p-value for every gene in the dataset. 
+
+Even in these first 6 rows of results, we can see that the naive method assigns small p-values to many genes, despite the fact that no genes are truly differentially expressed in this data. We can make a uniform QQ-plot of the p-values for the naive method to see that they are not uniformly distributed and thus do not control the Type 1 error. The p-values are stored in the 4th column of the ``results.naive`` matrix. 
 
 ```{r}
 library(ggplot2)
-ggplot(data=results.naive, aes(sample=pval))+geom_qq(distribution="qunif")+geom_abline(col="red")
+ggplot(data=NULL, aes(sample=results.naive[,4]))+geom_qq(distribution="qunif")+geom_abline(col="red")
 ```
 
-We now address the issue using count splitting. The key steps are (1) running the ``countsplit`` function to get ``Xtrain`` and ``Xtest`` and then (2) running the analysis step with ``Xtest`` as the response and clusters obtained from ``Xtrain`` as the latent variable. 
+We now address the issue using count splitting. The key steps are (1) running the ``countsplit`` function to get ``Xtrain`` and ``Xtest`` and then (2) running the analysis step with ``Xtest`` as the response and clusters obtained from ``Xtrain`` as the latent variable. The ``countsplit`` function returns a list, which we call ``split`` here, which contains the training set and the test set.
 
 ```{r}
 set.seed(2)
 split <- countsplit(X, epsilon=0.5)
+names(split)
 Xtrain <- split$train
 Xtest <- split$test
+```
+
+We run the same analysis steps as above, but we run the clustering on ``Xtrain`` and we use ``Xtest`` as the response in our regression. 
+
+```{r}
 clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
-results.countsplit <- fit_glms(Xtest, clusters.train, family="poisson")
-ggplot(data=results.countsplit,aes(sample=pval))+geom_qq(distribution="qunif")+geom_abline(col="red")
+results.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[2,]))
+head(results.countsplit)
 ```
 
-The p-values obtained from count splitting are uniformly distributed, as they should be under this global null where no genes are differentially expressed because all cells have expression counts drawn from the same distribution. 
+We can already see from the summary output that the p-values for the first 6 genes are much larger. When we make the same uniform QQ-plot as before, we see that the p-values obtained from count splitting are uniformly distributed, as they should be under this global null where no genes are differentially expressed because all cells have expression counts drawn from the same distribution. 
 
-# Simple example on real data using scran. 
-
-We now use real data. We still use basic k-means clustering and our own GLM functions, so we still don't need any fancy packages. But we point out a new places where we might want to be aware of how our package fits in with common pipeline steps.
-
-We use the cardiomyocyte data from Elborany et al. that is used in our paper. This data is included in this package as a SingleCellExperiment object, so it is simple to load. We will use a few steps from the ``scran`` package. 
-
-The main differences between this section and the last is that we will select a subset of highly variable genes and we will estimate and then account for size factors. We use the size factors estimated on the training set in our analysis! This follows our general principle of estimating all the preprocessing on the training set.
-
-(TO DO add instructions to install scran from bioconductor. )
-
-
-
-```{r, message=FALSE, warning=FALSE}
-library(scran)
-library(tidyverse)
-```
-
-
-We first load the data.
 
 ```{r}
-data(cm)
+ggplot(data=NULL, aes(sample=results.countsplit[,4]))+geom_qq(distribution="qunif")+geom_abline(col="red")
 ```
 
-We now extract the counts and perform count splitting.
+## Simulated data with true signal
+
+We now demonstrate the performance of count splitting on a simple simulated dataset that contains two true clusters. We first randomly assign the cells to one of two true clusters. We then generate data such that $X_{ij} \sim \mathrm{Poisson}(\Lambda_{ij})$. Genes $1--10$ are differentially expressed-- for $j=1,\ldots,10$, $\Lambda_{ij} = 5$ for cells in cluster $0$ and $\Lambda_{ij}=10$ for cells in cluster $1$. Genes $11--200$ are not differentially expressed ($\Lambda_{ij}=5$ for all cells). 
 
 ```{r}
 set.seed(1)
-X <- t(counts(cm))
+n <- 1000
+p <- 200
+clusters.true <- rbinom(n, size=1, prob=0.5)
+Lambda <- matrix(5, nrow=n, ncol=p)
+Lambda[clusters.true==1, 1:10] <- 10
+X <-apply(Lambda,1:2,rpois,n=1)
+```
+
+We now count split the data and save `Xtrain` and `Xtest` for later use.
+
+```{r}
+set.seed(111)
 split <- countsplit(X, epsilon=0.5)
 Xtrain <- split$train
 Xtest <- split$test
 ```
 
-Note the use of transpose. We want a cell-by-gene matrix, but the ``SingleCellExperiment`` object ``cm`` stores the opposite of this in the ``counts`` attribute.
-
-Now we want to compute clusters on the training set. But this time, instead of simply running ``kmeans()`` on ``log(Xtrain+1)``, we will use an existing scRNA-seq pipeline from the ``scran`` package that also involves preprocessing steps such as selecting highly variable genes. In order to do this, we need to do some analysis that expects a ``SingleCellExperiment`` object rather than a simple matrix. To make a ``SingleCellExperiment`` training object, we make a copy of the ``cm`` object but update the ``counts`` to store ``Xtrain``. 
-
-```{r}
-cm.train <- cm
-counts(cm.train) <- t(Xtrain)
-```
-
-Now we are ready for our analysis! These steps were inspired by the `\textt{scran}``scran`` tutorial, available at \url{https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html}.
-
+First, let's look at the effect of count splitting on our ability to estimate the true clusters. 
+If we use all of our data `X` to estimate the clusters, we make only 5 errors. 
 
 ```{r}
-sizeFactors(cm.train) <- librarySizeFactors(cm.train)
-## Pre-processing
-cm.train <- logNormCounts(cm.train)
-top.hvgs <- getTopHVGs(modelGeneVar(cm.train), fdr.threshold=0.05)
-cm.train <- fixedPCA(cm.train, subset.row=top.hvgs)
-
-## Graph clustering
-clusters.train <- clusterCells(cm.train,use.dimred="PCA")
+set.seed(222)
+clusters.full <- kmeans(log(X+1), centers=2)$cluster
+table(clusters.true, clusters.full)
 ```
 
-It turns out that this function returned 7 clusters.
-
-```{r,out.width="90%"}
-table(clusters.train)
-ggplot(as_tibble(reducedDim(cm.train)), aes(x=PC1, y=PC2, col=as.factor(clusters.train)))+geom_point()+labs(col="Cluster")
-```
-
-Suppose we are interested in looking for differentially expressed genes between clusters 1 and 2. Here is how we would do that with negative binomial GLMs. For computational efficiency, we don't want to check all 21,000 genes. Let's check 500 randomly selected genes. 
-
-```{r, warning=FALSE}
-set.seed(1)
-indices <- which(clusters.train==1 | clusters.train==2)
-genes <- sample(1:NCOL(Xtest), size=500)
-results <- fit_glms(Xtest[indices,genes], clusters.train[indices], offsets=clusters.train$sizeFactors, family="quasipoisson")
-table(results$pval < 0.01)
-head(results)
-```
-
-(maybe to do = use their own scran findMarkers function. )
-
-
-# Example integrated with Seurat
-
-We now go through a similar workflow but we use Seurat. 
-
-```{r, warning=FALSE}
-library(Seurat)
-```
-
-We load the same data from the last example, which is an object of class ``SingleCellExperiment``. To work wih Seurat, the first step is to convert the object. We need to run logNormCounts first to get this to work. 
-
-```{r, eval=FALSE}
-data(cm)
-sizeFactors(cm) <- librarySizeFactors(cm)
-cm <- logNormCounts(cm)
-cm.seurat <- as.Seurat(cm)
-```
-
-Since all preprocessing should happen downstream of count splitting, the very first thing we do is split the data!!
+If instead we use only `Xtrain` to estimate the clusters, we see that we make a few additional errors, but that in general we still get excellent estimates.
 
 ```{r}
-set.seed(1)
-X <- t(GetAssayData(object = cm.seurat, slot = "counts"))
-split <- countsplit(X, epsilon=0.5)
-Xtrain <- split$train
-Xtest <- split$test
+clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
+table(clusters.train, clusters.full)
 ```
 
-Now we follow some steps from one of the Seurat introductory tutorials. But first we need a training set Seurat object. One thing that is really silly is that if you just update the Seurat counts it doesn't update the log counts!! Which is a big problem! So we take a step back towards scran. Whoops. 
+We now compare the slopes and intercepts that we estimate via count splitting to those that we would get in the ideal setting where we were able to observe the true clusters. 
 
 ```{r}
-cm.train <- cm
-counts(cm.train) <- Xtrain
-sizeFactors(cm.train) <- librarySizeFactors(cm.train)
-cm.train <- logNormCounts(cm.train)
-cm.seurat.train <- as.Seurat(cm.train)
+intercepts.ideal <- t(apply(X, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[1,1]))
+slopes.ideal <- t(apply(X, 2, function(u) summary(glm(u~clusters.true, family="poisson"))$coefficients[2,1]))
 ```
 
-Everything below here is not done!!
+Let's compare these ideal intercepts and slopes to the values that we get if we instead use either $\widehat{L}(X)$ or $\widehat{L}(X^\mathrm{train})$. 
 
-```{r, eval=FALSE}
-X1 <- t(GetAssayData(object = cm.seurat, slot = "counts"))
-X2 <- t(GetAssayData(object = cm.seurat, slot = "data"))
-X3 <- t(GetAssayData(object = cm.seurat, slot = "scale.data"))
+```{r}
+clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
+intercepts.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[1,1]))
+slopes.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[2,1]))
+```
 
-plot(log2(X1[,17]/cm.seurat$sizeFactor+1), X2[,17])
-abline(0,1, col="red")
-
-X1 <- t(GetAssayData(object = cm.seurat.train, slot = "counts"))
-X2 <- t(GetAssayData(object = cm.seurat.train, slot = "data"))
-X3 <- t(GetAssayData(object = cm.seurat.train, slot = "scale.data"))
-
-plot(log2(X1[,17]/cm.seurat.train$sizeFactor+1), X2[,17])
+This plot shows what we get.
+```{r}
+library(ggplot2)
+library(patchwork)
+p1 <- ggplot(data=NULL, aes(x=intercepts.ideal, y=intercepts.countsplit))+geom_point()+geom_abline(intercept= log(0.5), slope=1, col="red")
+p2 <- ggplot(data=NULL, aes(x=slopes.ideal, y=slopes.countsplit))+geom_point()+geom_abline(intercept=0, slope=1, col="red")
+p1 + p2
 ```
 
 
-```{r, eval=FALSE}
-cm.seurat.train[["percent.mt"]] <- PercentageFeatureSet(cm.seurat.train, pattern = "^MT-")
-cm.seurat.train <- subset(cm.seurat.train, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
-cm.seurat.train <- NormalizeData(cm.seurat.train)
-cm.seurat.train <- FindVariableFeatures(cm.seurat.train, selection.method = "vst", nfeatures = 2000)
-pbmc <- ScaleData(pbmc, features = all.genes)
-pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
-ElbowPlot(pbmc)
-pbmc <- FindNeighbors(pbmc, dims = 1:10)
-pbmc <- FindClusters(pbmc, resolution = 0.5)
-
-cluster2.markers <- FindMarkers(pbmc, ident.1 = 2, min.pct = 0.25)
-head(cluster2.markers, n = 5)
-```
-
-
-# Example integrated with Monocle3
-
-Maybe for this one I should have it reproduce the analysis from the paper? Or is that overkill? 
-
-```{r, eval=FALSE}
-library(monocle3)
-
-gene_meta <- data.frame(gene_short_name = rownames(t(Xtrain)))
-rownames(gene_meta) <- rownames(t(Xtrain))
-cds.train <- new_cell_data_set(t(Xtrain), gene_metadata = gene_meta)
-cds.train <- preprocess_cds(cds.train, num_dim = 100)
-cds.train <- reduce_dimension(cds.train)
-cds.train<- cluster_cells(cds.train, partition_qval = 0.05)
-cds.train <- learn_graph(cds.train, use_partition=FALSE)
-
-### Finally!! Get the pseudotime. 
-### The monocle3 function will make you pick a root cell I think
-### It opens in a shiny app. 
-cds.train <- order_cells(cds.train)
-
-pseudotime.train <- pseudotime(cds.train)
-sizeFactors.train <- librarySizeFactors(cds.train)
-
-results.monocle.countsplit <- fit_glms(Xtest, pseudotime.train, offsets=sizeFactors.train)
-```
-
-
-# Example integrated with other scRNA-seq packages and pipelines.
-
-More examples are coming soon! Feel free to reach out (``aneufeld@uw.edu``) if there is a package or pipeline that you would like to see added to this tutorial. 
+We see that
