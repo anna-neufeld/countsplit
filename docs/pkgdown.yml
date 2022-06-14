@@ -1,5 +1,5 @@
 pandoc: 2.14.0.3
-pkgdown: 2.0.3
+pkgdown: 2.0.4
 pkgdown_sha: ~
 articles:
   countsplit_tutorial: countsplit_tutorial.html
@@ -8,5 +8,5 @@ articles:
   overview: overview.html
   scran_tutorial: scran_tutorial.html
   seurat_tutorial: seurat_tutorial.html
-last_built: 2022-06-14T05:45Z
+last_built: 2022-06-14T19:39Z
 

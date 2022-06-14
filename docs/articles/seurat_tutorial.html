@@ -5,13 +5,13 @@
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tutorial: countsplitting and Seurat • countsplit</title>
+<title>Tutorial: count splitting with seurat • countsplit</title>
 <!-- jquery --><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script><!-- Bootstrap --><link href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.4.0/flatly/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js" integrity="sha256-nuL8/2cJ5NDSSwnKD8VqreErSWHtnEP9E7AySL+1ev4=" crossorigin="anonymous"></script><!-- bootstrap-toc --><link rel="stylesheet" href="../bootstrap-toc.css">
 <script src="../bootstrap-toc.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- pkgdown --><link href="../pkgdown.css" rel="stylesheet">
-<script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial: countsplitting and Seurat">
+<script src="../pkgdown.js"></script><meta property="og:title" content="Tutorial: count splitting with seurat">
 <meta property="og:description" content="countsplit">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -75,81 +75,115 @@
       </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
-      <h1 data-toc-skip>Tutorial: countsplitting and Seurat</h1>
+      <h1 data-toc-skip>Tutorial: count splitting with seurat</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/anna-neufeld/countsplit/blob/HEAD/vignettes/seurat_tutorial.Rmd" class="external-link"><code>vignettes/seurat_tutorial.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/anna-neufeld/countsplit/blob/HEAD/vignettes/vignettes/seurat_tutorial.Rmd" class="external-link"><code>vignettes/vignettes/seurat_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>seurat_tutorial.Rmd</code></div>
 
     </div>
 
     
     
-<p>This tutorial is inspired by the Seurat <a href="https://satijalab.org/seurat/articles/pbmc3k_tutorial.html" class="external-link">clutering</a> and <a href="https://satijalab.org/seurat/articles/de_vignette.html" class="external-link">differential expression</a> vignettes.</p>
+<p>In this tutorial, we use the same data and follow the same steps as the Seurat <a href="https://satijalab.org/seurat/articles/pbmc3k_tutorial.html" class="external-link">clutering</a> tutorial. We use count splitting and we highlight the steps that should be performed on the training set and the test set. We also point out some places where count splitting may lead to confusion. For more information on the Seurat methodology, see the <a href="https://satijalab.org/seurat/" class="external-link">website</a> or papers such as <span class="citation">Hao et al. (2021)</span>, <span class="citation">Stuart et al. (2019)</span>, <span class="citation">Butler et al. (2018)</span>.</p>
 <div class="section level2">
 <h2 id="install-seurat">Install Seurat<a class="anchor" aria-label="anchor" href="#install-seurat"></a>
 </h2>
-<p>If you don’t already have <code>seurat</code>, you will need to run:</p>
+<p>If you don’t already have <code>Seurat</code>, you will need to run:</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw">if</span> <span class="op">(</span><span class="op">!</span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">require</a></span><span class="op">(</span><span class="st">"BiocManager"</span>, quietly <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span>
     <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"BiocManager"</span><span class="op">)</span>
-<span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"Seurat"</span><span class="op">)</span>
-<span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://devtools.r-lib.org/reference/remote-reexports.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">'satijalab/seurat-data'</span><span class="op">)</span></code></pre></div>
+<span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="st">"Seurat"</span><span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="loading-the-data">Loading the data<a class="anchor" aria-label="anchor" href="#loading-the-data"></a>
 </h2>
-<p>We use the same dataset as in the Seurat <a href="https://satijalab.org/seurat/articles/pbmc3k_tutorial.html" class="external-link">clutering</a> vignette. For convenience, we included the <code>pbmc</code> dataset in this package. We just need to read it in and create a Seurat object.</p>
+<p>We use the same dataset as in the Seurat <a href="https://satijalab.org/seurat/articles/pbmc3k_tutorial.html" class="external-link">clutering</a> vignette. For convenience, we included the <code>pbmc</code> dataset raw counts (obtained from 10x genomics) in this package. We just need to load the packages and load the count matrix.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">underscore_func</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">u</span><span class="op">)</span> <span class="op">{</span>
-  <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_replace.html" class="external-link">str_replace_all</a></span><span class="op">(</span><span class="va">u</span>, <span class="st">"_"</span>,<span class="st">"-"</span><span class="op">)</span>
-<span class="op">}</span></code></pre></div>
-<p>This is sort of a dumb step that I did at the front.</p>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://satijalab.org/seurat" class="external-link">Seurat</a></span><span class="op">)</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/anna-neufeld/countsplit" class="external-link">countsplit</a></span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">pbmc.counts</span>, package<span class="op">=</span><span class="st">"countsplit"</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">pbmc.counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">pbmc.counts</span><span class="op">)</span>, <span class="va">underscore_func</span><span class="op">)</span></code></pre></div>
-<p>The first step is to count split!</p>
+<span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">pbmc.counts</span>, package<span class="op">=</span><span class="st">"countsplit"</span><span class="op">)</span></code></pre></div>
+<p>Seurat objects cannot handle gene names that have underscores in them. To avoid issues later in the tutorial (where we will need to use gene names to map between the training and test sets), we run the following code to replace all underscores with dashes in the gene names of the raw counts matrix.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">pbmc.counts</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/lapply.html" class="external-link">sapply</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">pbmc.counts</span><span class="op">)</span>, <span class="kw">function</span><span class="op">(</span><span class="va">u</span><span class="op">)</span> <span class="fu">stringr</span><span class="fu">::</span><span class="fu"><a href="https://stringr.tidyverse.org/reference/str_replace.html" class="external-link">str_replace_all</a></span><span class="op">(</span><span class="va">u</span>, <span class="st">"_"</span>,<span class="st">"-"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="applying-count-splitting-and-creating-a-seurat-object">Applying count splitting and creating a Seurat object<a class="anchor" aria-label="anchor" href="#applying-count-splitting-and-creating-a-seurat-object"></a>
+</h2>
+<p>We now count split to obtain two raw count matrices.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
 <span class="va">split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/countsplit.html">countsplit</a></span><span class="op">(</span><span class="va">pbmc.counts</span>, epsilon<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span>
 <span class="va">Xtrain</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">$</span><span class="va">train</span>
 <span class="va">Xtest</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">$</span><span class="va">test</span></code></pre></div>
-<p>THIS DOES SOME SUBSETTING. WE need to remember the subsetting for later.</p>
+<p>We now want to store the training matrix in a Seurat object so that we can apply the preprocessing steps from the Seurat clustering tutorial. As recommended by Seurat, this code will remove any genes that were not expressed in at least <code>3</code> cells and will remove any cells that did not have at least <code>200</code> expressed genes.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/CreateSeuratObject.html" class="external-link">CreateSeuratObject</a></span><span class="op">(</span>counts <span class="op">=</span> <span class="va">Xtrain</span>, min.cells <span class="op">=</span> <span class="fl">3</span>, min.features <span class="op">=</span> <span class="fl">200</span><span class="op">)</span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="standard-preprocessing-workflow-">Standard preprocessing workflow.<a class="anchor" aria-label="anchor" href="#standard-preprocessing-workflow-"></a>
-</h2>
+<p>The Seurat tutorial then recommends further subsetting the cells to exclude cells that have unique feature counts over 2,500 or less than 200, and to exclude cells tha have &gt;5% mitochondrial counts</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pbmc.train</span><span class="op">[[</span><span class="st">"percent.mt"</span><span class="op">]</span><span class="op">]</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/PercentageFeatureSet.html" class="external-link">PercentageFeatureSet</a></span><span class="op">(</span><span class="va">pbmc.train</span>, pattern <span class="op">=</span> <span class="st">"^MT-"</span><span class="op">)</span>
-<span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">pbmc.train</span>, subset <span class="op">=</span> <span class="va">nFeature_RNA</span> <span class="op">&gt;</span> <span class="fl">200</span> <span class="op">&amp;</span> <span class="va">nFeature_RNA</span> <span class="op">&lt;</span> <span class="fl">2500</span> <span class="op">&amp;</span> <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">5</span><span class="op">)</span>
-<span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/NormalizeData.html" class="external-link">NormalizeData</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span>
-<span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindVariableFeatures.html" class="external-link">FindVariableFeatures</a></span><span class="op">(</span><span class="va">pbmc.train</span>, selection.method <span class="op">=</span> <span class="st">"vst"</span>, nfeatures <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span></code></pre></div>
-<p>Here is a first step where we can compare to the seurat workflow and see we are getting really similar results despite only using the training set.</p>
+<span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">pbmc.train</span>, subset <span class="op">=</span> <span class="va">nFeature_RNA</span> <span class="op">&gt;</span> <span class="fl">200</span> <span class="op">&amp;</span> <span class="va">nFeature_RNA</span> <span class="op">&lt;</span> <span class="fl">2500</span> <span class="op">&amp;</span> <span class="va">percent.mt</span> <span class="op">&lt;</span> <span class="fl">5</span><span class="op">)</span></code></pre></div>
+<p>We note that now the dimensions of <code>Xtrain</code> and <code>Xtest</code> do not match up with the dimensions of our new Seurat object.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://patchwork.data-imaginist.com" class="external-link">patchwork</a></span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 32738  2700</span></code></pre>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">Xtest</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 32738  2700</span></code></pre>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 12421  2615</span></code></pre>
+<p>To avoid any confusion later, we create <code>Xtestsubset</code>, which contains the same genes and the same cells as <code>pbmc.train</code>.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span>
+<span class="va">cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span>
+<span class="va">Xtestsubset</span> <span class="op">&lt;-</span> <span class="va">Xtest</span><span class="op">[</span><span class="va">rows</span>,<span class="va">cols</span><span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">Xtestsubset</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 12421  2615</span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="preprocessing-workflow-">Preprocessing workflow.<a class="anchor" aria-label="anchor" href="#preprocessing-workflow-"></a>
+</h2>
+<p>We take this time to point out some intricacies of the <code>Seurat</code> object that could become confusing in future analyses. A <code>Seurat</code> object has three Assays: <code>counts</code>, <code>data</code>, and <code>scale.data</code>. At this point in the analysis, <code>data</code> and <code>counts</code> both store the raw counts, and <code>scale.data</code> is empty.</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">pbmc.train</span>, <span class="st">"counts"</span><span class="op">)</span>, <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">pbmc.train</span>, <span class="st">"data"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] TRUE</span></code></pre>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">pbmc.train</span>, <span class="st">"scale.data"</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## &lt;0 x 0 matrix&gt;</span></code></pre>
+<p>These assays will change as we run further preprocessing steps, and this will be important to keep in mind. We next normalize and compute the set of highly variable features, as in the Seurat tutorial. Note that normalizing changes the <code>data</code> Assay of our object such that it stores normalized data, rather than counts.</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/NormalizeData.html" class="external-link">NormalizeData</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/all.equal.html" class="external-link">all.equal</a></span><span class="op">(</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">pbmc.train</span>, <span class="st">"counts"</span><span class="op">)</span>, <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">GetAssayData</a></span><span class="op">(</span><span class="va">pbmc.train</span>, <span class="st">"data"</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] "Attributes: &lt; Component \"x\": Mean relative difference: 0.7230153 &gt;"</span></code></pre>
+<p>Computing the set of highly variable features does not alter the dimension of the dataset. All features are retained, but these highly variable features are the ones that will be used downstream during dimension reduction.</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 12421  2615</span></code></pre>
+<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindVariableFeatures.html" class="external-link">FindVariableFeatures</a></span><span class="op">(</span><span class="va">pbmc.train</span>, selection.method <span class="op">=</span> <span class="st">"vst"</span>, nfeatures <span class="op">=</span> <span class="fl">2000</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 12421  2615</span></code></pre>
+<p>At this point in the Seurat tuorial, they make a plot with the top 10 variable features labeled. Here, we reproduce this plot and show that we identify nearly the same top 10 genes as they did in the Seurat <a href="https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#standard-pre-processing-workflow-1" class="external-link">tutorial</a>. This is comforting, as it shows that the training set is retaining a lot of info compared to the full dataset. The overlapping genes are: <code>PPBP, LYZ, FTL, S100A9, S100A8, GNLY, FTH1, IGLL5, PF4</code>. The only difference is that on the training set we selected <code>HLA-DRA</code> instead of <code>GNG11</code>.</p>
+<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span>
 <span class="va">top10</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span>, <span class="fl">10</span><span class="op">)</span>
-<span class="va">plot1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/VariableFeaturePlot.html" class="external-link">VariableFeaturePlot</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span>
-<span class="va">plot2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/LabelPoints.html" class="external-link">LabelPoints</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">plot1</span>, points <span class="op">=</span> <span class="va">top10</span>, repel <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
-<span class="va">plot2</span></code></pre></div>
-<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
-<p>We once again see SUPER similar results to the seurat tutorial despite the use of count splitting. The genes are basically the same!</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<span class="va">plot1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/VariableFeaturePlot.html" class="external-link">VariableFeaturePlot</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span> 
+<span class="va">plot2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/LabelPoints.html" class="external-link">LabelPoints</a></span><span class="op">(</span>plot <span class="op">=</span> <span class="va">plot1</span>, points <span class="op">=</span> <span class="va">top10</span><span class="op">)</span>
+<span class="va">plot2</span> <span class="op">+</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>col<span class="op">=</span><span class="st">"none"</span><span class="op">)</span></code></pre></div>
+<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-13-1.png" width="100%"> We continue following the preprocessing steps from the tutorial, and notice that each time we reproduce a plot we have essentially the same results as in the tutorial, despite the fact that we are only using the training data. Besides things like sign flips of principal components and re-labeling of clusters, nearly everything looks the same. For example, the same sets of genes seem to define the first two principal components. We note that <code>ScaleData</code> finally fills in the <code>scale.data</code> Assay in the object.</p>
+<div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">all.genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span>
 <span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/ScaleData.html" class="external-link">ScaleData</a></span><span class="op">(</span><span class="va">pbmc.train</span>,features <span class="op">=</span> <span class="va">all.genes</span><span class="op">)</span>
 <span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunPCA.html" class="external-link">RunPCA</a></span><span class="op">(</span><span class="va">pbmc.train</span>, features <span class="op">=</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/VariableFeatures.html" class="external-link">VariableFeatures</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">pbmc.train</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://satijalab.org/seurat/reference/VizDimLoadings.html" class="external-link">VizDimLoadings</a></span><span class="op">(</span><span class="va">pbmc.train</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, reduction <span class="op">=</span> <span class="st">"pca"</span><span class="op">)</span></code></pre></div>
-<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">pbmc.train</span>, reduction <span class="op">=</span> <span class="st">"pca"</span><span class="op">)</span></code></pre></div>
-<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-8-2.png" width="700"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://satijalab.org/seurat/reference/DimHeatmap.html" class="external-link">DimHeatmap</a></span><span class="op">(</span><span class="va">pbmc.train</span>, dims <span class="op">=</span> <span class="fl">1</span>, cells <span class="op">=</span> <span class="fl">500</span>, balanced <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
-<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-9-1.png" width="700"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<span class="fu"><a href="https://satijalab.org/seurat/reference/VizDimLoadings.html" class="external-link">VizDimLoadings</a></span><span class="op">(</span><span class="va">pbmc.train</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">2</span>, reduction <span class="op">=</span> <span class="st">"pca"</span><span class="op">)</span><span class="op">+</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/theme.html" class="external-link">theme</a></span><span class="op">(</span>axis.text <span class="op">=</span> <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/element.html" class="external-link">element_text</a></span><span class="op">(</span>size<span class="op">=</span><span class="fl">10</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-14-1.png" width="100%"></p>
+<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">pbmc.train</span>, reduction <span class="op">=</span> <span class="st">"pca"</span><span class="op">)</span><span class="op">+</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/guides.html" class="external-link">guides</a></span><span class="op">(</span>col<span class="op">=</span><span class="st">"none"</span><span class="op">)</span></code></pre></div>
+<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-14-2.png" width="100%"></p>
+<p>We skip the next few visualizations from the <code>Seurat</code> tutorial. We will return to the gene expression heatmaps later, using the testing data rather than the training data.</p>
+<div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindNeighbors.html" class="external-link">FindNeighbors</a></span><span class="op">(</span><span class="va">pbmc.train</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>
 <span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindClusters.html" class="external-link">FindClusters</a></span><span class="op">(</span><span class="va">pbmc.train</span>, resolution<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span></code></pre></div>
 <pre><code><span class="co">## Modularity Optimizer version 1.3.0 by Ludo Waltman and Nees Jan van Eck</span>
@@ -161,33 +195,108 @@
 <span class="co">## Maximum modularity in 10 random starts: 0.8613</span>
 <span class="co">## Number of communities: 7</span>
 <span class="co">## Elapsed time: 0 seconds</span></code></pre>
-<p>While our plot is upside down and we got different labels, it really seems like we probably estimated the same things as in the Seurat tutorial.</p>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<p>Finally, we perform clustering. While our plot has some sign flips and relabeling, we seem to basically get the same clusters as in the Seurat tutorial. We skipped some steps in the tutorial that looked for the optimal number of dimensions, and decided to just use 10 (as in the tutorial).</p>
+<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pbmc.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/RunUMAP.html" class="external-link">RunUMAP</a></span><span class="op">(</span><span class="va">pbmc.train</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>
 <span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">pbmc.train</span>, reduction <span class="op">=</span> <span class="st">"umap"</span><span class="op">)</span></code></pre></div>
-<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-16-1.png" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="finding-differentially-expressed-features-manually">Finding differentially expressed features manually<a class="anchor" aria-label="anchor" href="#finding-differentially-expressed-features-manually"></a>
+</h2>
+<p>Now that we computed clusters from the training set, it is time to look for differentially expressed genes across the clusters. The “safest” way to perform this analysis would be to extract the cluster labels from <code>pbmc.train</code> and write your own analysis functions to see how the columns of <code>Xtestsubset</code> (created above) vary across these clusters. This approach is the safest because we know for sure that the clusters were obtained using only the training data and that the analysis uses only the testing data.</p>
+<p>First, we extract the clusters and verify that we have a cluster for every cell in <code>Xtestsubset</code>.</p>
+<div class="sourceCode" id="cb31"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">clusters.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/Idents.html" class="external-link">Idents</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">clusters.train</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## clusters.train</span>
+<span class="co">##   0   1   2   3   4   5   6 </span>
+<span class="co">## 722 466 459 410 352 176  30</span></code></pre>
+<div class="sourceCode" id="cb33"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">clusters.train</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 2615</span></code></pre>
+<div class="sourceCode" id="cb35"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">NCOL</a></span><span class="op">(</span><span class="va">Xtestsubset</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">## [1] 2615</span></code></pre>
+<p>Next, we note that the <code>FindMarkers</code> function in Seurat (what they use for differential expression) does a wilcox test by default. And the first example of differential expression in their tutorial compares cluster 2 against all other clusters. It seems from the plots as though our cluster 2 maps well to their cluster 2, despite the general re-ordering of clusters. Therefore, we try to reproduce their cluster 2 analysis by hand.</p>
+<p>Note that the <code>FindMarkers</code> function acts on the log-Normalized data. The size factor normalization actually matters here, so let’s do that.</p>
+<div class="sourceCode" id="cb37"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">sf</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colSums.html" class="external-link">colSums</a></span><span class="op">(</span><span class="va">Xtestsubset</span><span class="op">)</span>
+<span class="va">Xtestsubset_norm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">Xtestsubset</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">u</span><span class="op">)</span> <span class="va">u</span><span class="op">/</span><span class="va">sf</span><span class="op">)</span><span class="op">)</span>
+<span class="va">Xtestsubset_lognorm</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/Log.html" class="external-link">log</a></span><span class="op">(</span><span class="va">Xtestsubset_norm</span> <span class="op">+</span><span class="fl">1</span><span class="op">)</span></code></pre></div>
+<p>Note that for computational speedup, they only test genes that meet a certain threshold of log-fold expression change. For simplicity, we just test all genes here, so this code is pretty slow.</p>
+<p>We identify <code>LTB</code>, <code>IL32</code>, <code>CD3D</code>, <code>IL7R</code>, and <code>LDHB</code> as the top markers of cluster 2, which is exactly the same as in the tutorial (although the order is slightly different and the p0values are slightly different).</p>
+<div class="sourceCode" id="cb38"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cluster2</span> <span class="op">&lt;-</span> <span class="va">clusters.train</span><span class="op">==</span><span class="fl">2</span>
+<span class="va">pvals2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">Xtestsubset_lognorm</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">u</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/stats/wilcox.test.html" class="external-link">wilcox.test</a></span><span class="op">(</span><span class="va">u</span><span class="op">~</span><span class="va">cluster2</span><span class="op">)</span><span class="op">$</span><span class="va">p.value</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">pvals2</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##          LTB         IL32         IL7R         CD3D      HLA-DRA       TYROBP </span>
+<span class="co">## 1.024995e-69 2.795907e-65 1.555729e-52 1.822045e-52 2.461172e-50 3.652260e-47</span></code></pre>
+</div>
+<div class="section level2">
+<h2 id="finding-differentially-expressed-features-with-seurat">Finding differentially expressed features with Seurat<a class="anchor" aria-label="anchor" href="#finding-differentially-expressed-features-with-seurat"></a>
+</h2>
+<p>It would be nice to be able to make a <code>Seurat</code> object containing the training clusters from the testing counts. This would allow us to use some of Seurat’s nice visualization features for differential expression testing. We note that care should be taken in this section, as we are mixing-and-matching pieces of Seurat objects and Seurat functions not explicitly mentioned in this tutorial may end up having unexpected behavior.</p>
+<p>We first let <code>pbmc.test</code> equal <code>pbmc.train</code>. This ensures that our test set object gets the same cluster information and UMAP information as the training set, such that we can still visualize the training set clusters. We then update the <code>counts</code> Assay to store the test set counts. Unfortunately, once we do this, the <code>data</code> and <code>scale.data</code> assays are strange because they no longer propertly store the normalized or scaled counts. We run normalize and scale functions to remedy this.</p>
+<div class="sourceCode" id="cb40"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">pbmc.test</span> <span class="op">&lt;-</span> <span class="va">pbmc.train</span>
+<span class="va">pbmc.test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">SetAssayData</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">pbmc.test</span>, slot <span class="op">=</span> <span class="st">"counts"</span>, new.data <span class="op">=</span> <span class="va">Xtestsubset</span><span class="op">)</span>
+<span class="va">pbmc.test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/NormalizeData.html" class="external-link">NormalizeData</a></span><span class="op">(</span><span class="va">pbmc.test</span><span class="op">)</span>
+<span class="va">pbmc.test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/ScaleData.html" class="external-link">ScaleData</a></span><span class="op">(</span><span class="va">pbmc.test</span>, features <span class="op">=</span> <span class="va">all.genes</span><span class="op">)</span></code></pre></div>
+<p>Now we should be ready to do some cool visualization. We first convince ourselves that the Seurat <code>FindMarkers</code> function returns the same information as the manual differential expression test above!!! We are happy to see this!!! So basically, we can always use the <code>FindMarkers</code> function instead of doing things manually.</p>
+<div class="sourceCode" id="cb41"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cluster2.markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindMarkers.html" class="external-link">FindMarkers</a></span><span class="op">(</span><span class="va">pbmc.test</span>, ident.1 <span class="op">=</span> <span class="fl">2</span>, min.pct <span class="op">=</span> <span class="fl">0</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">pvals2</span><span class="op">)</span>, n<span class="op">=</span><span class="fl">10</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##          LTB         IL32         IL7R         CD3D      HLA-DRA       TYROBP </span>
+<span class="co">## 1.024995e-69 2.795907e-65 1.555729e-52 1.822045e-52 2.461172e-50 3.652260e-47 </span>
+<span class="co">##         LDHB     HLA-DPB1     HLA-DRB1         CD74 </span>
+<span class="co">## 6.409036e-45 1.208847e-43 5.578914e-43 3.876074e-39</span></code></pre>
+<div class="sourceCode" id="cb43"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">cluster2.markers</span>, n <span class="op">=</span> <span class="fl">10</span><span class="op">)</span></code></pre></div>
+<pre><code><span class="co">##                 p_val avg_log2FC pct.1 pct.2    p_val_adj</span>
+<span class="co">## LTB      1.024995e-69  1.2573889 0.904 0.521 1.273146e-65</span>
+<span class="co">## IL32     2.795907e-65  1.2014270 0.800 0.363 3.472796e-61</span>
+<span class="co">## IL7R     1.555729e-52  1.1410766 0.575 0.213 1.932370e-48</span>
+<span class="co">## CD3D     1.822045e-52  0.9193555 0.758 0.327 2.263162e-48</span>
+<span class="co">## HLA-DRA  2.461172e-50 -3.3849585 0.205 0.524 3.057022e-46</span>
+<span class="co">## TYROBP   3.652260e-47 -3.5375959 0.065 0.404 4.536472e-43</span>
+<span class="co">## LDHB     6.409036e-45  0.8943173 0.813 0.439 7.960663e-41</span>
+<span class="co">## HLA-DPB1 1.208847e-43 -2.6613164 0.155 0.469 1.501509e-39</span>
+<span class="co">## HLA-DRB1 5.578914e-43 -2.5094670 0.107 0.433 6.929570e-39</span>
+<span class="co">## CD74     3.876074e-39 -2.3598621 0.595 0.704 4.814471e-35</span></code></pre>
+<div class="section level3">
+<h3 id="cool-visualizations">Cool visualizations!<a class="anchor" aria-label="anchor" href="#cool-visualizations"></a>
+</h3>
 <div class="section level4">
-<h4 id="cool-visualizations">Cool visualizations!<a class="anchor" aria-label="anchor" href="#cool-visualizations"></a>
+<h4 id="feature-plots">Feature Plots<a class="anchor" aria-label="anchor" href="#feature-plots"></a>
 </h4>
-<p>This first one helps us map to the Suerat tutorial- like which clusters are which. The second one is hopefully gonna help us figure out how to make the test matrix.</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://satijalab.org/seurat/reference/FeaturePlot.html" class="external-link">FeaturePlot</a></span><span class="op">(</span><span class="va">pbmc.train</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"MS4A1"</span>, <span class="st">"GNLY"</span>, <span class="st">"CD3E"</span>, <span class="st">"CD14"</span>, <span class="st">"FCER1A"</span>, <span class="st">"FCGR3A"</span>, <span class="st">"LYZ"</span>, <span class="st">"PPBP"</span>,
-    <span class="st">"CD8A"</span><span class="op">)</span>, reduction<span class="op">=</span><span class="st">"umap"</span><span class="op">)</span></code></pre></div>
-<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
+<div class="sourceCode" id="cb45"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">p0</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/DimPlot.html" class="external-link">DimPlot</a></span><span class="op">(</span><span class="va">pbmc.train</span>, reduction <span class="op">=</span> <span class="st">"umap"</span><span class="op">)</span>
+<span class="va">p1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FeaturePlot.html" class="external-link">FeaturePlot</a></span><span class="op">(</span><span class="va">pbmc.train</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RPS12"</span>,<span class="st">"S100A9"</span><span class="op">)</span>, reduction<span class="op">=</span><span class="st">"umap"</span><span class="op">)</span>
+<span class="va">p2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FeaturePlot.html" class="external-link">FeaturePlot</a></span><span class="op">(</span><span class="va">pbmc.test</span>, features <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"RPS12"</span>, <span class="st">"S100A9"</span><span class="op">)</span>, reduction<span class="op">=</span><span class="st">"umap"</span><span class="op">)</span>
+<span class="va">p0</span><span class="op">+</span><span class="va">p1</span><span class="op">+</span><span class="va">p2</span><span class="op">+</span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">3</span><span class="op">)</span></code></pre></div>
+<p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-22-1.png" width="700"></p>
 </div>
 <div class="section level4">
-<h4 id="finding-differentially-expressed-features">Finding differentially expressed features<a class="anchor" aria-label="anchor" href="#finding-differentially-expressed-features"></a>
+<h4 id="heat-maps">Heat Maps<a class="anchor" aria-label="anchor" href="#heat-maps"></a>
 </h4>
-<p>Now we need to make a test dataset! Ok shoot the dimensions are not going to match up unless we can figure out how to NOTE that this updated COUNTS but not like the scaled data</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">pbmc.test</span> <span class="op">&lt;-</span> <span class="va">pbmc.train</span>
-<span class="va">rows</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">Xtest</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">rownames</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span><span class="op">)</span>
-<span class="va">cols</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sets.html" class="external-link">intersect</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">Xtest</span><span class="op">)</span>, <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">pbmc.train</span><span class="op">)</span><span class="op">)</span>
-<span class="va">Xtestsubset</span> <span class="op">&lt;-</span> <span class="va">Xtest</span><span class="op">[</span><span class="va">rows</span>,<span class="va">cols</span><span class="op">]</span>
-<span class="va">pbmc.test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://mojaveazure.github.io/seurat-object/reference/AssayData.html" class="external-link">SetAssayData</a></span><span class="op">(</span>object <span class="op">=</span> <span class="va">pbmc.test</span>, slot <span class="op">=</span> <span class="st">"counts"</span>, new.data <span class="op">=</span> <span class="va">Xtestsubset</span><span class="op">)</span></code></pre></div>
-<p>Ok this is good. The one thing I am worried about is that the findMarkers function uses like scaled or logged data instead of raw counts. But I guess we will just see what happens.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cluster2.markers</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindMarkers.html" class="external-link">FindMarkers</a></span><span class="op">(</span><span class="va">pbmc.test</span>, ident.1 <span class="op">=</span> <span class="fl">2</span>, min.pct <span class="op">=</span> <span class="fl">0.25</span><span class="op">)</span></code></pre></div>
+<p>We return to further up in the Seurat tutorial to see which of the TEST SET genes vary across the TRAINING SET PCs.</p>
+</div>
+</div>
+</div>
+<div class="section level2">
+<h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
+</h2>
+<div id="refs" class="references csl-bib-body hanging-indent">
+<div id="ref-seurat3" class="csl-entry">
+Butler, Andrew, Paul Hoffman, Peter Smibert, Efthymia Papalexi, and Rahul Satija. 2018. <span>“Integrating Single-Cell Transcriptomic Data Across Different Conditions, Technologies, and Species.”</span> <em>Nature Biotechnology</em> 36: 411–20.
+</div>
+<div id="ref-seurat1" class="csl-entry">
+Hao, Yuhan, Stephanie Hao, Erica Andersen-Nissen, William M. Mauck III, Shiwei Zheng, Andrew Butler, Maddie J. Lee, et al. 2021. <span>“Integrated Analysis of Multimodal Single-Cell Data.”</span> <em>Cell</em>.
+</div>
+<div id="ref-seurat2" class="csl-entry">
+Stuart, Tim, Andrew Butler, Paul Hoffman, Christoph Hafemeister, Efthymia Papalexi, William M Mauck III, Yuhan Hao, Marlon Stoeckius, Peter Smibert, and Rahul Satija. 2019. <span>“Comprehensive Integration of Single-Cell Data.”</span> <em>Cell</em> 177: 1888–1902.
+</div>
 </div>
 </div>
   </div>
@@ -209,7 +318,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer>

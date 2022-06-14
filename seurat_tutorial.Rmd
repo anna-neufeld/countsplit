@@ -3,6 +3,7 @@ title: "Tutorial: count splitting with seurat"
 output: rmarkdown::html_vignette
 bibliography: latent.bib
 vignette: >
+  %\VignetteIndexEntry{"Tutorial: counts plitting with seurat"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -75,8 +76,8 @@ dim(pbmc.train)
 To avoid any confusion later, we create `Xtestsubset`, which contains the same genes and the same cells as `pbmc.train`. 
 
 ```{r}
-rows <- rownames(pbmc.train)
-cols <- colnames(pbmc.train)
+rows <- intersect(rownames(Xtest), rownames(pbmc.train))
+cols <- intersect(colnames(Xtest), colnames(pbmc.train))
 Xtestsubset <- Xtest[rows,cols]
 dim(Xtestsubset)
 ```
@@ -111,11 +112,10 @@ dim(pbmc.train)
 At this point in the Seurat tuorial, they make a plot with the top 10 variable features labeled. Here, we reproduce this plot and show that we identify nearly the same top 10 genes as they did in the Seurat [tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#standard-pre-processing-workflow-1). This is comforting, as it shows that the training set is retaining a lot of info compared to the full dataset. The overlapping genes are: ``PPBP, LYZ, FTL, S100A9, S100A8, GNLY, FTH1, IGLL5, PF4``. The only difference is that on the training set we selected ``HLA-DRA`` instead of ``GNG11``.   
 
 ```{r, out.width="100%"}
-library(ggplot2)
 top10 <- head(VariableFeatures(pbmc.train), 10)
-plot1 <- VariableFeaturePlot(pbmc.train) 
+plot1 <- VariableFeaturePlot(pbmc.train)
 plot2 <- LabelPoints(plot = plot1, points = top10)
-plot2 + guides(col="none")
+plot2
 ```
 We continue following the preprocessing steps from the tutorial, and notice that each time we reproduce a plot we have essentially the same results as in the tutorial, despite the fact that we are only using the training data. Besides things like sign flips of principal components and re-labeling of clusters, nearly everything looks the same. For example, the same sets of genes seem to define the first two principal components. We note that ``ScaleData`` finally fills in the ``scale.data`` Assay in the object. 
 
@@ -123,8 +123,8 @@ We continue following the preprocessing steps from the tutorial, and notice that
 all.genes <- rownames(pbmc.train)
 pbmc.train <- ScaleData(pbmc.train,features = all.genes)
 pbmc.train <- RunPCA(pbmc.train, features = VariableFeatures(object = pbmc.train))
-VizDimLoadings(pbmc.train, dims = 1:2, reduction = "pca")+theme(axis.text = element_text(size=10))
-DimPlot(pbmc.train, reduction = "pca")+guides(col="none")
+VizDimLoadings(pbmc.train, dims = 1:2, reduction = "pca")
+DimPlot(pbmc.train, reduction = "pca")
 ```
 
 We skip the next few visualizations from the ``Seurat`` tutorial. We will return to the gene expression heatmaps later, using the testing data rather than the training data. 
@@ -136,7 +136,7 @@ pbmc.train <- FindClusters(pbmc.train, resolution=0.5)
 
 Finally, we perform clustering. While our plot has some sign flips and relabeling, we seem to basically get the same clusters as in the Seurat tutorial. We skipped some steps in the tutorial that looked for the optimal number of dimensions, and decided to just use 10 (as in the tutorial).  
 
-```{r,}
+```{r}
 pbmc.train <- RunUMAP(pbmc.train, dims = 1:10)
 DimPlot(pbmc.train, reduction = "umap")
 ```
