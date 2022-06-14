@@ -12,6 +12,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE
 )
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
 In this tutorial, we demonstrate how to use the ``countsplit`` package to perform inference after latent variable selection for scRNA-seq data. In this tutorial, we work with simple simulated data and use only the ``countsplit`` package. In the other tutorials on this site, we show how the ``countsplit`` package can be integrated into pipelines with other scRNA-seq packages such as ``scran``, ``monocle3`` and ``seurat``

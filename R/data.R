@@ -11,3 +11,16 @@
 #' @examples
 #' data(cm)
 "cm"
+
+
+#' This was downloaded using the instructions at the start of the Seurat clustering tutorial.
+#' It is included here for convenience. 
+#'
+#' @docType data
+#'}
+#' @keywords datasets
+#' @format A RDS object. 
+#' @references 
+#' @examples
+#' data(pbmc)
+"pbmc"

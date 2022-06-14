@@ -9,10 +9,10 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
-https://satijalab.org/seurat/articles/de_vignette.html 
+This tutorial is inspired by the Seurat [clutering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) and [differential expression](https://satijalab.org/seurat/articles/de_vignette.html) vignettes. 
 
 # Install Seurat
 
@@ -25,17 +25,113 @@ BiocManager::install("Seurat")
 devtools::install_github('satijalab/seurat-data')
 ```
 
+# Loading the data
 
-ANNA fun activity = can I get this data to work. 
+We use the same dataset as in the Seurat [clutering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) vignette. For convenience, we included the `pbmc` dataset in this package. We just need to read it in and create a Seurat object. 
 
+```{r}
+underscore_func <- function(u) {
+  stringr::str_replace_all(u, "_","-")
+}
+```
+
+This is sort of a dumb step that I did at the front. 
 
 ```{r}
 library(Seurat)
-library(SeuratData)
+library(countsplit)
+data(pbmc.counts, package="countsplit")
+rownames(pbmc.counts) <- sapply(rownames(pbmc.counts), underscore_func)
+```
+
+The first step is to count split!
+```{r}
+set.seed(1)
+split <- countsplit(pbmc.counts, epsilon=0.5)
+Xtrain <- split$train
+Xtest <- split$test
 ```
 
 
-# Load the data
+THIS DOES SOME SUBSETTING. WE need to remember the subsetting for later. 
 
-We load the same ``SingleCellExperiment`` object
+```{r}
+pbmc.train <- CreateSeuratObject(counts = Xtrain, min.cells = 3, min.features = 200)
+```
 
+
+
+
+# Standard preprocessing workflow.
+
+```{r}
+pbmc.train[["percent.mt"]] <- PercentageFeatureSet(pbmc.train, pattern = "^MT-")
+pbmc.train <- subset(pbmc.train, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+pbmc.train <- NormalizeData(pbmc.train)
+pbmc.train <- FindVariableFeatures(pbmc.train, selection.method = "vst", nfeatures = 2000)
+```
+
+
+Here is a first step where we can compare to the seurat workflow and see we are getting really similar results despite only using the training set. 
+```{r}
+library(patchwork)
+top10 <- head(VariableFeatures(pbmc.train), 10)
+plot1 <- VariableFeaturePlot(pbmc.train)
+plot2 <- LabelPoints(plot = plot1, points = top10, repel = TRUE)
+plot2
+```
+
+We once again see SUPER similar results to the seurat tutorial despite the use of count splitting. The genes are basically the same!
+```{r}
+all.genes <- rownames(pbmc.train)
+pbmc.train <- ScaleData(pbmc.train,features = all.genes)
+pbmc.train <- RunPCA(pbmc.train, features = VariableFeatures(object = pbmc.train))
+VizDimLoadings(pbmc.train, dims = 1:2, reduction = "pca")
+DimPlot(pbmc.train, reduction = "pca")
+```
+
+
+```{r}
+DimHeatmap(pbmc.train, dims = 1, cells = 500, balanced = TRUE)
+```
+
+```{r}
+pbmc.train <- FindNeighbors(pbmc.train, dims = 1:10)
+pbmc.train <- FindClusters(pbmc.train, resolution=0.5)
+```
+
+
+While our plot is upside down and we got different labels, it really seems like we probably estimated the same things as in the Seurat tutorial. 
+```{r}
+pbmc.train <- RunUMAP(pbmc.train, dims = 1:10)
+DimPlot(pbmc.train, reduction = "umap")
+```
+
+
+### Cool visualizations!
+
+This first one helps us map to the Suerat tutorial- like which clusters are which. The second one is hopefully gonna help us figure out how to make the test matrix. 
+```{r}
+FeaturePlot(pbmc.train, features = c("MS4A1", "GNLY", "CD3E", "CD14", "FCER1A", "FCGR3A", "LYZ", "PPBP",
+    "CD8A"), reduction="umap")
+```
+
+### Finding differentially expressed features 
+
+Now we need to make a test dataset!
+Ok shoot the dimensions are not going to match up unless we can figure out how to 
+NOTE that this updated COUNTS but not like the scaled data 
+
+```{r}
+pbmc.test <- pbmc.train
+rows <- intersect(rownames(Xtest), rownames(pbmc.train))
+cols <- intersect(colnames(Xtest), colnames(pbmc.train))
+Xtestsubset <- Xtest[rows,cols]
+pbmc.test <- SetAssayData(object = pbmc.test, slot = "counts", new.data = Xtestsubset)
+```
+
+Ok this is good. The one thing I am worried about is that the findMarkers function uses like scaled or logged data instead of raw counts. But I guess we will just see what happens. 
+
+```{r}
+cluster2.markers <- FindMarkers(pbmc, ident.1 = 2, min.pct = 0.25)
+```
