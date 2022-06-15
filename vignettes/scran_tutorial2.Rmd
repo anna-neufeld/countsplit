@@ -3,7 +3,7 @@ title: "Tutorial: countsplitting and scran"
 output: rmarkdown::html_vignette
 bibliography: latent.bib
 vignette: >
-  %\VignetteIndexEntry{"Scran Tutorial: countsplitting and scran"}
+  %\VignetteIndexEntry{"Scran Tutorial: countsplitting and scran OLD"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
