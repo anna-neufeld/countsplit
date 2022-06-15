@@ -11,7 +11,8 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
-In this tutorial, we use the same data and follow the same steps as the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) tutorial. We use count splitting and we highlight the steps that should be performed on the training set and the test set. We also point out some places where count splitting may lead to confusion. For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
+The purpose of this tutorial is to reproduce the analysis from the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) tutorial while using `countsplit` to avoid the double dipping that was inherent in that tutorial. We use the same data and carry out the same processes as in the Seurat tutorial, but we highlight the steps that should be performed on the training set as opposed to on the test set. We also point out some steps in the pipeline where count splitting could potentially cause confusion. 
+For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
 
 # Install Seurat
 
@@ -42,7 +43,7 @@ rownames(pbmc.counts) <- sapply(rownames(pbmc.counts), function(u) stringr::str_
 
 # Applying count splitting and creating a Seurat object
 
-We now count split to obtain two raw count matrices. 
+We now count split to obtain two raw count matrices. This is the only place in this tutorial where we actually use a function from the `countsplit` package. 
 
 ```{r}
 set.seed(1)
@@ -51,13 +52,13 @@ Xtrain <- split$train
 Xtest <- split$test
 ```
 
-We now want to store the training matrix in a Seurat object so that we can apply the preprocessing steps from the Seurat clustering tutorial. As recommended by Seurat, this code will remove any genes that were not expressed in at least `3` cells and will remove any cells that did not have at least `200` expressed genes. 
+We now must store the training matrix in a Seurat object so that we can apply the preprocessing steps from the Seurat clustering tutorial. As recommended by Seurat, this code will remove any genes that were not expressed in at least `3` cells and will remove any cells that did not have at least `200` expressed genes. 
 
 ```{r}
 pbmc.train <- CreateSeuratObject(counts = Xtrain, min.cells = 3, min.features = 200)
 ```
 
-The Seurat tutorial then recommends further subsetting the cells to exclude cells that have unique feature counts over 2,500 or less than 200, and to exclude cells tha have >5% mitochondrial counts
+The Seurat tutorial then recommends further subsetting the cells to exclude cells that have unique feature counts over 2,500 or less than 200, and to exclude cells that have >5% mitochondrial counts
 
 ```{r}
 pbmc.train[["percent.mt"]] <- PercentageFeatureSet(pbmc.train, pattern = "^MT-")
@@ -81,9 +82,11 @@ Xtestsubset <- Xtest[rows,cols]
 dim(Xtestsubset)
 ```
 
-# Preprocessing workflow.
+# Preprocessing workflow
 
-We take this time to point out some intricacies of the ``Seurat`` object that could become confusing in future analyses. A ``Seurat`` object has three Assays: ``counts``, ``data``, and ``scale.data``. At this point in the analysis, ``data`` and ``counts`` both store the raw counts, and ``scale.data`` is empty. 
+All steps in the preprocessing workflow are performed on `pbmc.train`. 
+
+We take this time to point out some intricacies of the ``Seurat`` object that could become confusing in future analyses. A ``Seurat`` object has three assays: ``counts``, ``data``, and ``scale.data``. At this point in the analysis, ``data`` and ``counts`` both store the raw counts, and ``scale.data`` is empty. 
 
 ```{r}
 all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
@@ -93,7 +96,7 @@ all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
 GetAssayData(pbmc.train, "scale.data")
 ```
 
-These assays will change as we run further preprocessing steps, and this will be important to keep in mind. We next normalize and compute the set of highly variable features, as in the Seurat tutorial. Note that normalizing changes the ``data`` Assay of our object such that it stores normalized data, rather than counts. 
+These assays will change as we run further preprocessing steps, and this will be important to keep in mind. We next normalize and compute the set of highly variable features, as in the Seurat tutorial. Note that normalizing changes the ``data`` assay of `pbmc.train` such that it stores normalized data, rather than counts. 
 
 ```{r}
 pbmc.train <- NormalizeData(pbmc.train)
@@ -117,7 +120,7 @@ plot1 <- VariableFeaturePlot(pbmc.train)
 plot2 <- LabelPoints(plot = plot1, points = top10)
 plot2 + guides(col="none")
 ```
-We continue following the preprocessing steps from the tutorial, and notice that each time we reproduce a plot we have essentially the same results as in the tutorial, despite the fact that we are only using the training data. Besides things like sign flips of principal components and re-labeling of clusters, nearly everything looks the same. For example, the same sets of genes seem to define the first two principal components. We note that ``ScaleData`` finally fills in the ``scale.data`` Assay in the object. 
+We continue following the preprocessing steps from the tutorial, and notice that each time we reproduce a plot we have essentially the same results as in the tutorial, despite the fact that we are only using the training data. Besides things like sign flips of principal components and re-labeling of clusters, nearly everything looks the same. For example, the same sets of genes seem to define the first two principal components. We note that ``ScaleData`` finally fills in the ``scale.data`` assay in the object, and some downstream functions will access this assay. 
 
 ```{r,out.width="100%"}
 all.genes <- rownames(pbmc.train)
@@ -127,14 +130,14 @@ VizDimLoadings(pbmc.train, dims = 1:2, reduction = "pca")+theme(axis.text = elem
 DimPlot(pbmc.train, reduction = "pca")+guides(col="none")
 ```
 
-We skip the next few visualizations from the ``Seurat`` tutorial. We will return to the gene expression heatmaps later, using the testing data rather than the training data. 
+We skip the next few visualizations from the Seurat tutorial, but we return to the gene expression heatmaps at the end of this vignette. As in the Seurat tutorial, we retain 10 principal components for clustering analysis. 
 
 ```{r}
 pbmc.train <- FindNeighbors(pbmc.train, dims = 1:10)
 pbmc.train <- FindClusters(pbmc.train, resolution=0.5)
 ```
 
-Finally, we perform clustering. While our plot has some sign flips and relabeling, we seem to basically get the same clusters as in the Seurat tutorial. We skipped some steps in the tutorial that looked for the optimal number of dimensions, and decided to just use 10 (as in the tutorial).  
+Finally, we visualize the clusters that we have computed. While our plot has some sign flips and relabeling, we seem to basically get the same clusters as in the Seurat tutorial. This shows that using only the training set did not drastically alter the findings. 
 
 ```{r,}
 pbmc.train <- RunUMAP(pbmc.train, dims = 1:10)
@@ -143,7 +146,7 @@ DimPlot(pbmc.train, reduction = "umap")
 
 # Finding differentially expressed features manually
 
-Now that we computed clusters from the training set, it is time to look for differentially expressed genes across the clusters. The "safest" way to perform this analysis would be to extract the cluster labels from ``pbmc.train`` and write your own analysis functions to see how the columns of ``Xtestsubset`` (created above) vary across these clusters. This approach is the safest because we know for sure that the clusters were obtained using only the training data and that the analysis uses only the testing data.
+Now that we computed clusters from the training set, it is time to look for differentially expressed genes across the clusters. The "safest" way to perform this analysis is to extract the cluster labels from ``pbmc.train`` and write our own analysis functions to see how the columns of ``Xtestsubset`` (created above) vary across these clusters. This approach is the safest because we know for sure that the clusters were obtained using only the training data and that the analysis uses only the testing data.
 
 First, we extract the clusters and verify that we have a cluster for every cell in ``Xtestsubset``. 
 
@@ -154,9 +157,9 @@ length(clusters.train)
 NCOL(Xtestsubset)
 ```
 
-Next, we note that the ``FindMarkers`` function in Seurat (what they use for differential expression) does a wilcox test by default. And the first example of differential expression in their tutorial compares cluster 2 against all other clusters. It seems from the plots as though our cluster 2 maps well to their cluster 2, despite the general re-ordering of clusters. Therefore, we try to reproduce their cluster 2 analysis by hand.
+Next, we note that the ``FindMarkers`` function in Seurat (which is used for differential expression testing) does a wilcox test by default. The first example of differential expression testing in their tutorial compares cluster 2 against all other clusters. From visual inspection, it seems that their cluster 2 matches up well with our cluster 2 (this was just good luck; several other clusters have received different labels). Therefore, we try to reproduce their cluster 2 analysis by hand.
 
-Note that the ``FindMarkers`` function acts on the log-Normalized data. The size factor normalization actually matters here, so let's do that.
+Note that the ``FindMarkers`` function acts on the log-Normalized data, and so to reproduce this analysis by hand we must log and normalize the test data. 
 
 ```{r}
 sf <- colSums(Xtestsubset)
@@ -164,9 +167,7 @@ Xtestsubset_norm <- t(apply(Xtestsubset, 1, function(u) u/sf))
 Xtestsubset_lognorm <- log(Xtestsubset_norm +1)
 ```
 
-Note that for computational speedup, they only test genes that meet a certain threshold of log-fold expression change. For simplicity, we just test all genes here, so this code is pretty slow. 
-
-We identify ``LTB``, ``IL32``, ``CD3D``, ``IL7R``, and ``LDHB`` as the top markers of cluster 2, which is exactly the same as in the tutorial (although the order is slightly different and the p0values are slightly different). 
+For computational simplicity, the Seurat tutorial only tests a subset of genes for differential expression. For simplicity, here we test all of the genes. 
 
 ```{r}
 cluster2 <- clusters.train==2
@@ -174,11 +175,13 @@ pvals2 <- apply(Xtestsubset_lognorm, 1, function(u) wilcox.test(u~cluster2)$p.va
 head(sort(pvals2))
 ```
 
+We identify ``LTB``, ``IL32``, ``CD3D``, ``IL7R``, and ``LDHB`` as the top markers of cluster 2, which is exactly the same as in the Seurat tutorial (although the order is slightly different and the p0values are slightly different). 
+
 # Finding differentially expressed features with Seurat
 
-It would be nice to be able to make a ``Seurat`` object containing the training clusters from the testing counts. This would allow us to use some of Seurat's nice visualization features for differential expression testing. We note that care should be taken in this section, as we are mixing-and-matching pieces of Seurat objects and Seurat functions not explicitly mentioned in this tutorial may end up having unexpected behavior. 
+It would be nice to be able to make a ``Seurat`` object containing the training set clusters but the test set counts. This would allow us to use some of Seurat's nice visualization features for differential expression testing. We note that care should be taken in this section, as we are mixing-and-matching pieces of Seurat objects and Seurat functions not explicitly mentioned in this tutorial may have unexpected behavior. 
 
-We first let ``pbmc.test`` equal ``pbmc.train``. This ensures that our test set object gets the same cluster information and UMAP information as the training set, such that we can still visualize the training set clusters. We then update the ``counts`` Assay to store the test set counts. Unfortunately, once we do this, the ``data`` and ``scale.data`` assays are strange because they no longer propertly store the normalized or scaled counts. We run normalize and scale functions to remedy this.
+We first let `pbmc.test` equal `pbmc.train`. This ensures that our test set object gets the same cluster information and UMAP information as the training set, such that we can still visualize the training set clusters. We then update the `counts` assay to store the test set counts. Unfortunately, once we do this, the `data` and `scale.data` assays are not automatically updated to store the normalized or scaled counts. We run normalize and scale functions to remedy this.
 
 ```{r}
 pbmc.test <- pbmc.train
@@ -187,7 +190,7 @@ pbmc.test <- NormalizeData(pbmc.test)
 pbmc.test <- ScaleData(pbmc.test, features = all.genes)
 ```
 
-Now we should be ready to do some cool visualizations. We first convince ourselves that the Seurat ``FindMarkers`` function returns the same information as the manual differential expression test above!!! We are happy to see this!!! So basically, we can always use the ``FindMarkers`` function instead of doing things manually. 
+We first verify that the Seurat ``FindMarkers`` function returns the same information as the manual differential expression test above. It does! 
 
 ```{r}
 cluster2.markers <- FindMarkers(pbmc.test, ident.1 = 2, min.pct = 0)
@@ -197,12 +200,18 @@ head(cluster2.markers, n = 10)
 
 The main reason it is useful to store the test matrix in a ``Seurat`` object is that it lets us use many cool visualization features. 
 
-Consider the following heatmaps. 
+Consider the following sets of heatmaps. 
+
+This first set of heatmaps is computed using the training counts. All principal components are computed on the training set. Each panel shows a principal component. 500 randomly selected cells are ordered along the principal component on the X-axis. The genes with the top 5 highest loadings are shown on the Y-axis. While the association between the genes and the principal components clearly decreases as we move from PC1 to PC15, PC15 still clearly shows association between the top 5 genes and the PC. This association is due to the fact that the training data itself was used to construct the PCs-- and so there will always be some genes that appear to be associated with the PC. 
 ```{r}
 DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE)
+```
+
+Now instead we still show principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 10 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 11-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association seen in the initial heatmaps was simply due to overfitting; these PCs do not measure anything useful or interesting. 
+```{r}
 DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE)
 ```
-The first 10 or so principal components seem to measure true signal in the data. We can tell that they are measuring true signal because we see the same gene expression patterns on the test set as we do on the training set. If the test set genes are differentially expressed across the training set PCs, it suggests that the PCs are measuring true variation. On the other hand, consider the PCs 11-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. 
+
 This matches insights from the Seurat tutorial (insights obtained using Jackstraw), where they suggested that somewhere between 7-12 PCs would be the right number to keep, and they chose to keep 10.
 These heatmaps show the utility of count splitting in helping distinguish signal from noise.
 
