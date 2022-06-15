@@ -11,11 +11,11 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
+
 Before using this tutorial, we recommend that you read through our ``introduction to count splitting" tutorial to understand our method in a simple example with simulated data. 
 
-The purpose of this tutorial is to reproduce the analysis from the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) tutorial while using `countsplit` to avoid the double dipping that was inherent in that tutorial. The analysis mirrors the analysis in the June, 2022 version of the Seurat tutorial. In the event that the Seurat tutorial at the link above gets modified, we have also reproduced the relevant analyses below for reference. 
-
-We use the same data and carry out the same processes as in the Seurat tutorial, but we highlight the steps that should be performed on the training set as opposed to on the test set. We also point out some steps in the pipeline where count splitting could potentially cause confusion. For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
+The purpose of this tutorial is to reproduce the analysis from the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) tutorial while using `countsplit` to avoid the double dipping that was inherent in that tutorial. We use the same data and carry out the same processes as in the Seurat tutorial, but we highlight the steps that should be performed on the training set as opposed to on the test set. We also point out some steps in the pipeline where count splitting could potentially cause confusion. 
+For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
 
 # Install Seurat
 
@@ -29,7 +29,7 @@ BiocManager::install("Seurat")
 
 # Loading the data
 
-We use the same dataset as in the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) vignette. For convenience, we included the `pbmc` dataset raw counts (obtained from 10x genomics) in the `countsplit` package. We just need to load the packages and load the count matrix. 
+We use the same dataset as in the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) vignette. For convenience, we included the `pbmc` dataset raw counts (obtained from 10x genomics) in this package. We just need to load the packages and load the count matrix. 
 
 ```{r}
 library(Seurat)
