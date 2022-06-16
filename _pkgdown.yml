@@ -14,16 +14,16 @@ navbar:
     - github
   components:
     tutorial:
-      text: Getting started
+      text: Introductory tutorial
       href: articles/countsplit_tutorial.html
     seurat:
-      text: Tutorial with Seurat
+      text: Seurat tutorial
       href: articles/seurat_tutorial.html
     scran:
-      text: Tutorial with scran
+      text: Scran tutorial
       href: articles/scran_tutorial.html
     monocle3:
-      text: Tutorial with monocle3
+      text: Monocle3 tutorial
       href: articles/monocle3_tutorial.html
     reference:
       text: Reference

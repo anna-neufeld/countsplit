@@ -13,9 +13,11 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
+**This tutorial is under construction.**
+
 Before using this tutorial, we recommend that you read through our ``introduction to count splitting" tutorial to understand our method in a simple example with simulated data. 
 
-For this tutorial, we reproduce the Monocle3 [vignette](https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/), but we apply count splitting. Throughout the tutorial, we see that we reach similar takeaways to those reached in the Monocle3 vignette, despite the fact that we estimate pseudotime using only the training set. 
+For this tutorial, we reproduce the Monocle3[vignette](https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/), but we apply count splitting. Throughout the tutorial, we see that we reach similar takeaways to those reached in the Monocle3 vignette, despite the fact that we estimate pseudotime using only the training set. 
 
 # Install Monocle3
 
@@ -52,104 +54,104 @@ cds_train <- new_cell_data_set(Xtrain,
 ```
 
 
-# Preprocess and estimate pseudotime
+<!-- # Preprocess and estimate pseudotime -->
 
-We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estiamtes. Everything in this section uses the training set only. 
+<!-- We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estiamtes. Everything in this section uses the training set only.  -->
 
-```{r}
-cds_train <- preprocess_cds(cds_train, num_dim = 50)
-cds_train <- align_cds(cds_train, alignment_group = "batch", residual_model_formula_str = "~ bg.300.loading + bg.400.loading + bg.500.1.loading + bg.500.2.loading + bg.r17.loading + bg.b01.loading + bg.b02.loading")
-```
+<!-- ```{r} -->
+<!-- cds_train <- preprocess_cds(cds_train, num_dim = 50) -->
+<!-- cds_train <- align_cds(cds_train, alignment_group = "batch", residual_model_formula_str = "~ bg.300.loading + bg.400.loading + bg.500.1.loading + bg.500.2.loading + bg.r17.loading + bg.b01.loading + bg.b02.loading") -->
+<!-- ``` -->
 
-The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. 
+<!-- The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data.  -->
 
-```{r}
-cds_train <- reduce_dimension(cds_train)
-plot_cells(cds_train, label_groups_by_cluster=FALSE,  color_cells_by = "cell.type")
-```
+<!-- ```{r} -->
+<!-- cds_train <- reduce_dimension(cds_train) -->
+<!-- plot_cells(cds_train, label_groups_by_cluster=FALSE,  color_cells_by = "cell.type") -->
+<!-- ``` -->
 
-Finally, we learn the graph that will be usef to construct pseudotime. 
+<!-- Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the `use.partition=FALSE` argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.  -->
 
-```{r}
-cds_train <- cluster_cells(cds_train)
-cds_train <- learn_graph(cds_train)
-plot_cells(cds_train,
-           color_cells_by = "cell.type",
-           label_groups_by_cluster=FALSE,
-           label_leaves=FALSE,
-           label_branch_points=FALSE)
-```
-To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex. 
+<!-- ```{r} -->
+<!-- cds_train <- cluster_cells(cds_train) -->
+<!-- cds_train <- learn_graph(cds_train, use.partition=FALSE) -->
+<!-- plot_cells(cds_train, -->
+<!--            color_cells_by = "cell.type", -->
+<!--            label_groups_by_cluster=FALSE, -->
+<!--            label_leaves=FALSE, -->
+<!--            label_branch_points=FALSE) -->
+<!-- ``` -->
+<!-- To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex.  -->
 
-```{r}
-get_earliest_principal_node <- function(cds, time_bin="130-170"){
-  cell_ids <- which(colData(cds)[, "embryo.time.bin"] == time_bin)
-  
-  closest_vertex <-
-  cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
-  closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
-  root_pr_nodes <-
-  igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
-  (which.max(table(closest_vertex[cell_ids,]))))]
-  
-  root_pr_nodes
-}
-cds_train <- order_cells(cds_train, root_pr_nodes=get_earliest_principal_node(cds_train))
-plot_cells(cds_train,
-           color_cells_by = "pseudotime",
-           label_cell_groups=FALSE,
-           label_leaves=FALSE,
-           label_branch_points=FALSE,
-           graph_label_size=1.5)
-```
+<!-- ```{r} -->
+<!-- get_earliest_principal_node <- function(cds, time_bin="130-170"){ -->
+<!--   cell_ids <- which(colData(cds)[, "embryo.time.bin"] == time_bin) -->
 
-# Differential Expression
+<!--   closest_vertex <- -->
+<!--   cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex -->
+<!--   closest_vertex <- as.matrix(closest_vertex[colnames(cds), ]) -->
+<!--   root_pr_nodes <- -->
+<!--   igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names -->
+<!--   (which.max(table(closest_vertex[cell_ids,]))))] -->
 
-Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. 
+<!--   root_pr_nodes -->
+<!-- } -->
+<!-- cds_train <- order_cells(cds_train, root_pr_nodes=get_earliest_principal_node(cds_train)) -->
+<!-- plot_cells(cds_train, -->
+<!--            color_cells_by = "pseudotime", -->
+<!--            label_cell_groups=FALSE, -->
+<!--            label_leaves=FALSE, -->
+<!--            label_branch_points=FALSE, -->
+<!--            graph_label_size=1.5) -->
+<!-- ``` -->
 
-## By hand
+<!-- # Differential Expression -->
 
-If we wanted to do this ``by hand", we could do the following. FILL IN. NOTE TO SELF you need to remove cells with infinite pseudotime. 
+<!-- Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we use the test set.  -->
 
-## Using Monocle3's graph test
+<!-- ## By hand -->
 
-We skip ahead to the "finding genes that change as a function of pseudotime" [section](https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep) of the Monocle3 vignette. 
+<!-- If we wanted to do this ``by hand", we could do the following. FILL IN. NOTE TO SELF you need to remove cells with infinite pseudotime.  -->
 
-In this section, we will need our test set to be stored in a `cell_data_set` that contains the test set counts. We need this object to store the training set graph. To accomplish this, we make a copy of `cds_train` and only update the counts.  
+<!-- ## Using Monocle3's graph test -->
 
-```{r}
-cds_test <- cds_train
-counts(cds_test) <- Xtest
-```
+<!-- We skip ahead to the "finding genes that change as a function of pseudotime" [section](https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep) of the Monocle3 vignette.  -->
 
-We now run the `graph_test` function, which is the preferred Monocle3 methodology for finding genes that vary across pseudotime. 
+<!-- In this section, we will need our test set to be stored in a `cell_data_set` that contains the test set counts. We need this object to store the training set graph. To accomplish this, we make a copy of `cds_train` and only update the counts.   -->
 
-```{r}
-ciliated_cds_pr_test_res <- graph_test(cds_test, neighbor_graph="principal_graph", cores=4)
-pr_deg_ids <- row.names(subset(ciliated_cds_pr_test_res, q_value < 0.0005))
-```
+<!-- ```{r} -->
+<!-- cds_test <- cds_train -->
+<!-- counts(cds_test) <- Xtest -->
+<!-- ``` -->
 
-Here are a couple of interesting genes that score as highly significant according to graph_test(). Up to the fact that our dimension-reduced plots seem to be mirror images of those in the Monocle3 tutorial, we see very similar trends to the Monocle3 tutorial. 
+<!-- We now run the `graph_test` function, which is the preferred Monocle3 methodology for finding genes that vary across pseudotime.  -->
 
-```{r, results='hide'}
-plot_cells(cds_test, genes=c("hlh-4", "gcy-8", "dac-1", "oig-8"),
-           show_trajectory_graph=FALSE,
-           label_cell_groups=FALSE,
-           label_leaves=FALSE)
-```
+<!-- ```{r} -->
+<!-- ciliated_cds_pr_test_res <- graph_test(cds_test, neighbor_graph="principal_graph", cores=4) -->
+<!-- pr_deg_ids <- row.names(subset(ciliated_cds_pr_test_res, q_value < 0.0005)) -->
+<!-- ``` -->
 
+<!-- Here are a couple of interesting genes that score as highly significant according to graph_test(). Up to the fact that our dimension-reduced plots seem to be mirror images of those in the Monocle3 tutorial, we see very similar trends to the Monocle3 tutorial.  -->
 
+<!-- ```{r, results='hide'} -->
+<!-- plot_cells(cds_test, genes=c("hlh-4", "gcy-8", "dac-1", "oig-8"), -->
+<!--            show_trajectory_graph=FALSE, -->
+<!--            label_cell_groups=FALSE, -->
+<!--            label_leaves=FALSE) -->
+<!-- ``` -->
 
 
 
 
-ANNA NOTE TO SELF: this looked WAY BETTER beofre !! What did you do wrong?? Add partiion=FAlse back in?? 
 
-```{r}
-AFD_genes <- c("gcy-8", "dac-1", "oig-8")
-AFD_lineage_cds <- cds_test[rowData(cds_test)$gene_short_name %in% AFD_genes,
-                       colData(cds_test)$cell.type %in% c("AFD")]
-plot_genes_in_pseudotime(AFD_lineage_cds,
-                         color_cells_by="embryo.time.bin",
-                         min_expr=0.5)
-```
+
+<!-- ANNA NOTE TO SELF: this looked WAY BETTER beofre !! What did you do wrong?? Add partiion=FAlse back in??  -->
+
+<!-- ```{r} -->
+<!-- AFD_genes <- c("gcy-8", "dac-1", "oig-8") -->
+<!-- AFD_lineage_cds <- cds_test[rowData(cds_test)$gene_short_name %in% AFD_genes, -->
+<!--                        colData(cds_test)$cell.type %in% c("AFD")] -->
+<!-- plot_genes_in_pseudotime(AFD_lineage_cds, -->
+<!--                          color_cells_by="embryo.time.bin", -->
+<!--                          min_expr=0.5) -->
+<!-- ``` -->

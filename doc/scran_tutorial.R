@@ -36,38 +36,3 @@ Xtest <- split$test
 cm.train <- cm
 counts(cm.train) <- Xtrain
 
-## -----------------------------------------------------------------------------
-clusters <- quickCluster(cm.train)
-cm.train <- computeSumFactors(cm.train, clusters=clusters)
-cm.train <- logNormCounts(cm.train)
-
-## -----------------------------------------------------------------------------
-top.hvgs <- getTopHVGs(modelGeneVar(cm.train), n=2000)
-
-## -----------------------------------------------------------------------------
-cm.train<- fixedPCA(cm.train, subset.row=top.hvgs)
-clusters.train <- clusterCells(cm.train,use.dimred="PCA")
-
-## ----out.width="90%"----------------------------------------------------------
-table(clusters.train)
-ggplot(as_tibble(reducedDim(cm.train)), aes(x=PC1, y=PC2, col=as.factor(clusters.train)))+geom_point()+labs(col="Cluster")
-
-## ---- warning=FALSE-----------------------------------------------------------
-set.seed(1)
-indices <- which(clusters.train==1 | clusters.train==2)
-genes <- sample(1:NCOL(Xtest), size=500)
-results <- t(apply(Xtest[genes, indices], 1, function(u) summary(glm(u~clusters.train[indices], offset=sizeFactors(cm.train)[indices], family="poisson"))$coefficients[2,]))
-table(results[,4] < 0.01)
-head(results)
-
-## -----------------------------------------------------------------------------
-cm.test <- SingleCellExperiment(list(counts=Xtest))
-sizeFactors(cm.test) <- sizeFactors(cm.train)
-cm.test <- logNormCounts(cm.test)
-
-## -----------------------------------------------------------------------------
-results <- scran::findMarkers(
-  cm.test, groups= clusters.train,
-  pval.type = "all")
-results[[1]]
-

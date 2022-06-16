@@ -33,23 +33,23 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">countsplit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.0.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
 <li>
-  <a href="../articles/countsplit_tutorial.html">Getting started</a>
+  <a href="../articles/countsplit_tutorial.html">Introductory tutorial</a>
 </li>
 <li>
-  <a href="../articles/scran_tutorial.html">Tutorial with scran</a>
+  <a href="../articles/seurat_tutorial.html">Seurat tutorial</a>
 </li>
 <li>
-  <a href="../articles/seurat_tutorial.html">Tutorial with Seurat</a>
+  <a href="../articles/scran_tutorial.html">Scran tutorial</a>
 </li>
 <li>
-  <a href="../articles/monocle3_tutorial.html">Tutorial with monocle3</a>
+  <a href="../articles/monocle3_tutorial.html">Monocle3 tutorial</a>
 </li>
 <li>
   <a href="../reference/index.html">Reference</a>
@@ -78,13 +78,14 @@
       <h1 data-toc-skip>Tutorial: countsplitting and scran</h1>
             
       
-      <small class="dont-index">Source: <a href="https://github.com/anna-neufeld/countsplit/blob/HEAD/vignettes/vignettes/scran_tutorial.Rmd" class="external-link"><code>vignettes/vignettes/scran_tutorial.Rmd</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/anna-neufeld/countsplit/blob/HEAD/vignettes/scran_tutorial.Rmd" class="external-link"><code>vignettes/scran_tutorial.Rmd</code></a></small>
       <div class="hidden name"><code>scran_tutorial.Rmd</code></div>
 
     </div>
 
     
     
+<p><strong>This tutorial is under construction.</strong></p>
 <p>Before using this tutorial, we recommend that you read through our ``introduction to count splitting” tutorial to understand our method in a simple package with simulated data.</p>
 <p>In this tutorial, we use a real dataset from <span class="citation">(<strong>elorbany2022single?</strong>)</span> that is also used in our paper. The dataset contains 10,000 cells collected over 15 days of a directed differentiation protocol from induced pluripotent stem cells (IPSC) to cardiomyocytes (cm).</p>
 <div class="section level2">
@@ -173,95 +174,53 @@
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cm.train</span> <span class="op">&lt;-</span> <span class="va">cm</span>
 <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">Xtrain</span></code></pre></div>
-<p>Now we are ready for our analysis! These steps were inspired by the <a href="https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html" class="external-link">`<code>scran</code> tutorial</a>. We first compute sum factors for normalization and then we perform log normalization of the dataset.</p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/quickCluster.html" class="external-link">quickCluster</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span>
-<span class="va">cm.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/computeSumFactors.html" class="external-link">computeSumFactors</a></span><span class="op">(</span><span class="va">cm.train</span>, clusters<span class="op">=</span><span class="va">clusters</span><span class="op">)</span>
-<span class="va">cm.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span></code></pre></div>
-<p>We then recide to work only with the top 2000 highly variable features for the remainder of the analysis. As noted in the <code>scran</code> tutorial, rather than select the top 2000 we could also try to use something like a FDR threshold to select only those that seem significantly variable.</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">top.hvgs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/getTopHVGs.html" class="external-link">getTopHVGs</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/scran/man/modelGeneVar.html" class="external-link">modelGeneVar</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span>, n<span class="op">=</span><span class="fl">2000</span><span class="op">)</span></code></pre></div>
-<p>Finally, we run scran’s <code>clusterCells</code> function, which is a wrapper function for the graph-based clustering steps carried out in the tutorial.</p>
-<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cm.train</span><span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/fixedPCA.html" class="external-link">fixedPCA</a></span><span class="op">(</span><span class="va">cm.train</span>, subset.row<span class="op">=</span><span class="va">top.hvgs</span><span class="op">)</span>
-<span class="va">clusters.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/clusterCells.html" class="external-link">clusterCells</a></span><span class="op">(</span><span class="va">cm.train</span>,use.dimred<span class="op">=</span><span class="st">"PCA"</span><span class="op">)</span></code></pre></div>
-<p>It turns out that this function returned 11 clusters. We can visualize them below.</p>
-<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">clusters.train</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## clusters.train</span>
-<span class="co">##    1    2    3    4    5    6    7 </span>
-<span class="co">## 1997  698  588 2312 2983  958  464</span></code></pre>
-<div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/as_tibble.html" class="external-link">as_tibble</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/reducedDims.html" class="external-link">reducedDim</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span><span class="op">)</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>x<span class="op">=</span><span class="va">PC1</span>, y<span class="op">=</span><span class="va">PC2</span>, col<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">as.factor</a></span><span class="op">(</span><span class="va">clusters.train</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">+</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span><span class="op">)</span><span class="op">+</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/labs.html" class="external-link">labs</a></span><span class="op">(</span>col<span class="op">=</span><span class="st">"Cluster"</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## Don't know how to automatically pick scale for object of type reduced.dim.matrix/matrix. Defaulting to continuous.</span>
-<span class="co">## Don't know how to automatically pick scale for object of type reduced.dim.matrix/matrix. Defaulting to continuous.</span></code></pre>
-<p><img src="scran_tutorial_files/figure-html/unnamed-chunk-12-1.png" width="90%"></p>
-</div>
-<div class="section level2">
-<h2 id="differential-expression-testing-with-poisson-glms">Differential expression testing with Poisson GLMs<a class="anchor" aria-label="anchor" href="#differential-expression-testing-with-poisson-glms"></a>
-</h2>
-<p>We now consider two ways to check differential expression. The first is Poisson GLMs for differentially expressed genes between clusters 1 and 2. We don’t need <code>Xtest</code> to be in a special object for this. For computational efficiency, we don’t want to check all 21,000 genes. Let’s check 500 randomly selected genes. Recall that in <code>Xtest</code>, the genes are the rows and not the columns. As in our manuscript, we include size factors as offsets here.</p>
-<div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
-<span class="va">indices</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="va">clusters.train</span><span class="op">==</span><span class="fl">1</span> <span class="op">|</span> <span class="va">clusters.train</span><span class="op">==</span><span class="fl">2</span><span class="op">)</span>
-<span class="va">genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sample.html" class="external-link">sample</a></span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">NCOL</a></span><span class="op">(</span><span class="va">Xtest</span><span class="op">)</span>, size<span class="op">=</span><span class="fl">500</span><span class="op">)</span>
-<span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/t.html" class="external-link">t</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/apply.html" class="external-link">apply</a></span><span class="op">(</span><span class="va">Xtest</span><span class="op">[</span><span class="va">genes</span>, <span class="va">indices</span><span class="op">]</span>, <span class="fl">1</span>, <span class="kw">function</span><span class="op">(</span><span class="va">u</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/glm.html" class="external-link">glm</a></span><span class="op">(</span><span class="va">u</span><span class="op">~</span><span class="va">clusters.train</span><span class="op">[</span><span class="va">indices</span><span class="op">]</span>, offset<span class="op">=</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/sizeFactors.html" class="external-link">sizeFactors</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span><span class="op">[</span><span class="va">indices</span><span class="op">]</span>, family<span class="op">=</span><span class="st">"poisson"</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">coefficients</span><span class="op">[</span><span class="fl">2</span>,<span class="op">]</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">results</span><span class="op">[</span>,<span class="fl">4</span><span class="op">]</span> <span class="op">&lt;</span> <span class="fl">0.01</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## </span>
-<span class="co">## FALSE  TRUE </span>
-<span class="co">##   428    72</span></code></pre>
-<div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">results</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">##               Estimate Std. Error     z value    Pr(&gt;|z|)</span>
-<span class="co">## FRRS1      -0.27893344  1.0953237 -0.25465845 0.798986910</span>
-<span class="co">## SYNJ2      -0.01942228  0.4241392 -0.04579223 0.963475851</span>
-<span class="co">## KCNMB2-AS1 -0.17357296  0.5527615 -0.31401061 0.753512984</span>
-<span class="co">## TP53INP1   -0.51532223  0.6212037 -0.82955438 0.406790781</span>
-<span class="co">## AC006970.1 -1.23444489  1.0376196 -1.18968921 0.234168568</span>
-<span class="co">## C3orf62     1.42581453  0.4368847  3.26359421 0.001100086</span></code></pre>
-</div>
-<div class="section level2">
-<h2 id="differential-expression-testing-with-scran">Differential expression testing with scran<a class="anchor" aria-label="anchor" href="#differential-expression-testing-with-scran"></a>
-</h2>
-<p>If instead of using our own <code>glm</code> code we want to use the <code>scoreMarkers</code> function from the <code>scran</code> package, as in the scran tutorial, we need to store our test matrix in a <code>SingleCellExperiment</code> object.</p>
-<p>We can either construct this from scratch using only the count matrix, or we could make a copy of the original <code>cm</code> object and add the count matrix after. It depends on if we want to be sure to obtain the metadata or not.</p>
-<div class="sourceCode" id="cb29"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cm.test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>counts<span class="op">=</span><span class="va">Xtest</span><span class="op">)</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/sizeFactors.html" class="external-link">sizeFactors</a></span><span class="op">(</span><span class="va">cm.test</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/sizeFactors.html" class="external-link">sizeFactors</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span>
-<span class="va">cm.test</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scuttle/man/logNormCounts.html" class="external-link">logNormCounts</a></span><span class="op">(</span><span class="va">cm.test</span><span class="op">)</span></code></pre></div>
-<p>This first element in <code>results</code> shows marker genes that distinguish cluster 1 from all other clusters. We see that, even with count splitting, there are highly significant marker genes.</p>
-<div class="sourceCode" id="cb30"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu">scran</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/scran/man/findMarkers.html" class="external-link">findMarkers</a></span><span class="op">(</span>
-  <span class="va">cm.test</span>, groups<span class="op">=</span> <span class="va">clusters.train</span>,
-  pval.type <span class="op">=</span> <span class="st">"all"</span><span class="op">)</span>
-<span class="va">results</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></code></pre></div>
-<pre><code><span class="co">## DataFrame with 21971 rows and 9 columns</span>
-<span class="co">##               p.value         FDR summary.logFC     logFC.2     logFC.3</span>
-<span class="co">##             &lt;numeric&gt;   &lt;numeric&gt;     &lt;numeric&gt;   &lt;numeric&gt;   &lt;numeric&gt;</span>
-<span class="co">## TPM1      1.08718e-87 2.38865e-83      1.524155    -2.60820   -1.691339</span>
-<span class="co">## TNNT2     3.92556e-20 3.42042e-16      0.243453    -2.74309   -0.629304</span>
-<span class="co">## MYL7      4.67036e-20 3.42042e-16     -0.619474    -3.00084   -0.619474</span>
-<span class="co">## NEXN      6.38871e-17 3.50916e-13      0.180813    -1.26727   -0.599001</span>
-<span class="co">## ANKRD1    8.78375e-17 3.85975e-13      0.256620    -1.45896   -1.366888</span>
-<span class="co">## ...               ...         ...           ...         ...         ...</span>
-<span class="co">## GABRQ               1           1             0  0.00000000  0.00000000</span>
-<span class="co">## CLIC2               1           1             0  0.00000000 -0.00355741</span>
-<span class="co">## EEF1A1P41           1           1             0 -0.00491876  0.00000000</span>
-<span class="co">## PCDH11Y             1           1             0  0.00000000  0.00000000</span>
-<span class="co">## TMSB4Y              1           1             0  0.00000000  0.00000000</span>
-<span class="co">##                logFC.4      logFC.5      logFC.6     logFC.7</span>
-<span class="co">##              &lt;numeric&gt;    &lt;numeric&gt;    &lt;numeric&gt;   &lt;numeric&gt;</span>
-<span class="co">## TPM1          1.393705     1.539964     1.764288    1.524155</span>
-<span class="co">## TNNT2         0.261539     0.284571     0.299269    0.243453</span>
-<span class="co">## MYL7          0.511705     0.595673     0.518480    0.422453</span>
-<span class="co">## NEXN          0.165924     0.185703     0.184252    0.180813</span>
-<span class="co">## ANKRD1        0.300527     0.322272     0.295123    0.256620</span>
-<span class="co">## ...                ...          ...          ...         ...</span>
-<span class="co">## GABRQ     -0.004987919 -0.002776015  0.000000000  0.00000000</span>
-<span class="co">## CLIC2     -0.000899236  0.000000000 -0.002090804  0.00000000</span>
-<span class="co">## EEF1A1P41 -0.000239274  0.000000000  0.000000000  0.00000000</span>
-<span class="co">## PCDH11Y   -0.001452754 -0.001119289 -0.000813786  0.00000000</span>
-<span class="co">## TMSB4Y     0.000000000 -0.000292628  0.000000000 -0.00585973</span></code></pre>
+<!-- Now we are ready for our analysis! These steps were inspired by the [`\textt{scran}``scran`` tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html).  -->
+<!-- We first compute sum factors for normalization and then we perform log normalization of the dataset.  -->
+<!-- ```{r} -->
+<!-- clusters <- quickCluster(cm.train) -->
+<!-- cm.train <- computeSumFactors(cm.train, clusters=clusters) -->
+<!-- cm.train <- logNormCounts(cm.train) -->
+<!-- ``` -->
+<!-- We then recide to work only with the top 2000 highly variable features for the remainder of the analysis. As noted in the ``scran`` tutorial, rather than select the top 2000 we could also try to use something like a FDR threshold to select only those that seem significantly variable.  -->
+<!-- ```{r} -->
+<!-- top.hvgs <- getTopHVGs(modelGeneVar(cm.train), n=2000) -->
+<!-- ``` -->
+<!-- Finally, we run scran's ``clusterCells`` function, which is a wrapper function for the graph-based clustering steps carried out in the tutorial.  -->
+<!-- ```{r} -->
+<!-- cm.train<- fixedPCA(cm.train, subset.row=top.hvgs) -->
+<!-- clusters.train <- clusterCells(cm.train,use.dimred="PCA") -->
+<!-- ``` -->
+<!-- It turns out that this function returned 11 clusters. We can visualize them below.  -->
+<!-- ```{r,out.width="90%"} -->
+<!-- table(clusters.train) -->
+<!-- ggplot(as_tibble(reducedDim(cm.train)), aes(x=PC1, y=PC2, col=as.factor(clusters.train)))+geom_point()+labs(col="Cluster") -->
+<!-- ``` -->
+<!-- # Differential expression testing with Poisson GLMs -->
+<!-- We now consider two ways to check differential expression. The first is Poisson GLMs for differentially expressed genes between clusters 1 and 2. We don't need ``Xtest`` to be in a special object for this. For computational efficiency, we don't want to check all 21,000 genes. Let's check 500 randomly selected genes. -->
+<!-- Recall that in ``Xtest``, the genes are the rows and not the columns. As in our manuscript, we include size factors as offsets here.  -->
+<!-- ```{r, warning=FALSE} -->
+<!-- set.seed(1) -->
+<!-- indices <- which(clusters.train==1 | clusters.train==2) -->
+<!-- genes <- sample(1:NCOL(Xtest), size=500) -->
+<!-- results <- t(apply(Xtest[genes, indices], 1, function(u) summary(glm(u~clusters.train[indices], offset=sizeFactors(cm.train)[indices], family="poisson"))$coefficients[2,])) -->
+<!-- table(results[,4] < 0.01) -->
+<!-- head(results) -->
+<!-- ``` -->
+<!-- # Differential expression testing with scran -->
+<!-- If instead of using our own ``glm`` code we want to use the ``scoreMarkers`` function from the ``scran`` package, as in the scran tutorial, we need to store our test matrix in a ``SingleCellExperiment`` object.  -->
+<!-- We can either construct this from scratch using only the count matrix, or we could make a copy of the original ``cm`` object and add the count matrix after. It depends on if we want to be sure to obtain the metadata or not.  -->
+<!-- ```{r} -->
+<!-- cm.test <- SingleCellExperiment(list(counts=Xtest)) -->
+<!-- sizeFactors(cm.test) <- sizeFactors(cm.train) -->
+<!-- cm.test <- logNormCounts(cm.test) -->
+<!-- ``` -->
+<!-- This first element in ``results`` shows marker genes that distinguish cluster 1 from all other clusters. We see that, even with count splitting, there are highly significant marker genes. -->
+<!-- ```{r} -->
+<!-- results <- scran::findMarkers( -->
+<!--   cm.test, groups= clusters.train, -->
+<!--   pval.type = "all") -->
+<!-- results[[1]] -->
+<!-- ``` -->
 </div>
   </div>
 

@@ -17,7 +17,7 @@ The purpose of this tutorial is to reproduce the analysis from the Seurat [clust
 
 We use the same data and carry out the same processes as in the Seurat tutorial, but we highlight the steps that should be performed on the training set as opposed to on the test set. We also point out some steps in the pipeline where count splitting could potentially cause confusion. For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
 
-# Install Seurat
+# Install Seurat and countsplit
 
 If you don't already have ``Seurat``, you will need to run:
 
@@ -27,14 +27,22 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install("Seurat")
 ```
 
+Make sure that ``remotes`` is installed by running ``install.packages("remotes")``, then type
+
+```{r}
+remotes::install_github("anna-neufeld/countsplit")
+```
+
 # Loading the data
 
-We use the same dataset as in the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) vignette. For convenience, we included the `pbmc` dataset raw counts (obtained from 10x genomics) in the `countsplit` package. We just need to load the packages and load the count matrix. 
+We use the same dataset as in the Seurat [clustering](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) vignette. For convenience, we included the `pbmc` dataset raw counts (obtained from 10x genomics) in the `countsplit` package. We just need to load the packages and load the count matrix. If any of the packages besides `Seurat` and `countsplit` are not installed, they can be installed from `cran` with `install.packages()`. 
 
 ```{r}
 library(Seurat)
 library(countsplit)
+library(ggplot2)
 library(patchwork)
+library(mclust)
 data(pbmc.counts, package="countsplit")
 ```
 
@@ -61,11 +69,22 @@ We now must store the training matrix in a Seurat object so that we can apply th
 pbmc.train <- CreateSeuratObject(counts = Xtrain, min.cells = 3, min.features = 200)
 ```
 
+For the sake of comparing our analysis to the one in the Seurat tutorial, we also create a `pbmc` object that contains the full expression matrix, as opposed to the training set. Any time we apply operations to `pbmc.train`, we will apply the same operations to `pbmc` for the sake of comparison. 
+
+```{r}
+pbmc <- CreateSeuratObject(counts = pbmc.counts, min.cells = 3, min.features = 200)
+```
+
 The Seurat tutorial then recommends further subsetting the cells to exclude cells that have unique feature counts over 2,500 or less than 200, and to exclude cells that have >5% mitochondrial counts
 
 ```{r}
+# Apply to training object
 pbmc.train[["percent.mt"]] <- PercentageFeatureSet(pbmc.train, pattern = "^MT-")
 pbmc.train <- subset(pbmc.train, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
+
+# Apply to full object
+pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
+pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
 ```
 
 We note that now the dimensions of `Xtrain` and `Xtest` do not match up with the dimensions of our new Seurat object.
@@ -85,9 +104,16 @@ Xtestsubset <- Xtest[rows,cols]
 dim(Xtestsubset)
 ```
 
+We also note that `pbmc.train` and `pbmc` do not have the same dimensions, as the original requirement about the number of non-zero counts for each gene/cell was applied separately to the full data and the training set. Later, when it is needed to make comparisons, we will subset `pbmc` appropriately. 
+
+```{r}
+dim(pbmc.train)
+dim(pbmc)
+```
+
 # Preprocessing workflow
 
-All steps in the preprocessing workflow are performed on `pbmc.train`. 
+For our count splitting analysis, all steps in the preprocessing workflow are performed on `pbmc.train`. Importantly, the test set is left untouched throughout this section. We perform the workflow on `pbmc` in paralell for the sake of comparison. 
 
 We take this time to point out some intricacies of the ``Seurat`` object that could become confusing in future analyses. A ``Seurat`` object has three assays: ``counts``, ``data``, and ``scale.data``. At this point in the analysis, ``data`` and ``counts`` both store the raw counts, and ``scale.data`` is empty. 
 
@@ -104,6 +130,9 @@ These assays will change as we run further preprocessing steps, and this will be
 ```{r}
 pbmc.train <- NormalizeData(pbmc.train)
 all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
+
+# Apply to pbmc, for the sake of comparison. 
+pbmc <- NormalizeData(pbmc)
 ```
 
 Computing the set of highly variable features does not alter the dimension of the dataset. All features are retained, but these highly variable features are the ones that will be used downstream during dimension reduction. 
@@ -112,39 +141,77 @@ Computing the set of highly variable features does not alter the dimension of th
 dim(pbmc.train)
 pbmc.train <- FindVariableFeatures(pbmc.train, selection.method = "vst", nfeatures = 2000)
 dim(pbmc.train)
+
+# Apply to pbmc, for the sake of comparison. 
+pbmc  <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
 ```
 
-At this point in the Seurat tuorial, they make a plot with the top 10 variable features labeled. Here, we reproduce this plot and show that we identify nearly the same top 10 genes as they did in the Seurat [tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html#standard-pre-processing-workflow-1). This is comforting, as it shows that the training set is retaining a lot of info compared to the full dataset. The overlapping genes are: ``PPBP, LYZ, FTL, S100A9, S100A8, GNLY, FTH1, IGLL5, PF4``. The only difference is that on the training set we selected ``HLA-DRA`` instead of ``GNG11``.   
-
-```{r, out.width="100%"}
-library(ggplot2)
-top10 <- head(VariableFeatures(pbmc.train), 10)
-plot1 <- VariableFeaturePlot(pbmc.train) 
-plot2 <- LabelPoints(plot = plot1, points = top10)
-plot2 + guides(col="none")
-```
-We continue following the preprocessing steps from the tutorial, and notice that each time we reproduce a plot we have essentially the same results as in the tutorial, despite the fact that we are only using the training data. Besides things like sign flips of principal components and re-labeling of clusters, nearly everything looks the same. For example, the same sets of genes seem to define the first two principal components. We note that ``ScaleData`` finally fills in the ``scale.data`` assay in the object, and some downstream functions will access this assay. 
-
-```{r,out.width="100%"}
-all.genes <- rownames(pbmc.train)
-pbmc.train <- ScaleData(pbmc.train,features = all.genes)
-pbmc.train <- RunPCA(pbmc.train, features = VariableFeatures(object = pbmc.train))
-VizDimLoadings(pbmc.train, dims = 1:2, reduction = "pca")+theme(axis.text = element_text(size=10))
-DimPlot(pbmc.train, reduction = "pca")+guides(col="none")
-```
-
-We skip the next few visualizations from the Seurat tutorial, but we return to the gene expression heatmaps at the end of this vignette. As in the Seurat tutorial, we retain 10 principal components for clustering analysis. 
+At this point in the Seurat tutorial, they make a plot with the top 10 variable features labeled. Here, we reproduce this plot on the entire dataset and show that the plot obtained using only the training set is quite similar. 
 
 ```{r}
+top10 <- head(VariableFeatures(pbmc), 10)
+plot1 <- VariableFeaturePlot(pbmc) + ggtitle("pbmc")
+plot2 <- LabelPoints(plot = plot1, points = top10)
+top10.train <- head(VariableFeatures(pbmc.train), 10)
+plot1.train <- VariableFeaturePlot(pbmc.train) + ggtitle("pbmc.train")
+plot2.train <- LabelPoints(plot = plot1.train, points = top10.train)
+
+
+plot2 + plot2.train & guides(col="none")
+
+
+```
+
+The analysis on `pbmc` and the analysis on `pbmc.train` identify similar sets of genes as the top 10 most highly variable genes. This is comforting, as it shows that the training set is retaining a lot of info compared to the full dataset. The overlapping genes are: ``PPBP, LYZ, FTL, S100A9, S100A8, GNLY, FTH1, IGLL5, PF4``. The only difference is that on the training set we selected ``HLA-DRA`` instead of ``GNG11``.   
+
+We continue following the preprocessing steps from the Seurat tutorial on both `pbmc` and `pbmc.train`. The next step is to scale the data and to compute principal components. Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. We note that ``ScaleData`` finally fills in the ``scale.data`` assay in the object, and some downstream functions will access this assay. 
+
+```{r,out.width="100%"}
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc,features = all.genes)
+pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
+p1 <- VizDimLoadings(pbmc, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=10))+ggtitle("pbmc")
+p2 <- VizDimLoadings(pbmc, dims = 2, reduction = "pca")+theme(axis.text = element_text(size=10))
+
+all.genes.train <- rownames(pbmc.train)
+pbmc.train <- ScaleData(pbmc.train,features = all.genes.train)
+pbmc.train <- RunPCA(pbmc.train, features = VariableFeatures(object = pbmc.train))
+p1.train <- VizDimLoadings(pbmc.train, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=10))+ggtitle("pbmc.train")
+p2.train <- VizDimLoadings(pbmc.train, dims = 2, reduction = "pca")+theme(axis.text = element_text(size=10))
+
+p1+p1.train+p2+p2.train+plot_layout(nrow=2, ncol=2)
+```
+
+We can see that we obtain very similar principal components on the training set to those obtained on the full data (up to a sign flip). On both datasets, PC1 is dominated by the gene `MALAT1`, and genes like `CST3, TYROBF` are of lesser importance.  The second principal component is dominated by `CD79A` and `HLA-D0A1` and `HLA-DOB1`, wich `NKG7` having lesser importance. 
+
+Now that we have convinced ourselves that the training set is retaining a lot of the signal of the full dataset (and is thus able to estimate very similar principal components), we move on to clustering. We skip the next several visualizations and steps of the Seurat tutorial for brevity. We will return to the PC heatmaps at the end of this document. As in the Seurat tutorial, we retain 10 principal components for clustering. 
+
+```{r}
+pbmc <- FindNeighbors(pbmc, dims = 1:10)
+pbmc <- FindClusters(pbmc, resolution=0.5)
 pbmc.train <- FindNeighbors(pbmc.train, dims = 1:10)
 pbmc.train <- FindClusters(pbmc.train, resolution=0.5)
 ```
 
-Finally, we visualize the clusters that we have computed. While our plot has some sign flips and relabeling, we seem to basically get the same clusters as in the Seurat tutorial. This shows that using only the training set did not drastically alter the findings. 
+Finally, we visualize the clusters that we have computed. 
 
 ```{r,}
 pbmc.train <- RunUMAP(pbmc.train, dims = 1:10)
 DimPlot(pbmc.train, reduction = "umap")
+```
+
+We want to know how similar these clusters are to the ones computed on the full data. Looking at two UMAP plots could be potentially misleading, as the UMAP dimensions on the full dataset are \emph{different} than those on the training set. Instead, we look at the adjusted Rand index (@hubert1985comparing) between the clustering on the full dataset and the clustering on the training set. As a reminder, the training set has slightly fewer cells in it due to the preprocessing pipeline. We will look at the adjusted Rand index that takes into account only the cells in the training set.
+
+```{r}
+clusters.train <- Idents(pbmc.train)
+clusters.full.subset <- Idents(pbmc)[colnames(pbmc.train)]
+length(clusters.train)
+length(clusters.full.subset)
+adjustedRandIndex(clusters.train, clusters.full.subset)
+```
+
+```{r}
+table(clusters.train, clusters.full.subset)
 ```
 
 # Finding differentially expressed features manually

@@ -2,12 +2,8 @@ pandoc: 2.14.0.3
 pkgdown: 2.0.4
 pkgdown_sha: ~
 articles:
-  countsplit_tutorial: countsplit_tutorial.html
   monocle3_tutorial: monocle3_tutorial.html
-  monocle3_tutorial_old: monocle3_tutorial_old.html
-  overview: overview.html
   scran_tutorial: scran_tutorial.html
-  scran_tutorial2: scran_tutorial2.html
   seurat_tutorial: seurat_tutorial.html
-last_built: 2022-06-15T14:42Z
+last_built: 2022-06-16T17:56Z
 

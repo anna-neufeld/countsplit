@@ -7,7 +7,6 @@
 #'}
 #' @keywords datasets
 #' @format A RDS object. 
-#' @export
 #' @examples
 #' data(cm)
 "cm"
