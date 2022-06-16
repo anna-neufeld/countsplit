@@ -5,7 +5,6 @@ The ``countsplit`` R package splits an integer-valued matrix into a training mat
 
 The motivation for this method is described in Neufeld et al., 2022 [add link to preprint](XXXXXXX) in the context of inference after latent variable estimation for single cell RNA sequencing data. 
 
-The tutorials on this website are a work in progress, and will continue to be updated over the next few weeks. 
 
 How can I get countsplit?
 -----
