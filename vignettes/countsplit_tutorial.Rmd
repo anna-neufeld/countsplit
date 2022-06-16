@@ -1,0 +1,193 @@
+---
+title: "Tutorial: differential expression analysis on single cell RNA-seq data" 
+output: rmarkdown::html_vignette
+bibliography: latent.bib
+vignette: >
+  %\VignetteIndexEntry{"Tutorial: differential expression analysis on single cell RNA-seq data"}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE
+)
+knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
+```
+
+In this tutorial, we demonstrate how to use the ``countsplit`` package to perform inference after latent variable selection for scRNA-seq data. In this tutorial, we work with simple simulated data and use only the ``countsplit`` package. In the other tutorials on this site, we show how the ``countsplit`` package can be integrated into pipelines with other scRNA-seq packages such as ``scran``, ``monocle3`` and ``seurat``
+.
+We start by loading the packages we will be working with. Make sure that ``remotes`` is installed by running ``install.packages("remotes")``, then type
+
+```{r,eval=FALSE}
+remotes::install_github("anna-neufeld/countsplit")
+```
+
+```{r, message=FALSE}
+library(countsplit)
+library(ggplot2)
+library(patchwork)
+```
+
+
+To get comfortable with the ``countsplit`` package, we start by working with simple simulated datasets. For these analyses, we first cluster the cells using k-means clustering with k=2, and then we test for differential expression using Poisson generalized linear models (GLMs). These simple choices keep us from needing external scRNA-seq packages. 
+
+# Simulated data with no true signal. 
+
+First suppose that we have $n=1000$ cells and $p=200$ genes. Suppose that every count $\textbf{X}_{ij}$ is drawn from a $\text{Poisson}(5)$ distribution. We first generate this data. 
+
+```{r}
+set.seed(1)
+n <- 1000
+p <- 200
+X <- matrix(rpois(n*p, lambda=5), nrow=n)
+```
+
+In this tutorial, we are interested in knowing which genes are differentially expressed across discrete cell types. As the cell types are unknown, we estimate them via clustering. 
+
+## The naive method
+
+Suppose we are interested in studying differential expression across two clusters, obtained with k-means clustering. First we can see that if we estimate the clusters and test for differential expression using the same data, we do not control the Type 1 error rate. We refer to the practice of using the same data for clustering and differential expression testing as the "naive method" or "double dipping". Here is an example of what happens when we cluster the data and then test for differential expression on the same data. 
+
+```{r}
+clusters.full <- kmeans(log(X+1), centers=2)$cluster
+results.naive <- t(apply(X, 2, function(u) summary(glm(u~clusters.full, family="poisson"))$coefficients[2,]))
+head(results.naive)
+```
+
+The first line runs k-means with $k=2$ on the logged data (with a pseudocount of 1) and saves the cluster assignments for each cell in the dataset as``clusters.full``. For every column $X_j$ in $X$, the second line fits a Poisson GLM of $X_j$ on ``clusters.full`` and saves the summary of the slope coefficient in ``results.naive``. As shown in the output, we have saved a slope coefficient estimate, a standard error, a z-value, and a p-value for every gene in the dataset. 
+
+Even in these first 6 rows of results, we can see that the naive method assigns small p-values to many genes, despite the fact that no genes are truly differentially expressed in this data. We can make a uniform QQ-plot of the p-values for the naive method to see that they are not uniformly distributed and thus do not control the Type 1 error. The p-values are stored in the 4th column of the ``results.naive`` matrix. 
+
+```{r}
+ggplot(data=NULL, aes(sample=results.naive[,4]))+geom_qq(distribution="qunif")+geom_abline(col="red")
+```
+
+## Count splitting 
+
+We now address the issue using count splitting. The key steps are (1) running the ``countsplit`` function to get ``Xtrain`` and ``Xtest`` and then (2) running the analysis step with ``Xtest`` as the response and clusters obtained from ``Xtrain`` as the latent variable. The ``countsplit`` function returns a list, which we call ``split`` here, which contains the training set and the test set.
+
+```{r}
+set.seed(2)
+split <- countsplit(X, epsilon=0.5)
+names(split)
+Xtrain <- split$train
+Xtest <- split$test
+```
+
+We run the same analysis steps as above, but we run the clustering on ``Xtrain`` and we use ``Xtest`` as the response in our regression. 
+
+```{r}
+clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
+results.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~clusters.train, family="poisson"))$coefficients[2,]))
+head(results.countsplit)
+```
+
+We can already see from the summary output that the p-values for the first 6 genes are much larger. When we make the same uniform QQ-plot as before, we see that the p-values obtained from count splitting are uniformly distributed, as they should be under this global null where no genes are differentially expressed because all cells have expression counts drawn from the same distribution. 
+
+
+```{r}
+ggplot(data=NULL, aes(sample=results.countsplit[,4]))+geom_qq(distribution="qunif")+geom_abline(col="red")
+```
+
+In summary, count splitting controls the Type 1 error when there is no true signal in the data. 
+
+# Simulated data with true signal
+
+We now demonstrate the performance of count splitting on a simple simulated dataset that contains two true clusters. We first randomly assign the cells to one of two true clusters. We then generate data such that $X_{ij} \sim \mathrm{Poisson}(\Lambda_{ij})$. Genes 1-10 are differentially expressed-- for $j=1,\ldots,10$, $\Lambda_{ij} = 5$ for cells in cluster $0$ and $\Lambda_{ij}=10$ for cells in cluster $1$. Genes 11-200 are not differentially expressed ($\Lambda_{ij}=5$ for all cells). 
+
+```{r}
+set.seed(1)
+n <- 1000
+p <- 200
+clusters.true <- rbinom(n, size=1, prob=0.5)
+Lambda <- matrix(5, nrow=n, ncol=p)
+Lambda[clusters.true==1, 1:10] <- 10
+X <-apply(Lambda,1:2,rpois,n=1)
+```
+
+We now count split the data and save `Xtrain` and `Xtest` for later use.
+
+```{r}
+set.seed(111)
+split <- countsplit(X, epsilon=0.5)
+Xtrain <- split$train
+Xtest <- split$test
+```
+
+## Effect of using $X^{\mathrm{train}}$ for cluster estimation. 
+
+First, let's look at the effect of count splitting on our ability to estimate the true clusters. 
+If we use all of our data `X` to estimate the clusters, we make only 5 errors. 
+
+```{r}
+set.seed(222)
+clusters.full <- kmeans(log(X+1), centers=2)$cluster
+table(clusters.true, clusters.full)
+```
+
+If instead we use only `Xtrain` to estimate the clusters, we make a few additional errors, butwe still come very close to estimating the true clusters. 
+
+```{r}
+clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
+table(clusters.true, clusters.train)
+```
+
+## Effect of using $X^{test}$ for inference
+
+We now compare what happens when we regress $X_j$ on the true clusters to what happens if we regress $X_j^{\mathrm{test}}$ on the true clusters. We use the code below to fit a Poisson GLM of every gene on the true clusters; we save both the slope and the intercept. 
+
+```{r}
+coeffs.X <- t(apply(X, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[,1]))
+coeffs.Xtest <- t(apply(Xtest, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[,1]))
+```
+
+The plot below shows that the slopes resulting from `X` and the slopes resulting from `Xtest` tend to fall on the diagonal line `y=x` and so tend to be approximately equal to eachother. The intercepts, on the other hand, get shifted by `log(0.5)` when we use the `Xtest` rather than `X`. 
+
+```{r}
+differentially_expressed = as.factor(c(rep(1,10), rep(0,190)))
+p1 <- ggplot(data=NULL, aes(x=coeffs.X[,1], y=coeffs.Xtest[,1], col=differentially_expressed))+
+  geom_point()+
+  geom_abline(intercept= log(0.5), slope=1, col="red")+
+  geom_abline(intercept= 0, slope=1, col="red", lty=2)+
+  coord_fixed()+xlim(0,2)+ylim(0,2)+
+  xlab("Intercepts, X")+ ylab("Intercepts, Xtest")+
+  ggtitle("Intercepts")
+p2 <- ggplot(data=NULL, aes(x=coeffs.X[,2], y=coeffs.Xtest[,2], col=differentially_expressed))+
+  geom_point()+
+  geom_abline(intercept=0, slope=1, col="red")+
+  coord_fixed()+xlim(0,1)+ylim(0,1)+
+  xlab("Slopes, X")+ ylab("Slopes, Xtest")+
+  ggtitle("Slopes")
+p1 + p2 + plot_layout(guides="collect") & theme_bw()
+```
+
+## Overall comparison of count splitting to ideal method
+
+Finally, we compare the overall slope and intercept estimates that we get from count splitting to what we would get in the ideal setting where we get to regress $X_j$ on the true clusters. Note that `coeffs.ideal` is identical to `coeffs.X` from the previous section; we reproduce it here for convenience. 
+
+```{r}
+coeffs.ideal <- t(apply(X, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[,1]))
+coeffs.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~as.factor(clusters.train), family="poisson"))$coefficients[,1]))
+p1 <- ggplot(data=NULL, aes(x=coeffs.ideal[,1], y=coeffs.countsplit[,1], col=differentially_expressed))+
+  geom_point()+
+  geom_abline(intercept= log(0.5), slope=1, col="red")+
+  geom_abline(intercept= 0, slope=1, col="red", lty=2)+
+  coord_fixed()+xlim(0,2)+ylim(0,2)+
+  xlab("Intercepts, ideal")+ ylab("Intercepts, count split")+
+  ggtitle("Intercepts")
+p2 <- ggplot(data=NULL, aes(x=coeffs.ideal[,2], y=coeffs.countsplit[,2], col=differentially_expressed))+
+  geom_point()+
+  geom_abline(intercept=0, slope=1, col="red")+
+  coord_fixed()+xlim(0,1)+ylim(0,1)+
+  xlab("Slopes, ideal")+ ylab("Slopes, count split")+
+  ggtitle("Slopes")
+p1 + p2 + plot_layout(guides="collect") & theme_bw()
+```
+
+Overall, we see general agreement between the parameters estimated via countsplitting and those estimated via the ideal method. The slopes tend to be the same, whereas the intercepts are shifted by `log(0.5)`, as expected. 
+
+
+
+
+
