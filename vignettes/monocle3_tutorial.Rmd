@@ -3,7 +3,7 @@ title: "Tutorial: countsplitting and Monocle3"
 output: rmarkdown::html_vignette
 bibliography: latent.bib
 vignette: >
-  %\VignetteIndexEntry{"Tutorial: countsplitting and Monocle3"}
+  %\VignetteIndexEntry{Tutorial: countsplitting and Monocle3}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
