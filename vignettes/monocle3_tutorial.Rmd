@@ -70,7 +70,7 @@ cds_train <- reduce_dimension(cds_train)
 plot_cells(cds_train, label_groups_by_cluster=FALSE,  color_cells_by = "cell.type")
 ```
 
-Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the `use.partition=FALSE` argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.
+Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the `use_partition=FALSE` argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.
 
 ```{r}
 cds_train <- cluster_cells(cds_train)
@@ -81,6 +81,7 @@ plot_cells(cds_train,
            label_leaves=FALSE,
            label_branch_points=FALSE)
 ```
+
 To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex.
 
 ```{r}
@@ -107,53 +108,53 @@ plot_cells(cds_train,
 
 # Differential Expression
 
-Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we use the test set.
+Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we rely on the pseudotime from the training set but we rely on the test set counts for differential expression analysis.
 
-**Coming soon.**
-
-<!-- ## By hand -->
-
-<!-- If we wanted to do this ``by hand", we could do the following. FILL IN. NOTE TO SELF you need to remove cells with infinite pseudotime.  -->
-
-<!-- ## Using Monocle3's graph test -->
-
-<!-- We skip ahead to the "finding genes that change as a function of pseudotime" [section](https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep) of the Monocle3 vignette.  -->
-
-<!-- In this section, we will need our test set to be stored in a `cell_data_set` that contains the test set counts. We need this object to store the training set graph. To accomplish this, we make a copy of `cds_train` and only update the counts.   -->
-
-<!-- ```{r} -->
-<!-- cds_test <- cds_train -->
-<!-- counts(cds_test) <- Xtest -->
-<!-- ``` -->
-
-<!-- We now run the `graph_test` function, which is the preferred Monocle3 methodology for finding genes that vary across pseudotime.  -->
-
-<!-- ```{r, message=FALSE, results='hide'} -->
-<!-- ciliated_cds_pr_test_res <- graph_test(cds_test, neighbor_graph="principal_graph", cores=4) -->
-<!-- pr_deg_ids <- row.names(subset(ciliated_cds_pr_test_res, q_value < 0.0005)) -->
-<!-- ``` -->
-
-<!-- Here are a couple of interesting genes that score as highly significant according to graph_test(). Up to the fact that our dimension-reduced plots seem to be mirror images of those in the Monocle3 tutorial, we see very similar trends to the Monocle3 tutorial.  -->
-
-<!-- ```{r, results='hide'} -->
-<!-- plot_cells(cds_test, genes=c("hlh-4", "gcy-8", "dac-1", "oig-8"), -->
-<!--            show_trajectory_graph=FALSE, -->
-<!--            label_cell_groups=FALSE, -->
-<!--            label_leaves=FALSE) -->
-<!-- ``` -->
+## By hand
 
 
+First, we carry out differential expression testing "by hand". We fit a negative binomial GLMs of each test set gene onto the pseudotime computed from the training set. For computational efficiency, we only do this for 500 randomly selected genes. 
+
+```{r}
+pseudotime.train <- pseudotime(cds.train)
+```
+
+## Using Monocle3's Graph Test
+
+We skip ahead to the "finding genes that change as a function of pseudotime" [section](https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep) of the Monocle3 vignette. The differential expression testing method recommended in the Monocle3 tutorial is `graph_test()`, which uses Moran's I statistics to test if cells that are adjacent in pseudotime space have similar expression values for certain genes. 
+
+In this section, we will need our test set to be stored in a `cell_data_set` that contains the test set counts. We need this object to store the training set graph. To accomplish this, we make a copy of `cds_train` and only update the counts.  
+
+```{r} 
+cds_test <- cds_train 
+counts(cds_test) <- Xtest 
+```
+
+We now run the `graph_test` function, which is the preferred Monocle3 methodology for finding genes that vary across pseudotime.
+
+```{r, message=FALSE, results='hide'}
+ciliated_cds_pr_test_res <- graph_test(cds_test, neighbor_graph="principal_graph", cores=4) 
+pr_deg_ids <- row.names(subset(ciliated_cds_pr_test_res, q_value < 0.0005)) -->
+```
+
+Here are a couple of interesting genes that score as highly significant according to graph_test(). Up to the fact that our dimension-reduced plots seem to be mirror images of those in the Monocle3 tutorial, we see very similar trends to the Monocle3 tutorial. 
+
+```{r, results='hide'}
+plot_cells(cds_test, genes=c("hlh-4", "gcy-8", "dac-1", "oig-8"), 
+          show_trajectory_graph=FALSE, 
+           label_cell_groups=FALSE, 
+           label_leaves=FALSE) 
+``` 
+
+
+```{r}
+AFD_genes <- c("gcy-8", "dac-1", "oig-8")
+AFD_lineage_cds <- cds_test[rowData(cds_test)$gene_short_name %in% AFD_genes, 
+                       colData(cds_test)$cell.type %in% c("AFD")]
+plot_genes_in_pseudotime(AFD_lineage_cds, 
+                          color_cells_by="embryo.time.bin", 
+                          min_expr=0.5) 
+```
 
 
 
-
-<!-- ANNA NOTE TO SELF: this looked WAY BETTER beofre !! What did you do wrong?? Add partiion=FAlse back in??  -->
-
-<!-- ```{r} -->
-<!-- AFD_genes <- c("gcy-8", "dac-1", "oig-8") -->
-<!-- AFD_lineage_cds <- cds_test[rowData(cds_test)$gene_short_name %in% AFD_genes, -->
-<!--                        colData(cds_test)$cell.type %in% c("AFD")] -->
-<!-- plot_genes_in_pseudotime(AFD_lineage_cds, -->
-<!--                          color_cells_by="embryo.time.bin", -->
-<!--                          min_expr=0.5) -->
-<!-- ``` -->

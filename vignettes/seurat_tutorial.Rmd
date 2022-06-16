@@ -265,7 +265,7 @@ head(sort(pvals2.countsplit))
 head(sort(pvals2.naive))
 ```
 
-We identify ``LTB``, ``IL32``, ``CD3D``, ``IL7R``, and ``LDHB`` as the top markers of cluster 2, which is exactly the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). Thus, count splitting did not hurt our ability to detect the differentially expressed genes from the original analysis. 
+We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). Thus, count splitting did not hurt our ability to detect the differentially expressed genes from the original analysis. 
 
 # Finding differentially expressed features with Seurat
 
