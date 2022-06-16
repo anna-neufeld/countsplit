@@ -3,7 +3,7 @@ What is countsplit?
 
 The ``countsplit`` R package splits an integer-valued matrix into a training matrix and a test matrix using binomial thinning. Under a Poisson assumption, the training and test matrices are independent. 
 
-The motivation for this method is described in [our preprint](XXXXXXX) in the context of inference after latent variable estimation for single cell RNA sequencing data. 
+The motivation for this method is described in Neufeld et al., 2022 [add link to preprint](XXXXXXX) in the context of inference after latent variable estimation for single cell RNA sequencing data. 
 
 The tutorials on this website are a work in progress, and will continue to be updated over the next few weeks. 
 
@@ -24,6 +24,11 @@ See the [tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit
 
 Please visit [https://github.com/anna-neufeld/countsplit_paper](https://github.com/anna-neufeld/countsplit_paper) for code to reproduce the figures and tables from our paper. 
 
+
+References 
+----
+
+Neufeld, A.,Gao, L., Popp, J., Battle, A. & Witten, D. (2022), ‘Inference after latent variable estimation for single-cell RNA sequencing data’, arXiv preprint arXiv:XXXXXX.
 
 
 

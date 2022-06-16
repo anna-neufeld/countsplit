@@ -3,7 +3,7 @@ title: "Tutorial: countsplitting and Monocle3"
 output: rmarkdown::html_vignette
 bibliography: latent.bib
 vignette: >
-  %\VignetteIndexEntry{"Monocle3 Tutorial: countsplitting and Monocle3"}
+  %\VignetteIndexEntry{"Tutorial: countsplitting and Monocle3"}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -126,7 +126,7 @@ cds_train <- new_cell_data_set(Xtrain,
 
 <!-- We now run the `graph_test` function, which is the preferred Monocle3 methodology for finding genes that vary across pseudotime.  -->
 
-<!-- ```{r} -->
+<!-- ```{r, message=FALSE, results='hide'} -->
 <!-- ciliated_cds_pr_test_res <- graph_test(cds_test, neighbor_graph="principal_graph", cores=4) -->
 <!-- pr_deg_ids <- row.names(subset(ciliated_cds_pr_test_res, q_value < 0.0005)) -->
 <!-- ``` -->
