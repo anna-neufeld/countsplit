@@ -168,7 +168,7 @@ sort(top10.train)
 
 We continue following the preprocessing steps from the Seurat tutorial on both `pbmc` and `pbmc.train`. The next step is to scale the data and to compute principal components. Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. We note that ``ScaleData`` finally fills in the ``scale.data`` assay in the `pbmc` and `pbmc.train` objects, and some downstream functions will access this assay. 
 
-```{r,out.width="100%"}
+```{r,fig.height=15, fig.width=10}
 all.genes <- rownames(pbmc)
 pbmc <- ScaleData(pbmc,features = all.genes)
 pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
@@ -181,7 +181,7 @@ pbmc.train <- RunPCA(pbmc.train, features = VariableFeatures(object = pbmc.train
 p1.train <- VizDimLoadings(pbmc.train, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=7))+ggtitle("pbmc.train")
 p2.train <- VizDimLoadings(pbmc.train, dims = 2, reduction = "pca")+theme(axis.text = element_text(size=7))
 
-p1+p1.train+p2+p2.train+plot_layout(nrow=2, ncol=2, heights=unit(c(5, 4), c('cm', 'cm')))
+p1+p1.train+p2+p2.train+plot_layout(nrow=2, ncol=2)
 ```
 
 We can see that we obtain very similar principal components on the training set to those obtained on the full data (up to a sign flip). On both datasets, PC1 is dominated by the gene `MALAT1`, and genes like `CST3, TYROBF` are of lesser importance.  The second principal component is dominated by `CD79A` and `HLA-D0A1` and `HLA-DOB1`, with `NKG7` having lesser importance. 
@@ -304,7 +304,7 @@ The first set of heatmaps displays expression counts from the training set. Whil
 DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE)
 ```
 
-The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 7 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 10-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association
+The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 7-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association
 seen in the initial heatmaps was due to overfitting; these PCs do not measure anything useful or interesting. 
 
 ```{r, fig.height=15, fig.width=10}
@@ -312,10 +312,7 @@ DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE)
 ```
 
 This matches insights from the Seurat tutorial (insights obtained using Jackstraw), where they suggested that somewhere between 7-12 PCs would be the right number to keep, and they chose to keep 10. 
-
-While the rest of this tutorial focused on . 
-
-These heatmaps show the utility of count splitting in helping distinguish signal from noise.
+While the rest of this tutorial focused on how count splitting and the naive method provided similar conclusions (i.e. count splitting does not cause us to miss true signal when it is present), these heatmaps are the first place in this tutorial where we have seen ad advantage of count splitting (apart from the fact that we know theoretically that the naive method fails to control the Type 1 error rate). While the Seurat tutorial used the computationally expensive Jackstraw method to decide how many principal components to retail for the analysis, making the heatmaps of `pbmc.test` helps us quickly and visually see that only the first 6 PCs contain true signal. While Jackstraw requires re-computing PCs for many permuted versions of the data and is thus very slow, our heatmap above only required a single principal component calculation. 
 
 
 # References

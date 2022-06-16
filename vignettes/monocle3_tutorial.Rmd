@@ -15,7 +15,7 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 
 **This tutorial is under construction.**
 
-Before using this tutorial, we recommend that you read through our ``introduction to count splitting" tutorial to understand our method in a simple example with simulated data. 
+Before using this tutorial, we recommend that you read through our [introductory tuorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) to understand our method in a simple example with simulated data. 
 
 For this tutorial, we reproduce the Monocle3[vignette](https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/), but we apply count splitting. Throughout the tutorial, we see that we reach similar takeaways to those reached in the Monocle3 vignette, despite the fact that we estimate pseudotime using only the training set. 
 
@@ -54,60 +54,62 @@ cds_train <- new_cell_data_set(Xtrain,
 ```
 
 
-<!-- # Preprocess and estimate pseudotime -->
+# Preprocess and estimate pseudotime
 
-<!-- We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estiamtes. Everything in this section uses the training set only.  -->
+We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estiamtes. Everything in this section uses the training set only. 
 
-<!-- ```{r} -->
-<!-- cds_train <- preprocess_cds(cds_train, num_dim = 50) -->
-<!-- cds_train <- align_cds(cds_train, alignment_group = "batch", residual_model_formula_str = "~ bg.300.loading + bg.400.loading + bg.500.1.loading + bg.500.2.loading + bg.r17.loading + bg.b01.loading + bg.b02.loading") -->
-<!-- ``` -->
+```{r}
+cds_train <- preprocess_cds(cds_train, num_dim = 50)
+cds_train <- align_cds(cds_train, alignment_group = "batch", residual_model_formula_str = "~ bg.300.loading + bg.400.loading + bg.500.1.loading + bg.500.2.loading + bg.r17.loading + bg.b01.loading + bg.b02.loading")
+```
 
-<!-- The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data.  -->
+The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data.
 
-<!-- ```{r} -->
-<!-- cds_train <- reduce_dimension(cds_train) -->
-<!-- plot_cells(cds_train, label_groups_by_cluster=FALSE,  color_cells_by = "cell.type") -->
-<!-- ``` -->
+```{r}
+cds_train <- reduce_dimension(cds_train)
+plot_cells(cds_train, label_groups_by_cluster=FALSE,  color_cells_by = "cell.type")
+```
 
-<!-- Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the `use.partition=FALSE` argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.  -->
+Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the `use.partition=FALSE` argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.
 
-<!-- ```{r} -->
-<!-- cds_train <- cluster_cells(cds_train) -->
-<!-- cds_train <- learn_graph(cds_train, use.partition=FALSE) -->
-<!-- plot_cells(cds_train, -->
-<!--            color_cells_by = "cell.type", -->
-<!--            label_groups_by_cluster=FALSE, -->
-<!--            label_leaves=FALSE, -->
-<!--            label_branch_points=FALSE) -->
-<!-- ``` -->
-<!-- To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex.  -->
+```{r}
+cds_train <- cluster_cells(cds_train)
+cds_train <- learn_graph(cds_train, use_partition=FALSE)
+plot_cells(cds_train,
+           color_cells_by = "cell.type",
+           label_groups_by_cluster=FALSE,
+           label_leaves=FALSE,
+           label_branch_points=FALSE)
+```
+To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex.
 
-<!-- ```{r} -->
-<!-- get_earliest_principal_node <- function(cds, time_bin="130-170"){ -->
-<!--   cell_ids <- which(colData(cds)[, "embryo.time.bin"] == time_bin) -->
+```{r}
+get_earliest_principal_node <- function(cds, time_bin="130-170"){
+  cell_ids <- which(colData(cds)[, "embryo.time.bin"] == time_bin)
 
-<!--   closest_vertex <- -->
-<!--   cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex -->
-<!--   closest_vertex <- as.matrix(closest_vertex[colnames(cds), ]) -->
-<!--   root_pr_nodes <- -->
-<!--   igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names -->
-<!--   (which.max(table(closest_vertex[cell_ids,]))))] -->
+  closest_vertex <-
+  cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex
+  closest_vertex <- as.matrix(closest_vertex[colnames(cds), ])
+  root_pr_nodes <-
+  igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names
+  (which.max(table(closest_vertex[cell_ids,]))))]
 
-<!--   root_pr_nodes -->
-<!-- } -->
-<!-- cds_train <- order_cells(cds_train, root_pr_nodes=get_earliest_principal_node(cds_train)) -->
-<!-- plot_cells(cds_train, -->
-<!--            color_cells_by = "pseudotime", -->
-<!--            label_cell_groups=FALSE, -->
-<!--            label_leaves=FALSE, -->
-<!--            label_branch_points=FALSE, -->
-<!--            graph_label_size=1.5) -->
-<!-- ``` -->
+  root_pr_nodes
+}
+cds_train <- order_cells(cds_train, root_pr_nodes=get_earliest_principal_node(cds_train))
+plot_cells(cds_train,
+           color_cells_by = "pseudotime",
+           label_cell_groups=FALSE,
+           label_leaves=FALSE,
+           label_branch_points=FALSE,
+           graph_label_size=1.5)
+```
 
-<!-- # Differential Expression -->
+# Differential Expression
 
-<!-- Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we use the test set.  -->
+Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we use the test set.
+
+**Coming soon.**
 
 <!-- ## By hand -->
 

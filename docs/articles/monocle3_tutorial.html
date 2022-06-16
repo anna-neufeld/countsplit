@@ -86,7 +86,7 @@
     
     
 <p><strong>This tutorial is under construction.</strong></p>
-<p>Before using this tutorial, we recommend that you read through our ``introduction to count splitting” tutorial to understand our method in a simple example with simulated data.</p>
+<p>Before using this tutorial, we recommend that you read through our <a href="https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html" class="external-link">introductory tuorial</a> to understand our method in a simple example with simulated data.</p>
 <p>For this tutorial, we reproduce the Monocle3<a href="https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/" class="external-link">vignette</a>, but we apply count splitting. Throughout the tutorial, we see that we reach similar takeaways to those reached in the Monocle3 vignette, despite the fact that we estimate pseudotime using only the training set.</p>
 <div class="section level2">
 <h2 id="install-monocle3">Install Monocle3<a class="anchor" aria-label="anchor" href="#install-monocle3"></a>
@@ -115,49 +115,62 @@
 <span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/new_cell_data_set.html" class="external-link">new_cell_data_set</a></span><span class="op">(</span><span class="va">Xtrain</span>,
                          cell_metadata <span class="op">=</span> <span class="va">cell_metadata</span>,
                          gene_metadata <span class="op">=</span> <span class="va">gene_annotation</span><span class="op">)</span></code></pre></div>
-<!-- # Preprocess and estimate pseudotime -->
-<!-- We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estiamtes. Everything in this section uses the training set only.  -->
-<!-- ```{r} -->
-<!-- cds_train <- preprocess_cds(cds_train, num_dim = 50) -->
-<!-- cds_train <- align_cds(cds_train, alignment_group = "batch", residual_model_formula_str = "~ bg.300.loading + bg.400.loading + bg.500.1.loading + bg.500.2.loading + bg.r17.loading + bg.b01.loading + bg.b02.loading") -->
-<!-- ``` -->
-<!-- The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data.  -->
-<!-- ```{r} -->
-<!-- cds_train <- reduce_dimension(cds_train) -->
-<!-- plot_cells(cds_train, label_groups_by_cluster=FALSE,  color_cells_by = "cell.type") -->
-<!-- ``` -->
-<!-- Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the `use.partition=FALSE` argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.  -->
-<!-- ```{r} -->
-<!-- cds_train <- cluster_cells(cds_train) -->
-<!-- cds_train <- learn_graph(cds_train, use.partition=FALSE) -->
-<!-- plot_cells(cds_train, -->
-<!--            color_cells_by = "cell.type", -->
-<!--            label_groups_by_cluster=FALSE, -->
-<!--            label_leaves=FALSE, -->
-<!--            label_branch_points=FALSE) -->
-<!-- ``` -->
-<!-- To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex.  -->
-<!-- ```{r} -->
-<!-- get_earliest_principal_node <- function(cds, time_bin="130-170"){ -->
-<!--   cell_ids <- which(colData(cds)[, "embryo.time.bin"] == time_bin) -->
-<!--   closest_vertex <- -->
-<!--   cds@principal_graph_aux[["UMAP"]]$pr_graph_cell_proj_closest_vertex -->
-<!--   closest_vertex <- as.matrix(closest_vertex[colnames(cds), ]) -->
-<!--   root_pr_nodes <- -->
-<!--   igraph::V(principal_graph(cds)[["UMAP"]])$name[as.numeric(names -->
-<!--   (which.max(table(closest_vertex[cell_ids,]))))] -->
-<!--   root_pr_nodes -->
-<!-- } -->
-<!-- cds_train <- order_cells(cds_train, root_pr_nodes=get_earliest_principal_node(cds_train)) -->
-<!-- plot_cells(cds_train, -->
-<!--            color_cells_by = "pseudotime", -->
-<!--            label_cell_groups=FALSE, -->
-<!--            label_leaves=FALSE, -->
-<!--            label_branch_points=FALSE, -->
-<!--            graph_label_size=1.5) -->
-<!-- ``` -->
-<!-- # Differential Expression -->
-<!-- Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we use the test set.  -->
+</div>
+<div class="section level2">
+<h2 id="preprocess-and-estimate-pseudotime">Preprocess and estimate pseudotime<a class="anchor" aria-label="anchor" href="#preprocess-and-estimate-pseudotime"></a>
+</h2>
+<p>We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estiamtes. Everything in this section uses the training set only.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/preprocess_cds.html" class="external-link">preprocess_cds</a></span><span class="op">(</span><span class="va">cds_train</span>, num_dim <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>
+<span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/align_cds.html" class="external-link">align_cds</a></span><span class="op">(</span><span class="va">cds_train</span>, alignment_group <span class="op">=</span> <span class="st">"batch"</span>, residual_model_formula_str <span class="op">=</span> <span class="st">"~ bg.300.loading + bg.400.loading + bg.500.1.loading + bg.500.2.loading + bg.r17.loading + bg.b01.loading + bg.b02.loading"</span><span class="op">)</span></code></pre></div>
+<p>The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data.</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/reduce_dimension.html" class="external-link">reduce_dimension</a></span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_cells.html" class="external-link">plot_cells</a></span><span class="op">(</span><span class="va">cds_train</span>, label_groups_by_cluster<span class="op">=</span><span class="cn">FALSE</span>,  color_cells_by <span class="op">=</span> <span class="st">"cell.type"</span><span class="op">)</span></code></pre></div>
+<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<p>Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the <code>use.partition=FALSE</code> argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/cluster_cells.html" class="external-link">cluster_cells</a></span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span>
+<span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/learn_graph.html" class="external-link">learn_graph</a></span><span class="op">(</span><span class="va">cds_train</span>, use_partition<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<pre><code>## 
+  |                                                                            
+  |                                                                      |   0%
+  |                                                                            
+  |======================================================================| 100%</code></pre>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_cells.html" class="external-link">plot_cells</a></span><span class="op">(</span><span class="va">cds_train</span>,
+           color_cells_by <span class="op">=</span> <span class="st">"cell.type"</span>,
+           label_groups_by_cluster<span class="op">=</span><span class="cn">FALSE</span>,
+           label_leaves<span class="op">=</span><span class="cn">FALSE</span>,
+           label_branch_points<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
+<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-6-1.png" width="700"> To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex.</p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">get_earliest_principal_node</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cds</span>, <span class="va">time_bin</span><span class="op">=</span><span class="st">"130-170"</span><span class="op">)</span><span class="op">{</span>
+  <span class="va">cell_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">cds</span><span class="op">)</span><span class="op">[</span>, <span class="st">"embryo.time.bin"</span><span class="op">]</span> <span class="op">==</span> <span class="va">time_bin</span><span class="op">)</span>
+
+  <span class="va">closest_vertex</span> <span class="op">&lt;-</span>
+  <span class="va">cds</span><span class="op">@</span><span class="va">principal_graph_aux</span><span class="op">[[</span><span class="st">"UMAP"</span><span class="op">]</span><span class="op">]</span><span class="op">$</span><span class="va">pr_graph_cell_proj_closest_vertex</span>
+  <span class="va">closest_vertex</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">as.matrix</a></span><span class="op">(</span><span class="va">closest_vertex</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">cds</span><span class="op">)</span>, <span class="op">]</span><span class="op">)</span>
+  <span class="va">root_pr_nodes</span> <span class="op">&lt;-</span>
+  <span class="fu">igraph</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/igraph/man/V.html" class="external-link">V</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/principal_graph.html" class="external-link">principal_graph</a></span><span class="op">(</span><span class="va">cds</span><span class="op">)</span><span class="op">[[</span><span class="st">"UMAP"</span><span class="op">]</span><span class="op">]</span><span class="op">)</span><span class="op">$</span><span class="va">name</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/numeric.html" class="external-link">as.numeric</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span>
+  <span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/which.min.html" class="external-link">which.max</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">closest_vertex</span><span class="op">[</span><span class="va">cell_ids</span>,<span class="op">]</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">]</span>
+
+  <span class="va">root_pr_nodes</span>
+<span class="op">}</span>
+<span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/order_cells.html" class="external-link">order_cells</a></span><span class="op">(</span><span class="va">cds_train</span>, root_pr_nodes<span class="op">=</span><span class="fu">get_earliest_principal_node</span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span><span class="op">)</span>
+<span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_cells.html" class="external-link">plot_cells</a></span><span class="op">(</span><span class="va">cds_train</span>,
+           color_cells_by <span class="op">=</span> <span class="st">"pseudotime"</span>,
+           label_cell_groups<span class="op">=</span><span class="cn">FALSE</span>,
+           label_leaves<span class="op">=</span><span class="cn">FALSE</span>,
+           label_branch_points<span class="op">=</span><span class="cn">FALSE</span>,
+           graph_label_size<span class="op">=</span><span class="fl">1.5</span><span class="op">)</span></code></pre></div>
+<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-7-1.png" width="700"></p>
+</div>
+<div class="section level2">
+<h2 id="differential-expression">Differential Expression<a class="anchor" aria-label="anchor" href="#differential-expression"></a>
+</h2>
+<p>Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we use the test set.</p>
+<p><strong>Coming soon.</strong></p>
 <!-- ## By hand -->
 <!-- If we wanted to do this ``by hand", we could do the following. FILL IN. NOTE TO SELF you need to remove cells with infinite pseudotime.  -->
 <!-- ## Using Monocle3's graph test -->
