@@ -10,14 +10,13 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.0
 Imports:
   speedglm,
-  SingleCellExperiment,
   MASS
 Suggests:
   knitr,
   rmarkdown,
   ggplot2,
   patchwork,
-  speedglm
+  SingleCellExperiment
 VignetteBuilder: knitr
 URL: https://github.com/anna-neufeld/countsplit
 Depends: 

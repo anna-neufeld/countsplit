@@ -59,7 +59,7 @@ rownames(pbmc.counts) <- sapply(rownames(pbmc.counts), function(u) stringr::str_
 
 # Applying count splitting and creating a Seurat object
 
-We now count split to obtain two raw count matrices. This is the only place in this tutorial where we actually the `countsplit` package. 
+We now count split to obtain two raw count matrices. This is the only place in this tutorial where we use the `countsplit` package. 
 
 ```{r}
 set.seed(1)
@@ -221,7 +221,9 @@ table(clusters.train, clusters.full.subset)
 
 Overall, in this section, we saw that we get very similar estimated clusters when we use the training data obtained from count splitting compared to using the full data (as in the Seurat tutorial). 
 
-# Finding differentially expressed features manually
+# Finding differentially expressed features 
+
+## Manually
 
 Now that we computed clusters from the training set, it is time to look for differentially expressed genes across the clusters. The "safest" way to perform this analysis is to extract the cluster labels from ``pbmc.train`` and write our own analysis functions to see how the columns of ``Xtestsubset`` (created above) vary across these clusters. This approach is the safest because we know for sure that the clusters were obtained using only the training data and that the differential expression analysis uses only the testing data.
 
@@ -267,9 +269,9 @@ head(sort(pvals2.naive))
 
 We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). Thus, count splitting did not hurt our ability to detect the differentially expressed genes from the original analysis. 
 
-# Finding differentially expressed features with Seurat
+## Using Seurat
 
-It would be nice to be able to make a ``Seurat`` object containing the training set clusters but the test set counts. This would allow us to use some of Seurat's nice visualization features for differential expression testing. We note that care should be taken in this section, as we are mixing-and-matching pieces of Seurat objects and Seurat functions not explicitly mentioned in this tutorial may have unexpected behavior. 
+It would be nice to be able to make a ``Seurat`` object containing the training set clusters but the test set counts. This would allow us to use some of Seurat's nice visualization features for differential expression testing. We note that **care should be taken in this section**, as we are mixing-and-matching pieces of Seurat objects and Seurat functions not explicitly mentioned in this tutorial may have unexpected behavior. 
 
 We first let `pbmc.test` equal `pbmc.train`. This ensures that our test set object gets the same cluster information and UMAP information as the training set, such that we can still visualize the training set clusters. We then update the `counts` assay to store the test set counts. Unfortunately, once we do this, the `data` and `scale.data` assays are not automatically updated to store the normalized or scaled counts. We run normalize and scale functions to remedy this.
 
@@ -311,8 +313,8 @@ seen in the initial heatmaps was due to overfitting; these PCs do not measure an
 DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE)
 ```
 
-This matches insights from the Seurat tutorial (insights obtained using Jackstraw), where they suggested that somewhere between 7-12 PCs would be the right number to keep, and they chose to keep 10. 
-While the rest of this tutorial focused on how count splitting and the naive method provided similar conclusions (i.e. count splitting does not cause us to miss true signal when it is present), these heatmaps are the first place in this tutorial where we have seen ad advantage of count splitting (apart from the fact that we know theoretically that the naive method fails to control the Type 1 error rate). While the Seurat tutorial used the computationally expensive Jackstraw method to decide how many principal components to retail for the analysis, making the heatmaps of `pbmc.test` helps us quickly and visually see that only the first 6 PCs contain true signal. While Jackstraw requires re-computing PCs for many permuted versions of the data and is thus very slow, our heatmap above only required a single principal component calculation. 
+Our results using count splitting line up with insights from the Seurat tutorial obtained using Jackstraw: the original Seurat tutorial suggested that it would be reasonable to keep 7-12 PCs, and chose to keep 10 PCs. However, Jackstraw requires re-computing PCs for many permuted versions of the data, while our heatmaps obtained using count splitting requires only a single principal component calculation.
 
+While the rest of this tutorial focused on how count splitting and the naive method provided similar conclusions (i.e. count splitting does not cause us to miss true signal when it is present), these heatmaps are the first place in this tutorial where we have seen ad advantage of count splitting (apart from the fact that we know theoretically that the naive method fails to control the Type 1 error rate). 
 
 # References

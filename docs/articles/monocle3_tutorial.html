@@ -128,7 +128,7 @@
 <code class="sourceCode R"><span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/reduce_dimension.html" class="external-link">reduce_dimension</a></span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span>
 <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_cells.html" class="external-link">plot_cells</a></span><span class="op">(</span><span class="va">cds_train</span>, label_groups_by_cluster<span class="op">=</span><span class="cn">FALSE</span>,  color_cells_by <span class="op">=</span> <span class="st">"cell.type"</span><span class="op">)</span></code></pre></div>
 <p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
-<p>Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the <code>use.partition=FALSE</code> argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.</p>
+<p>Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the <code>use_partition=FALSE</code> argument to the `learn_graph`` function to ensure that our graph is made up of a single connected trajectory.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/cluster_cells.html" class="external-link">cluster_cells</a></span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span>
 <span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/learn_graph.html" class="external-link">learn_graph</a></span><span class="op">(</span><span class="va">cds_train</span>, use_partition<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
@@ -143,7 +143,8 @@
            label_groups_by_cluster<span class="op">=</span><span class="cn">FALSE</span>,
            label_leaves<span class="op">=</span><span class="cn">FALSE</span>,
            label_branch_points<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-6-1.png" width="700"> To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex.</p>
+<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<p>To pick a root node for pseudotime, we use the same method as in the Monocle3 vignette. We pick the cell from the first time bin that is closest to a graph vertex.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">get_earliest_principal_node</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cds</span>, <span class="va">time_bin</span><span class="op">=</span><span class="st">"130-170"</span><span class="op">)</span><span class="op">{</span>
   <span class="va">cell_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">cds</span><span class="op">)</span><span class="op">[</span>, <span class="st">"embryo.time.bin"</span><span class="op">]</span> <span class="op">==</span> <span class="va">time_bin</span><span class="op">)</span>
@@ -169,38 +170,42 @@
 <div class="section level2">
 <h2 id="differential-expression">Differential Expression<a class="anchor" aria-label="anchor" href="#differential-expression"></a>
 </h2>
-<p>Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we use the test set.</p>
-<p><strong>Coming soon.</strong></p>
-<!-- ## By hand -->
-<!-- If we wanted to do this ``by hand", we could do the following. FILL IN. NOTE TO SELF you need to remove cells with infinite pseudotime.  -->
-<!-- ## Using Monocle3's graph test -->
-<!-- We skip ahead to the "finding genes that change as a function of pseudotime" [section](https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep) of the Monocle3 vignette.  -->
-<!-- In this section, we will need our test set to be stored in a `cell_data_set` that contains the test set counts. We need this object to store the training set graph. To accomplish this, we make a copy of `cds_train` and only update the counts.   -->
-<!-- ```{r} -->
-<!-- cds_test <- cds_train -->
-<!-- counts(cds_test) <- Xtest -->
-<!-- ``` -->
-<!-- We now run the `graph_test` function, which is the preferred Monocle3 methodology for finding genes that vary across pseudotime.  -->
-<!-- ```{r, message=FALSE, results='hide'} -->
-<!-- ciliated_cds_pr_test_res <- graph_test(cds_test, neighbor_graph="principal_graph", cores=4) -->
-<!-- pr_deg_ids <- row.names(subset(ciliated_cds_pr_test_res, q_value < 0.0005)) -->
-<!-- ``` -->
-<!-- Here are a couple of interesting genes that score as highly significant according to graph_test(). Up to the fact that our dimension-reduced plots seem to be mirror images of those in the Monocle3 tutorial, we see very similar trends to the Monocle3 tutorial.  -->
-<!-- ```{r, results='hide'} -->
-<!-- plot_cells(cds_test, genes=c("hlh-4", "gcy-8", "dac-1", "oig-8"), -->
-<!--            show_trajectory_graph=FALSE, -->
-<!--            label_cell_groups=FALSE, -->
-<!--            label_leaves=FALSE) -->
-<!-- ``` -->
-<!-- ANNA NOTE TO SELF: this looked WAY BETTER beofre !! What did you do wrong?? Add partiion=FAlse back in??  -->
-<!-- ```{r} -->
-<!-- AFD_genes <- c("gcy-8", "dac-1", "oig-8") -->
-<!-- AFD_lineage_cds <- cds_test[rowData(cds_test)$gene_short_name %in% AFD_genes, -->
-<!--                        colData(cds_test)$cell.type %in% c("AFD")] -->
-<!-- plot_genes_in_pseudotime(AFD_lineage_cds, -->
-<!--                          color_cells_by="embryo.time.bin", -->
-<!--                          min_expr=0.5) -->
-<!-- ``` -->
+<p>Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we rely on the pseudotime from the training set but we rely on the test set counts for differential expression analysis.</p>
+<div class="section level3">
+<h3 id="by-hand">By hand<a class="anchor" aria-label="anchor" href="#by-hand"></a>
+</h3>
+<p>First, we carry out differential expression testing “by hand.” We fit a negative binomial GLMs of each test set gene onto the pseudotime computed from the training set. For computational efficiency, we only do this for 500 randomly selected genes.</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">pseudotime.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/pseudotime.html" class="external-link">pseudotime</a></span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span></code></pre></div>
+</div>
+<div class="section level3">
+<h3 id="using-monocle3s-graph-test">Using Monocle3’s Graph Test<a class="anchor" aria-label="anchor" href="#using-monocle3s-graph-test"></a>
+</h3>
+<p>We skip ahead to the “finding genes that change as a function of pseudotime” <a href="https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep" class="external-link">section</a> of the Monocle3 vignette. The differential expression testing method recommended in the Monocle3 tutorial is <code><a href="https://rdrr.io/pkg/monocle3/man/graph_test.html" class="external-link">graph_test()</a></code>, which uses Moran’s I statistics to test if cells that are adjacent in pseudotime space have similar expression values for certain genes.</p>
+<p>In this section, we will need our test set to be stored in a <code>cell_data_set</code> that contains the test set counts. We need this object to store the training set graph. To accomplish this, we make a copy of <code>cds_train</code> and only update the counts.</p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">cds_test</span> <span class="op">&lt;-</span> <span class="va">cds_train</span> 
+<span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cds_test</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">Xtest</span> </code></pre></div>
+<p>We now run the <code>graph_test</code> function, which is the preferred Monocle3 methodology for finding genes that vary across pseudotime.</p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">ciliated_cds_pr_test_res</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/graph_test.html" class="external-link">graph_test</a></span><span class="op">(</span><span class="va">cds_test</span>, neighbor_graph<span class="op">=</span><span class="st">"principal_graph"</span>, cores<span class="op">=</span><span class="fl">4</span><span class="op">)</span> 
+<span class="va">pr_deg_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/row.names.html" class="external-link">row.names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">ciliated_cds_pr_test_res</span>, <span class="va">q_value</span> <span class="op">&lt;</span> <span class="fl">0.0005</span><span class="op">)</span><span class="op">)</span> </code></pre></div>
+<p>Here are a couple of interesting genes that score as highly significant according to graph_test(). Up to the fact that our dimension-reduced plots seem to be mirror images of those in the Monocle3 tutorial, we see very similar trends to the Monocle3 tutorial.</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_cells.html" class="external-link">plot_cells</a></span><span class="op">(</span><span class="va">cds_test</span>, genes<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"hlh-4"</span>, <span class="st">"gcy-8"</span>, <span class="st">"dac-1"</span>, <span class="st">"oig-8"</span><span class="op">)</span>, 
+          show_trajectory_graph<span class="op">=</span><span class="cn">FALSE</span>, 
+           label_cell_groups<span class="op">=</span><span class="cn">FALSE</span>, 
+           label_leaves<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span> </code></pre></div>
+<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-11-1.png" width="700"></p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="va">AFD_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gcy-8"</span>, <span class="st">"dac-1"</span>, <span class="st">"oig-8"</span><span class="op">)</span>
+<span class="va">AFD_lineage_cds</span> <span class="op">&lt;-</span> <span class="va">cds_test</span><span class="op">[</span><span class="fu">rowData</span><span class="op">(</span><span class="va">cds_test</span><span class="op">)</span><span class="op">$</span><span class="va">gene_short_name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">AFD_genes</span>, 
+                       <span class="fu">colData</span><span class="op">(</span><span class="va">cds_test</span><span class="op">)</span><span class="op">$</span><span class="va">cell.type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AFD"</span><span class="op">)</span><span class="op">]</span>
+<span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_genes_in_pseudotime.html" class="external-link">plot_genes_in_pseudotime</a></span><span class="op">(</span><span class="va">AFD_lineage_cds</span>, 
+                          color_cells_by<span class="op">=</span><span class="st">"embryo.time.bin"</span>, 
+                          min_expr<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> </code></pre></div>
+<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
+</div>
 </div>
   </div>
 
