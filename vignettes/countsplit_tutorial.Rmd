@@ -40,7 +40,7 @@ p <- 200
 X <- matrix(rpois(n*p, lambda=5), nrow=n)
 ```
 
-In this tutorial, we are interested in knowing which genes are differentially expressed across discrete cell types. As the cell types are unknown, we estimate them via clustering. We will cluster this data to estimate cell types and then test for differential expression. Since there are no true cell types and no truly differentially expressed genes in this data, a test of differential expression that controls the Type 1 error rate should give uniformly distributed p-values on this data.
+In this tutorial, we are interested in knowing which genes are differentially expressed across discrete cell types. We will cluster this data to estimate cell types and then test for differential expression. Since there are no true cell types and no truly differentially expressed genes in this data, a test of differential expression that controls the Type 1 error rate should give uniformly distributed p-values on this data.
 
 ## The naive method
 
@@ -113,7 +113,7 @@ Xtrain <- split$train
 Xtest <- split$test
 ```
 
-## Effect of using $X^{\mathrm{train}}$ for cluster estimation. 
+## Effect of using Xtrain for cluster estimation. 
 
 First, let's look at the effect of count splitting on our ability to estimate the true clusters. 
 If we use all of our data `X` to estimate the clusters, we make only 5 errors. 
@@ -130,7 +130,7 @@ clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
 table(clusters.true, clusters.train)
 ```
 
-## Effect of using $X^{test}$ for inference
+## Effect of using Xtest for inference
 
 We now compare what happens when we regress $X_j$ on the true clusters to what happens if we regress $X_j^{\mathrm{test}}$ on the true clusters. We use the code below to fit a Poisson GLM of every gene on the true clusters; we save both the slope and the intercept. 
 
@@ -171,13 +171,13 @@ p1 <- ggplot(data=NULL, aes(x=coeffs.ideal[,1], y=coeffs.countsplit[,1], col=dif
   geom_abline(intercept= log(0.5), slope=1, col="red")+
   geom_abline(intercept= 0, slope=1, col="red", lty=2)+
   coord_fixed()+xlim(0,2)+ylim(0,2)+
-  xlab("Intercepts, ideal")+ ylab("Intercepts, count split")+
+  xlab("Intercepts from ideal method")+ ylab("Intercepts from count splitting")+
   ggtitle("Intercepts")
 p2 <- ggplot(data=NULL, aes(x=coeffs.ideal[,2], y=coeffs.countsplit[,2], col=differentially_expressed))+
   geom_point()+
   geom_abline(intercept=0, slope=1, col="red")+
   coord_fixed()+xlim(-0.15,1)+ylim(0.15,1)+
-  xlab("Slopes, ideal")+ ylab("Slopes, count split")+
+  xlab("Slopes from ideal method")+ ylab("Slopes from count splitting")+
   ggtitle("Slopes")
 p1 + p2 + plot_layout(guides="collect") & theme_bw()
 ```

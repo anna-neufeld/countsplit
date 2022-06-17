@@ -184,7 +184,7 @@ p2.train <- VizDimLoadings(pbmc.train, dims = 2, reduction = "pca")+theme(axis.t
 p1+p1.train+p2+p2.train+plot_layout(nrow=2, ncol=2)
 ```
 
-We can see that we obtain very similar principal components on the training set to those obtained on the full data (up to a sign flip). On both datasets, PC1 is dominated by the gene `MALAT1`, and genes like `CST3, TYROBF` are of lesser importance.  The second principal component is dominated by `CD79A` and `HLA-D0A1` and `HLA-DOB1`, with `NKG7` having lesser importance. 
+We can see that we obtain very similar principal components on the training set to those obtained on the full data. On both datasets, PC_1 is dominated by the gene `MALAT1` and genes like genes like `CST3, TYROBF` are of lesser importance. (The fact that `MALAT1` has a positive loading in `pbmc.train` and a negative loading in `pbmc` is simply due to a sign flip of the first principal component.) The second principal component is dominated by `CD79A` and `HLA-D0A1` and `HLA-DOB1`, with `NKG7` having lesser importance. (The sign flip is once again unimportant.)
 
 Now that we have convinced ourselves that the training set is retaining a lot of the signal of the full dataset (and is thus able to estimate very similar principal components), we move on to clustering. We skip the next several visualizations and steps of the Seurat tutorial for brevity. We will return to the principal component heatmaps at the end of this document. As in the Seurat tutorial, we retain 10 principal components for clustering. 
 
@@ -202,14 +202,19 @@ pbmc.train <- RunUMAP(pbmc.train, dims = 1:10)
 DimPlot(pbmc.train, reduction = "umap")
 ```
 
-We want to know how similar these clusters are to the ones computed on the full data. Looking at two UMAP plots could be potentially misleading, as the UMAP dimensions on the full dataset are \emph{different} than those on the training set. Instead, we look at the adjusted Rand index (@hubert1985comparing) between the clustering on the full dataset and the clustering on the training set. The training set has slightly fewer cells in it due to the preprocessing pipeline. We will look at the adjusted Rand index that takes into account only the cells in the training set. 
+We want to know how similar these clusters are to the ones computed on the full data. Looking at two UMAP plots could be potentially misleading, as the UMAP dimensions on the full dataset are \emph{different} than those on the training set. Further complicating our ability to compare the two clusterings, the training set has slightly fewer cells in it due to the preprocessing pipeline. 
 
 ```{r}
 clusters.train <- Idents(pbmc.train)
-clusters.full.subset <- Idents(pbmc)[colnames(pbmc.train)]
-all.equal(names(clusters.train), names(clusters.full.subset))
+clusters.full <- Idents(pbmc)
 length(clusters.train)
-length(clusters.full.subset)
+length(clusters.full)
+```
+
+To compare the two clusterings, we compute the adjusted Rand index (@hubert1985comparing) using only the cells that are included in the training set. 
+
+```{r}
+clusters.full.subset <- clusters.full[colnames(pbmc.train)] 
 adjustedRandIndex(clusters.train, clusters.full.subset)
 ```
 
@@ -225,7 +230,7 @@ Overall, in this section, we saw that we get very similar estimated clusters whe
 
 ## Manually
 
-Now that we computed clusters from the training set, it is time to look for differentially expressed genes across the clusters. The "safest" way to perform this analysis is to extract the cluster labels from ``pbmc.train`` and write our own analysis functions to see how the columns of ``Xtestsubset`` (created above) vary across these clusters. This approach is the safest because we know for sure that the clusters were obtained using only the training data and that the differential expression analysis uses only the testing data.
+Now that we computed clusters from the training set, it is time to look for differentially expressed genes across the clusters. The "safest" way to perform this analysis is to extract the cluster labels from ``pbmc.train`` and write our own analysis functions to see how the columns of ``Xtestsubset`` (created above) vary across these clusters. This approach is the safest because we know for sure that the clusters were obtained using only the training data and that the differential expression analysis uses only the test data.
 
 First, we extract the clusters and verify that we have a cluster for every cell in ``Xtestsubset``. 
 
@@ -267,7 +272,7 @@ head(sort(pvals2.countsplit))
 head(sort(pvals2.naive))
 ```
 
-We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). Thus, count splitting did not hurt our ability to detect the differentially expressed genes from the original analysis. 
+We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). While the takeaways of the two analyses are similar in this case, as explained in [our preprint](XXXXX), the naive method used in the Seurat tutorial cannot reliably determine which genes are differentially expressed, whereas count splitting can (under a Poisson assumption). 
 
 ## Using Seurat
 
