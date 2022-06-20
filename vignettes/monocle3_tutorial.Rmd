@@ -13,8 +13,6 @@ knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
-**This tutorial is under construction.**
-
 Before using this tutorial, we recommend that you read through our [introductory tuorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) to understand our method in a simple example with simulated data. 
 
 For this tutorial, we reproduce the Monocle3 [vignette](https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/), but we apply count splitting. Throughout the tutorial, we see that we reach similar takeaways to those reached in the Monocle3 vignette, despite the fact that we estimate pseudotime using only the training set. 
