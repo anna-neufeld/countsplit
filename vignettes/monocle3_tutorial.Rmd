@@ -70,7 +70,7 @@ cds_train <- align_cds(
 
 The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data.
 
-```{r, fig.height=10, fig.width=5}
+```{r}
 cds_train <- reduce_dimension(cds_train)
 plot_cells(cds_train, 
            label_groups_by_cluster=FALSE,  
