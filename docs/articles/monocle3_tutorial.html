@@ -85,7 +85,6 @@
 
     
     
-<p><strong>This tutorial is under construction.</strong></p>
 <p>Before using this tutorial, we recommend that you read through our <a href="https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html" class="external-link">introductory tuorial</a> to understand our method in a simple example with simulated data.</p>
 <p>For this tutorial, we reproduce the Monocle3 <a href="https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/" class="external-link">vignette</a>, but we apply count splitting. Throughout the tutorial, we see that we reach similar takeaways to those reached in the Monocle3 vignette, despite the fact that we estimate pseudotime using only the training set.</p>
 <div class="section level2">
@@ -136,7 +135,7 @@
 <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_cells.html" class="external-link">plot_cells</a></span><span class="op">(</span><span class="va">cds_train</span>, 
            label_groups_by_cluster<span class="op">=</span><span class="cn">FALSE</span>,  
            color_cells_by <span class="op">=</span> <span class="st">"cell.type"</span><span class="op">)</span></code></pre></div>
-<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
+<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-5-1.png" width="480"></p>
 <p>Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the <code>use_partition=FALSE</code> argument to the <code>learn_graph</code> function to ensure that our graph is made up of a single connected trajectory.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/cluster_cells.html" class="external-link">cluster_cells</a></span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span>
@@ -208,14 +207,14 @@
            label_cell_groups<span class="op">=</span><span class="cn">FALSE</span>, 
            label_leaves<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span> </code></pre></div>
 <p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-12-1.png" width="700"></p>
-<p>We can also select specific genes and plot their expression across pseudotime. As in the Monocle3 vignette, we see that all three of these genes get “activated” midway through the trajectory, but <code>dac-1</code> is activated slightly before the otheres.</p>
+<p>We can also select specific genes and plot their expression across pseudotime. As in the Monocle3 vignette, we see that all three of these genes get “activated” midway through the trajectory, but <code>dac-1</code> is activated slightly before the others.</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">AFD_genes</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"gcy-8"</span>, <span class="st">"dac-1"</span>, <span class="st">"oig-8"</span><span class="op">)</span>
 <span class="va">AFD_lineage_cds</span> <span class="op">&lt;-</span> <span class="va">cds_test</span><span class="op">[</span><span class="fu">rowData</span><span class="op">(</span><span class="va">cds_test</span><span class="op">)</span><span class="op">$</span><span class="va">gene_short_name</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="va">AFD_genes</span>, 
                        <span class="fu">colData</span><span class="op">(</span><span class="va">cds_test</span><span class="op">)</span><span class="op">$</span><span class="va">cell.type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AFD"</span><span class="op">)</span><span class="op">]</span>
 <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_genes_in_pseudotime.html" class="external-link">plot_genes_in_pseudotime</a></span><span class="op">(</span><span class="va">AFD_lineage_cds</span>,                          color_cells_by<span class="op">=</span><span class="st">"embryo.time.bin"</span>,min_expr<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> </code></pre></div>
 <p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
-<p>As in our <a href="https://anna-neufeld.github.io/countsplit/articles/seurat_tutorial.html" class="external-link">Seurat tuorial</a>, we see that a count splitting analysis yields similar conclusions to analyses that use the naive method (i.e. that use the same data to compute pseudotime and study differential expression). However, by avoiding double dipping, the analysis that uses count splitting more reliably answers the question of ``which genes are differentially expressed”? Thus, in this vignette, we have reproduced the analysis from the Monocle3 vignette, but have improved the reliability of this analysis.</p>
+<p>As in our <a href="https://anna-neufeld.github.io/countsplit/articles/seurat_tutorial.html" class="external-link">Seurat tuorial</a>, we see that a count splitting analysis yields similar conclusions to analyses that use the naive method (i.e. that use the same data to compute pseudotime and study differential expression). However, by avoiding double dipping, the analysis that uses count splitting more reliably answers the question of “which genes are differentially expressed?” Thus, in this vignette, we have reproduced the analysis from the Monocle3 vignette, but have improved the reliability of this analysis.</p>
 </div>
 </div>
   </div>

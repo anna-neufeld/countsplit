@@ -85,9 +85,8 @@
 
     
     
-<p><strong>This tutorial is under construction.</strong></p>
-<p>Before using this tutorial, we recommend that you read through our ``introduction to count splitting” tutorial to understand our method in a simple package with simulated data.</p>
-<p>In this tutorial, we use a real dataset from <span class="citation">Elorbany et al. (2022)</span> that is also used in our paper. The dataset contains 10,000 cells collected over 15 days of a directed differentiation protocol from induced pluripotent stem cells (IPSC) to cardiomyocytes (cm).</p>
+<p>Before using this tutorial, we recommend that you read through our <a href="https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html" class="external-link">introductory tuorial</a> to understand our method in a simple example with simulated data.</p>
+<p>In this tutorial, we use a real dataset from <span class="citation">Elorbany et al. (2022)</span>. The dataset contains 10,000 cells collected over 15 days of a directed differentiation protocol from induced pluripotent stem cells (IPSC) to cardiomyocytes (cm).</p>
 <div class="section level2">
 <h2 id="install-scran">Install scran<a class="anchor" aria-label="anchor" href="#install-scran"></a>
 </h2>
@@ -105,14 +104,10 @@
 <div class="section level2">
 <h2 id="load-the-data-and-perform-count-splitting">Load the data and perform count splitting<a class="anchor" aria-label="anchor" href="#load-the-data-and-perform-count-splitting"></a>
 </h2>
-<p>This data is included in this package as a SingleCellExperiment object, so it is simple to load. We will use a few steps from the <code>scran</code> package.</p>
-<p>The main differences between this section and the last is that we will select a subset of highly variable genes and we will estimate and then account for size factors. We use the size factors estimated on the training set in our analysis! This follows our general principle of estimating all the preprocessing on the training set.</p>
-<p>We first load the data.</p>
+<p>This data is included in this package as a <code>SingleCellExperiment</code> object, so it is simple to load.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span></code></pre></div>
-<p>This is a single cell experiment object.</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">cm</span></code></pre></div>
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/utils/data.html" class="external-link">data</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span>
+<span class="va">cm</span></code></pre></div>
 <pre><code><span class="co">## class: SingleCellExperiment </span>
 <span class="co">## dim: 21971 10000 </span>
 <span class="co">## metadata(0):</span>
@@ -126,14 +121,13 @@
 <span class="co">## mainExpName: NULL</span>
 <span class="co">## altExpNames(0):</span></code></pre>
 <p>The main item in <code>cm</code> that we care about is the counts matrix, which contains 21,971 genes and 10000 cells. We can view a small subset of it now.</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## [1] 21971 10000</span></code></pre>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span></code></pre></div>
-<pre><code><span class="co">## 10 x 10 sparse Matrix of class "dgCMatrix"</span></code></pre>
-<pre><code><span class="co">##    [[ suppressing 10 column names 'E1_E1CD3col4_CATTTGTGCTTG', 'E1_E1CD3col2_AGAATAAGTCAC', 'E2_E2CD2col5_ATGAATGATGAA' ... ]]</span></code></pre>
-<pre><code><span class="co">##                                 </span>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/dim.html" class="external-link">dim</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span><span class="op">)</span>
+<span class="co">## [1] 21971 10000</span>
+<span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">]</span>
+<span class="co">## 10 x 10 sparse Matrix of class "dgCMatrix"</span>
+<span class="co">##    [[ suppressing 10 column names 'E1_E1CD3col4_CATTTGTGCTTG', 'E1_E1CD3col2_AGAATAAGTCAC', 'E2_E2CD2col5_ATGAATGATGAA' ... ]]</span>
+<span class="co">##                                 </span>
 <span class="co">## AL627309.1  .  . . . . . . . . .</span>
 <span class="co">## AL627309.6  .  . . . . . . . . .</span>
 <span class="co">## AL627309.5  .  . . . . . . . . .</span>
@@ -143,22 +137,21 @@
 <span class="co">## MTCO1P12    2  7 2 . 2 . 1 2 3 .</span>
 <span class="co">## MTCO2P12    .  1 . . . . . . . .</span>
 <span class="co">## MTATP8P1    .  . . . . . . . . .</span>
-<span class="co">## MTATP6P1   10  8 . . . . 3 . 2 .</span></code></pre>
-<p>However, there is other important information included in this data. For example, the cells were collected from 19 individuals over the course of 15 days. This info is included in the object!! We don’t want to just extract the count matrices and ONLY work with those, because we don’t want to lose this info!</p>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">cm</span><span class="op">$</span><span class="va">individual</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## </span>
+<span class="co">## MTATP6P1   10  8 . . . . 3 . 2 .</span></code></pre></div>
+<p>There is other important information included in the <code>cm</code> object. For example, the cells were collected from 19 individuals over the course of 15 days. Information on which individual and which day each cell is from is saved within the <code>cm</code> object as column data.</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">cm</span><span class="op">$</span><span class="va">individual</span><span class="op">)</span>
+<span class="co">## </span>
 <span class="co">## 18520 18912 19093 18858 18508 18511 18907 18505 19190 18855 19159 18489 18517 </span>
 <span class="co">##   472   760   925   732   581   701   362   438   524   283   326   400   534 </span>
 <span class="co">## 18499 18870 19193 19209 19108 19127 </span>
-<span class="co">##   771   700   373   554   211   353</span></code></pre>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">cm</span><span class="op">$</span><span class="va">diffday</span><span class="op">)</span></code></pre></div>
-<pre><code><span class="co">## </span>
+<span class="co">##   771   700   373   554   211   353</span>
+<span class="fu"><a href="https://rdrr.io/r/base/table.html" class="external-link">table</a></span><span class="op">(</span><span class="va">cm</span><span class="op">$</span><span class="va">diffday</span><span class="op">)</span>
+<span class="co">## </span>
 <span class="co">##  day0  day1  day3  day5  day7 day11 day15 </span>
-<span class="co">##  2383  2389  1691   967  1260   862   448</span></code></pre>
-<p>We now extract the counts and perform count splitting. Note that these are all gene-by-cell matrices- which is different than what we use in our paper.</p>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<span class="co">##  2383  2389  1691   967  1260   862   448</span></code></pre></div>
+<p>To perform count splitting we wish to extract only the count matrix.</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed</a></span><span class="op">(</span><span class="fl">1</span><span class="op">)</span>
 <span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cm</span><span class="op">)</span>
 <span class="va">split</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/countsplit.html">countsplit</a></span><span class="op">(</span><span class="va">X</span>, epsilon<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span>
@@ -168,10 +161,11 @@
 <div class="section level2">
 <h2 id="run-preprocessing-and-clustering-on-the-training-set-">Run preprocessing and clustering on the training set.<a class="anchor" aria-label="anchor" href="#run-preprocessing-and-clustering-on-the-training-set-"></a>
 </h2>
+<p>We now wish to compute clusters on the training set. Unlike in our [introductory tutorial]</p>
 <p>Now we want to compute clusters on the training set. But this time, instead of simply running <code><a href="https://rdrr.io/r/stats/kmeans.html" class="external-link">kmeans()</a></code> on <code>log(Xtrain+1)</code>, we will use an existing scRNA-seq pipeline from the <code>scran</code> package that also involves preprocessing steps such as selecting highly variable genes. In order to do this, we need to do some analysis that expects a <code>SingleCellExperiment</code> object rather than a simple matrix.</p>
 <p>All we need to make the <code>SingleCellExperiment</code> training object is the <code>Xtrain</code> counts matrix. But it might be nice to retain the metadata in case we need it later. In this case, we do that by copying the original <code>cm</code> object and then updating the <code>counts</code> assay.</p>
 <p>Actually in this case I don’t need any metadata for my analysis. So I could also just contruct a new scRNAseq object from the counts only.</p>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cm.train</span> <span class="op">&lt;-</span> <span class="va">cm</span>
 <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">Xtrain</span></code></pre></div>
 <!-- Now we are ready for our analysis! These steps were inspired by the [`\textt{scran}``scran`` tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html).  -->

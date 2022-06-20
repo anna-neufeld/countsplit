@@ -70,7 +70,7 @@ cds_train <- align_cds(
 
 The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data.
 
-```{r}
+```{r, fig.height=10, fig.width=5}
 cds_train <- reduce_dimension(cds_train)
 plot_cells(cds_train, 
            label_groups_by_cluster=FALSE,  
@@ -160,7 +160,7 @@ plot_cells(cds_test, genes=c("hlh-4", "gcy-8", "dac-1", "oig-8"),
            label_leaves=FALSE) 
 ``` 
 
-We can also select specific genes and plot their expression across pseudotime. As in the Monocle3 vignette, we see that all three of these genes get "activated" midway through the trajectory, but `dac-1` is activated slightly before the otheres. 
+We can also select specific genes and plot their expression across pseudotime. As in the Monocle3 vignette, we see that all three of these genes get "activated" midway through the trajectory, but `dac-1` is activated slightly before the others. 
 
 ```{r}
 AFD_genes <- c("gcy-8", "dac-1", "oig-8")
@@ -170,5 +170,5 @@ plot_genes_in_pseudotime(AFD_lineage_cds,                          color_cells_b
 ```
 
 
-As in our [Seurat tuorial](https://anna-neufeld.github.io/countsplit/articles/seurat_tutorial.html), we see that a count splitting analysis yields similar conclusions to analyses that use the naive method (i.e. that use the same data to compute pseudotime and study differential expression). However, by avoiding double dipping, the analysis that uses count splitting more reliably answers the question of ``which genes are differentially expressed"? Thus, in this vignette, we have reproduced the analysis from the Monocle3 vignette, but have improved the reliability of this analysis. 
+As in our [Seurat tuorial](https://anna-neufeld.github.io/countsplit/articles/seurat_tutorial.html), we see that a count splitting analysis yields similar conclusions to analyses that use the naive method (i.e. that use the same data to compute pseudotime and study differential expression). However, by avoiding double dipping, the analysis that uses count splitting more reliably answers the question of "which genes are differentially expressed"? Thus, in this vignette, we have reproduced the analysis from the Monocle3 vignette, but have improved the reliability of this analysis. 
 

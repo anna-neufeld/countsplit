@@ -258,7 +258,7 @@ Xsubset_lognorm <- log(Xsubset_norm +1)
 ```
 
 
-```{r}
+```{r, collapse=TRUE}
 ### Do the count splitting analysis
 cluster2.train <- clusters.train==2
 pvals2.countsplit <- apply(Xtestsubset_lognorm, 1, function(u) wilcox.test(u~cluster2.train)$p.value)
@@ -289,7 +289,7 @@ pbmc.test <- ScaleData(pbmc.test, features = all.genes)
 
 We first verify that the Seurat ``FindMarkers`` function returns the same information as the manual differential expression test above. 
 
-```{r}
+```{r, collapse=TRUE}
 cluster2.markers <- FindMarkers(pbmc.test, ident.1 = 2, min.pct = 0)
 head(sort(pvals2.countsplit), n=10)
 head(cluster2.markers, n = 10)
@@ -297,7 +297,8 @@ head(cluster2.markers, n = 10)
 
 We can also verify that the top marker genes selected with count splitting still match up to those obtained from the naive method used in the Seurat tutorial. 
 
-```{r}
+```{r, collapse=TRUE}
+head(sort(pvals2.naive), n=10)
 head(FindMarkers(pbmc, ident.1=2), n=10)
 ```
 
@@ -311,7 +312,7 @@ The first set of heatmaps displays expression counts from the training set. Whil
 DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE)
 ```
 
-The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 7-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association
+The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 10-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association
 seen in the initial heatmaps was due to overfitting; these PCs do not measure anything useful or interesting. 
 
 ```{r, fig.height=15, fig.width=10}
