@@ -166,8 +166,7 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cm.train</span> <span class="op">&lt;-</span> <span class="va">cm</span>
 <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/assays.html" class="external-link">counts</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="va">Xtrain</span></code></pre></div>
-<p>We are now ready to preprocess and cluster this data. The steps used here were inspured by the</p>
-<p>Now we are ready for our analysis! These steps were inspired by the <a href="https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html" class="external-link">scran tutorial</a>. We first compute sum factors and then we perform log normalization.</p>
+<p>Now we are ready for our analysis. These steps were inspired by the <a href="https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html" class="external-link">scran tutorial</a>. We first compute sum factors and then we perform log normalization.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/quickCluster.html" class="external-link">quickCluster</a></span><span class="op">(</span><span class="va">cm.train</span><span class="op">)</span>
 <span class="va">cm.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/scran/man/computeSumFactors.html" class="external-link">computeSumFactors</a></span><span class="op">(</span><span class="va">cm.train</span>, clusters<span class="op">=</span><span class="va">clusters</span><span class="op">)</span>

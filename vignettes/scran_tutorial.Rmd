@@ -80,9 +80,7 @@ cm.train <- cm
 counts(cm.train) <- Xtrain
 ```
 
-We are now ready to preprocess and cluster this data. The steps used here were inspured by the 
-
-Now we are ready for our analysis! These steps were inspired by the [scran tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html).
+Now we are ready for our analysis. These steps were inspired by the [scran tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html).
 We first compute sum factors and then we perform log normalization. 
 
 ```{r}
