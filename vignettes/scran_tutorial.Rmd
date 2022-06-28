@@ -12,7 +12,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Before using this tutorial, we recommend that you read through our [introductory tuorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) to understand our method in a simple example with simulated data. 
+Before using this tutorial, we recommend that you read through our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) to understand our method in a simple example with simulated data. 
 
 In this tutorial, we use a real dataset from @elorbany2022single. The dataset contains 10,000 cells collected over 15 days of a directed differentiation protocol from induced pluripotent stem cells (IPSC) to cardiomyocytes (cm). 
 
@@ -140,7 +140,7 @@ head(results[results[,4] < 0.01,], n=10)
 
 In this section, instead of testing for differential expression "by hand" using `glm()`, we use the `scoreMarkers()` function from the scran package. This is the method used in the [scran tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html#6_Identifying_marker_genes), in the section titled "Find Marker Genes". 
 
-In order to use the `scoreMarkers()` function, we need to store our test matrix in a ``SingleCellExperiment`` object.  We can either construct this from scratch using only the count matrix, or we could make a copy of the original ``cm`` object and add the count matrix after. Since we do not anticipate needing any metadata in this section, we construct the obecjt from scratch. 
+In order to use the `scoreMarkers()` function, we need to store our test matrix in a ``SingleCellExperiment`` object.  We can either construct this from scratch using only the count matrix, or we could make a copy of the original ``cm`` object and add the count matrix after. Since we do not anticipate needing any metadata in this section, we construct the object from scratch. 
 
 ```{r}
 cm.test <- SingleCellExperiment(list(counts=Xtest))

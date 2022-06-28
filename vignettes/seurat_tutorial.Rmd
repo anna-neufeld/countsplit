@@ -3,6 +3,7 @@ title: "Tutorial: count splitting with seurat"
 output: rmarkdown::html_vignette
 bibliography: latent.bib
 vignette: >
+  %\VignetteIndexEntry{Tutorial: count splitting with seurat}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -11,7 +12,7 @@ vignette: >
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
-Before using this tutorial, we recommend that you read through our [introductory tuorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) to understand our method in a simple example with simulated data. 
+Before using this tutorial, we recommend that you read through our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) to understand our method in a simple example with simulated data. 
 
 The purpose of this tutorial is to reproduce the analysis from the Seurat [clustering tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) while using `countsplit`. The Seurat tutorial performs clustering and differential expression on the same dataset. As shown in our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html), this can lead to inflated Type 1 error rates during differential expression testing. For more information on why clustering and testing for differential expression on the same datasets creates problems, and why count splitting is needed, please see [add link to prepint](XXXXX). 
 
@@ -116,9 +117,9 @@ dim(pbmc)
 
 # Preprocessing workflow
 
-For our count splitting analysis, all steps in the preprocessing workflow are performed on `pbmc.train`. Importantly, the test set is left untouched throughout this section. We perform the workflow on `pbmc` in paralell for the sake of comparison. 
+For our count splitting analysis, all steps in the preprocessing workflow are performed on `pbmc.train`. Importantly, the test set is left untouched throughout this section. We perform the workflow on `pbmc` in parallel for the sake of comparison. 
 
-We take this time to point out some intricacies of the ``Seurat`` object that could become confusing in future analyses. A ``Seurat`` object has three assays: ``counts``, ``data``, and ``scale.data``. At this point in the analysis, ``data`` and ``counts`` both store the raw counts, and ``scale.data`` is empty. 
+We take this time to point out some intricacies of the ``Seurat`` object that could become confusing in future analyses. A single assay within a ``Seurat`` object has three slots: ``counts``, ``data``, and ``scale.data``. At this point in the analysis, ``data`` and ``counts`` both store the raw counts, and ``scale.data`` is empty. 
 
 ```{r}
 all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
@@ -128,7 +129,7 @@ all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
 GetAssayData(pbmc.train, "scale.data")
 ```
 
-These assays will change as we run further preprocessing steps, and this will be important to keep in mind. We next normalize and compute the set of highly variable features, as in the Seurat tutorial. Note that normalizing changes the ``data`` assay of `pbmc.train` such that it stores normalized data, rather than counts. 
+These assays will change as we run further preprocessing steps, and this will be important to keep in mind. We next normalize and compute the set of highly variable features, as in the Seurat tutorial. Note that normalizing changes the ``data`` slot within of `pbmc.train` such that it stores normalized data, rather than counts. 
 
 ```{r}
 pbmc.train <- NormalizeData(pbmc.train)
@@ -166,7 +167,7 @@ sort(top10)
 sort(top10.train)
 ```
 
-We continue following the preprocessing steps from the Seurat tutorial on both `pbmc` and `pbmc.train`. The next step is to scale the data and to compute principal components. Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. We note that ``ScaleData`` finally fills in the ``scale.data`` assay in the `pbmc` and `pbmc.train` objects, and some downstream functions will access this assay. 
+We continue following the preprocessing steps from the Seurat tutorial on both `pbmc` and `pbmc.train`. The next step is to scale the data and to compute principal components. Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. We note that ``ScaleData`` finally fills in the ``scale.data`` slot in the `pbmc` and `pbmc.train` objects, and some downstream functions will access this slot. 
 
 ```{r,fig.height=15, fig.width=10}
 all.genes <- rownames(pbmc)
@@ -278,7 +279,7 @@ We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cl
 
 It would be nice to be able to make a ``Seurat`` object containing the training set clusters but the test set counts. This would allow us to use some of Seurat's nice visualization features for differential expression testing. We note that **care should be taken in this section**, as we are mixing-and-matching pieces of Seurat objects and Seurat functions not explicitly mentioned in this tutorial may have unexpected behavior. 
 
-We first let `pbmc.test` equal `pbmc.train`. This ensures that our test set object gets the same cluster information and UMAP information as the training set, such that we can still visualize the training set clusters. We then update the `counts` assay to store the test set counts. Unfortunately, once we do this, the `data` and `scale.data` assays are not automatically updated to store the normalized or scaled counts. We run normalize and scale functions to remedy this.
+We first let `pbmc.test` equal `pbmc.train`. This ensures that our test set object gets the same cluster information and UMAP information as the training set, such that we can still visualize the training set clusters. We then update the `counts` slow of this object to store the test set counts. Unfortunately, once we do this, the `data` and `scale.data` slots are not automatically updated to store the normalized or scaled counts. We run normalize and scale functions to remedy this.
 
 ```{r}
 pbmc.test <- pbmc.train

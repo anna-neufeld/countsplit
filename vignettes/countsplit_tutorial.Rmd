@@ -62,7 +62,7 @@ ggplot(data=NULL, aes(sample=results.naive[,4]))+geom_qq(distribution="qunif")+g
 
 ## Count splitting 
 
-We now address the issue using count splitting. The key steps are (1) running the ``countsplit`` function to get ``Xtrain`` and ``Xtest`` and then (2) running the analysis step with ``Xtest`` as the response and clusters obtained from ``Xtrain`` as the latent variable. The ``countsplit`` function returns a list, which we call ``split`` here, which contains the training set and the test set.
+We now address the issue using count splitting. The key steps are (1) running the ``countsplit`` function to get ``Xtrain`` and ``Xtest`` and then (2) clustering the data using `Xtrain`, and then fitting a GLM to test for association between those clusters and each column of `Xtest`. The ``countsplit`` function returns a list, which we call ``split`` here, which contains the training set and the test set.
 
 The parameter epsilon, which must fall between 0 and 1, governs the relative amount of information from `X` that goes into the training set. When epislon is very close to 0, the training matrix will be extremely sparse and the test matrix will look a lot like `X`. When epsilon is very close to 1, the training matrix will be nearly identical to X, but the test matrix will be extremely sparse. The default in the `countsplit` function is to set epsilon=0.5. See [our preprint](XXXX) for more information.  
 
@@ -132,14 +132,14 @@ table(clusters.true, clusters.train)
 
 ## Effect of using Xtest for inference
 
-We now compare what happens when we regress $X_j$ on the true clusters to what happens if we regress $X_j^{\mathrm{test}}$ on the true clusters. We use the code below to fit a Poisson GLM of every gene on the true clusters; we save both the slope and the intercept. 
+We now compare what happens when we regress $X_j$ on the true clusters to what happens if we regress $X_j^{\mathrm{test}}$ on the true clusters. We use the code below to fit a Poisson GLM of every gene on the true clusters; we save both the slope and the intercept. We are interested in the GLM slopes, as the GLM slopes are non-zero if the gene is differentially expressed across the clusters. 
 
 ```{r}
 coeffs.X <- t(apply(X, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[,1]))
 coeffs.Xtest <- t(apply(Xtest, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[,1]))
 ```
 
-The plot below shows that the slopes resulting from `X` and the slopes resulting from `Xtest` tend to fall on the diagonal line `y=x` and so tend to be approximately equal to eachother. The intercepts, on the other hand, get shifted by `log(0.5)` when we use the `Xtest` rather than `X`. 
+The plot below shows that the slopes resulting from `X` and the slopes resulting from `Xtest` tend to fall on the diagonal line `y=x` and so tend to be approximately equal to eachother. The intercepts, on the other hand, get shifted by `log(0.5)` when we use the `Xtest` rather than `X`. This is as we would expect (see Section 4.1 of [our preprint](XXXXX)). 
 
 ```{r}
 differentially_expressed = as.factor(c(rep(1,10), rep(0,190)))

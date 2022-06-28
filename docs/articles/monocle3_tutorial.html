@@ -85,7 +85,7 @@
 
     
     
-<p>Before using this tutorial, we recommend that you read through our <a href="https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html" class="external-link">introductory tuorial</a> to understand our method in a simple example with simulated data.</p>
+<p>Before using this tutorial, we recommend that you read through our <a href="https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html" class="external-link">introductory tutorial</a> to understand our method in a simple example with simulated data.</p>
 <p>For this tutorial, we reproduce the Monocle3 <a href="https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/" class="external-link">vignette</a>, but we apply count splitting. Throughout the tutorial, we see that we reach similar takeaways to those reached in the Monocle3 vignette, despite the fact that we estimate pseudotime using only the training set.</p>
 <div class="section level2">
 <h2 id="install-monocle3">Install Monocle3<a class="anchor" aria-label="anchor" href="#install-monocle3"></a>
@@ -120,7 +120,7 @@
 <div class="section level2">
 <h2 id="preprocess-and-estimate-pseudotime">Preprocess and estimate pseudotime<a class="anchor" aria-label="anchor" href="#preprocess-and-estimate-pseudotime"></a>
 </h2>
-<p>We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estiamtes. Everything in this section uses the training set only.</p>
+<p>We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estimates. Everything in this section uses the training set only.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/preprocess_cds.html" class="external-link">preprocess_cds</a></span><span class="op">(</span><span class="va">cds_train</span>, num_dim <span class="op">=</span> <span class="fl">50</span><span class="op">)</span>
 <span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/align_cds.html" class="external-link">align_cds</a></span><span class="op">(</span>
@@ -146,7 +146,7 @@
            label_leaves<span class="op">=</span><span class="cn">FALSE</span>,
            label_branch_points<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
-<p>Once the graph is learned, Monocle3 computes pseudotime with the <code><a href="https://rdrr.io/pkg/monocle3/man/order_cells.html" class="external-link">order_cells()</a></code> function. This function simply projects the cells onto the principal graph to get a one dimensional representation. The only additional step is picking a root node in the graph that will correspond to <code>0</code> in pseudotime space. To pick a root node for pseudotime, we use the same method as in the Monocle3<a href="https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/" class="external-link">vignette</a>. We pick the cell from the first time bin that is closest to a graph vertex.</p>
+<p>Once the graph is learned, Monocle3 computes pseudotime with the <code><a href="https://rdrr.io/pkg/monocle3/man/order_cells.html" class="external-link">order_cells()</a></code> function. This function simply projects the cells onto the principal graph to get a one dimensional representation. The only additional step is picking a root node in the graph that will correspond to <code>0</code> in pseudotime space. To pick a root node for pseudotime, we use the same method as in the Monocle3 <a href="https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/" class="external-link">vignette</a>. We pick the cell from the first time bin that is closest to a graph vertex.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">get_earliest_principal_node</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cds</span>, <span class="va">time_bin</span><span class="op">=</span><span class="st">"130-170"</span><span class="op">)</span><span class="op">{</span>
   <span class="va">cell_ids</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/which.html" class="external-link">which</a></span><span class="op">(</span><span class="fu">colData</span><span class="op">(</span><span class="va">cds</span><span class="op">)</span><span class="op">[</span>, <span class="st">"embryo.time.bin"</span><span class="op">]</span> <span class="op">==</span> <span class="va">time_bin</span><span class="op">)</span>
@@ -191,7 +191,7 @@
 <div class="section level3">
 <h3 id="using-monocle3s-graph-test">Using Monocle3’s Graph Test<a class="anchor" aria-label="anchor" href="#using-monocle3s-graph-test"></a>
 </h3>
-<p>This section follows the “finding genes that change as a function of pseudotime” <a href="https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep" class="external-link">section</a> section of the Monocle3 vignette. The differential expression testing method recommended in the Monocle3 tutorial is <code><a href="https://rdrr.io/pkg/monocle3/man/graph_test.html" class="external-link">graph_test()</a></code>, which uses Moran’s I statistics to test if cells that are adjacent in pseudotime space have similar expression values for certain genes.</p>
+<p>This section follows the “finding genes that change as a function of pseudotime” <a href="https://cole-trapnell-lab.github.io/monocle3/docs/differential/#pseudo-dep" class="external-link">section</a> of the Monocle3 vignette. The differential expression testing method recommended in the Monocle3 tutorial is <code><a href="https://rdrr.io/pkg/monocle3/man/graph_test.html" class="external-link">graph_test()</a></code>, which uses Moran’s I statistics to test if cells that are adjacent in pseudotime space have similar expression values for certain genes.</p>
 <p>In this section, we will need our test set to be stored in a <code>cell_data_set</code> that contains the test set counts. We need this object to store the training set graph. To accomplish this, we make a copy of <code>cds_train</code> and only update the counts.</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cds_test</span> <span class="op">&lt;-</span> <span class="va">cds_train</span> 
@@ -214,7 +214,7 @@
                        <span class="fu">colData</span><span class="op">(</span><span class="va">cds_test</span><span class="op">)</span><span class="op">$</span><span class="va">cell.type</span> <span class="op"><a href="https://rdrr.io/r/base/match.html" class="external-link">%in%</a></span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AFD"</span><span class="op">)</span><span class="op">]</span>
 <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_genes_in_pseudotime.html" class="external-link">plot_genes_in_pseudotime</a></span><span class="op">(</span><span class="va">AFD_lineage_cds</span>,                          color_cells_by<span class="op">=</span><span class="st">"embryo.time.bin"</span>,min_expr<span class="op">=</span><span class="fl">0.5</span><span class="op">)</span> </code></pre></div>
 <p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-13-1.png" width="700"></p>
-<p>As in our <a href="https://anna-neufeld.github.io/countsplit/articles/seurat_tutorial.html" class="external-link">Seurat tuorial</a>, we see that a count splitting analysis yields similar conclusions to analyses that use the naive method (i.e. that use the same data to compute pseudotime and study differential expression). However, by avoiding double dipping, the analysis that uses count splitting more reliably answers the question of “which genes are differentially expressed?” Thus, in this vignette, we have reproduced the analysis from the Monocle3 vignette, but have improved the reliability of this analysis.</p>
+<p>The analysis in this tutorial identifies differentially expressed genes without double dipping in the data, and thus improves upon the analysis in the Monocle3 <a href="https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/" class="external-link">vignette</a>.</p>
 </div>
 </div>
   </div>
