@@ -123,12 +123,15 @@ clusters.full <- kmeans(log(X+1), centers=2)$cluster
 table(clusters.true, clusters.full)
 ```
 
-If instead we use only `Xtrain` to estimate the clusters, we make a few additional errors, but we still come very close to estimating the true clusters (the re-labelling of the clusters is unimportant).  
+If instead we use only `Xtrain` to estimate the clusters, we make a few additional errors, but we still come very close to estimating the true clusters.
 
 ```{r}
 clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
 table(clusters.true, clusters.train)
 ```
+
+The fact that cluster 0 in the true clustering maps to cluster 2 in the training set clustering is unimportant, but we will remember this later when we attempt to compare models. 
+
 
 ## Effect of using Xtest for inference
 
@@ -149,23 +152,23 @@ p1 <- ggplot(data=NULL, aes(x=coeffs.X[,1], y=coeffs.Xtest[,1], col=differential
   geom_abline(intercept= 0, slope=1, col="red", lty=2)+
   coord_fixed()+xlim(0,2)+ylim(0,2)+
   xlab("Intercepts from X")+ ylab("Intercepts from Xtest")+
-  ggtitle("Intercepts")
+  ggtitle("Intercepts")+theme_bw()
 p2 <- ggplot(data=NULL, aes(x=coeffs.X[,2], y=coeffs.Xtest[,2], col=differentially_expressed))+
   geom_point()+
   geom_abline(intercept=0, slope=1, col="red")+
   coord_fixed()+xlim(-0.15,1)+ylim(-0.15,1)+
   xlab("Slopes from X")+ ylab("Slopes from Xtest")+
-  ggtitle("Slopes")
-p1 + p2 + plot_layout(guides="collect") & theme_bw()
+  ggtitle("Slopes")+theme_bw()
+p1 + p2 + plot_layout(guides="collect")
 ```
 
 ## Overall comparison of count splitting to ideal method
 
-Finally, we compare the overall slope and intercept estimates that we get from count splitting to what we would get in the ideal setting where we get to regress $X_j$ on the true clusters. Note that `coeffs.ideal` is identical to `coeffs.X` from the previous section; we reproduce it here for convenience.
+Finally, we compare the overall slope and intercept estimates that we get from count splitting to what we would get in the ideal setting where we get to regress $X_j$ on the true clusters. Note that `coeffs.ideal` is identical to `coeffs.X` from the previous section; we reproduce it here for convenience. Note also that we regress `Xtest` on `as.factor(clusters.train==1)`, rather than `as.factor(clusters.train)`, simply because we saw above that the "cluster 1" in the training set maps to the "cluster 1" in the true clustering, and this consistency will ensure that the coefficients from the two models have the same sign. 
 
 ```{r}
 coeffs.ideal <- t(apply(X, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[,1]))
-coeffs.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~as.factor(clusters.train), family="poisson"))$coefficients[,1]))
+coeffs.countsplit <- t(apply(Xtest, 2, function(u) summary(glm(u~as.factor(clusters.train==1), family="poisson"))$coefficients[,1]))
 p1 <- ggplot(data=NULL, aes(x=coeffs.ideal[,1], y=coeffs.countsplit[,1], col=differentially_expressed))+
   geom_point()+
   geom_abline(intercept= log(0.5), slope=1, col="red")+
@@ -176,13 +179,13 @@ p1 <- ggplot(data=NULL, aes(x=coeffs.ideal[,1], y=coeffs.countsplit[,1], col=dif
 p2 <- ggplot(data=NULL, aes(x=coeffs.ideal[,2], y=coeffs.countsplit[,2], col=differentially_expressed))+
   geom_point()+
   geom_abline(intercept=0, slope=1, col="red")+
-  coord_fixed()+xlim(-0.15,1)+ylim(0.15,1)+
+  coord_fixed()+xlim(-0.15,1)+ylim(-0.15,1)+
   xlab("Slopes from ideal method")+ ylab("Slopes from count splitting")+
   ggtitle("Slopes")
 p1 + p2 + plot_layout(guides="collect") & theme_bw()
 ```
 
-Overall, we see general agreement between the parameters estimated via countsplitting and those estimated via the ideal method. The slopes tend to be the same, whereas the intercepts are shifted by `log(0.5)`, as expected. 
+Overall, we see general agreement between the parameters estimated via countsplitting and those estimated via the ideal method. The slopes tend to be the same, whereas the intercepts are shifted by `log(0.5)`, as expected based on [our preprint](XXXXXX). The slopes are the quantities that we care to do inference on, as they measure differential expression across clusters. 
 
 
 
