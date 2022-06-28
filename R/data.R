@@ -6,7 +6,7 @@
 #' @docType data
 #'
 #' @keywords datasets
-#' @format A RDS object. 
+#' @format A SingleCellExperiment object.  
 #' @examples
 #' data(cm)
 #' @references Elorbany, Reem, et al. "Single-cell sequencing reveals lineage-specific dynamic genetic regulation of gene expression during human cardiomyocyte differentiation." PLoS genetics 18.1 (2022): e1009666.
@@ -21,7 +21,7 @@
 #' @docType data
 #'
 #' @keywords datasets
-#' @format A matrix. 
+#' @format A dgCMatrix.
 #' @examples
 #' data(pbmc.counts)
 "pbmc.counts"
