@@ -167,7 +167,11 @@ sort(top10)
 sort(top10.train)
 ```
 
-We continue following the preprocessing steps from the Seurat tutorial on both `pbmc` and `pbmc.train`. The next step is to scale the data and to compute principal components. Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. We note that ``ScaleData`` finally fills in the ``scale.data`` slot in the `pbmc` and `pbmc.train` objects, and some downstream functions will access this slot. 
+## Comparing principal components on `pbmc` and `pcmc.train`
+
+We continue following the preprocessing steps from the Seurat tutorial on both `pbmc` and `pbmc.train`. The next step is to scale the data and to compute principal components. In this section, we show that `pbmc` and `pbmc.train` have very similar principal components. This is comforting, as it suggests that we do not lose too much information when we count split and estimate principal components on only the training set. 
+
+Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. We note that ``ScaleData`` finally fills in the ``scale.data`` slot in the `pbmc` and `pbmc.train` objects, and some downstream functions will access this slot. 
 
 ```{r,fig.height=15, fig.width=10}
 all.genes <- rownames(pbmc)
@@ -185,7 +189,9 @@ p2.train <- VizDimLoadings(pbmc.train, dims = 2, reduction = "pca")+theme(axis.t
 p1+p1.train+p2+p2.train+plot_layout(nrow=2, ncol=2)
 ```
 
-We can see that we obtain very similar principal components on the training set to those obtained on the full data. On both datasets, PC_1 is dominated by the gene `MALAT1` and genes like genes like `CST3, TYROBF` are of lesser importance. (The fact that `MALAT1` has a positive loading in `pbmc.train` and a negative loading in `pbmc` is simply due to a sign flip of the first principal component.) The second principal component is dominated by `CD79A` and `HLA-D0A1` and `HLA-DOB1`, with `NKG7` having lesser importance. (The sign flip is once again unimportant.)
+We can see that we obtain very similar principal components on the training set to those obtained on the full data. On both datasets, PC_1 is dominated by the gene `MALAT1` in one direction and genes like `CST3` and  `TYROBF` in the other direction. (The fact that `MALAT1` has a positive loading in `pbmc.train` and a negative loading in `pbmc` is simply due to a sign flip of the first principal component.) The second principal component is dominated by `CD79A` and `HLA-D0A1` and `HLA-DOB1`, with `NKG7` having a lot of importance with the opposite sign. (The sign flip between the two datasets is once again unimportant.)
+
+# Clustering the data
 
 Now that we have convinced ourselves that the training set is retaining a lot of the signal of the full dataset (and is thus able to estimate very similar principal components), we move on to clustering. We skip the next several visualizations and steps of the Seurat tutorial for brevity. We will return to the principal component heatmaps at the end of this document. As in the Seurat tutorial, we retain 10 principal components for clustering. 
 
@@ -203,7 +209,7 @@ pbmc.train <- RunUMAP(pbmc.train, dims = 1:10)
 DimPlot(pbmc.train, reduction = "umap")
 ```
 
-We want to know how similar these clusters are to the ones computed on the full data. Looking at two UMAP plots could be potentially misleading, as the UMAP dimensions on the full dataset are \emph{different} than those on the training set. Further complicating our ability to compare the two clusterings, the training set has slightly fewer cells in it due to the preprocessing pipeline. 
+We want to know how similar these clusters are to the ones computed on the full data. Looking at two UMAP plots could be potentially misleading, as the UMAP dimensions on the full dataset are *different* than those on the training set. Further complicating our ability to compare the two clusterings, the training set has slightly fewer cells in it due to the preprocessing pipeline. 
 
 ```{r}
 clusters.train <- Idents(pbmc.train)
@@ -225,11 +231,9 @@ The high adjusted Rand index shows that the clusters obtained from the training 
 table(clusters.train, clusters.full.subset)
 ```
 
-Overall, in this section, we saw that we get very similar estimated clusters when we use the training data obtained from count splitting compared to using the full data (as in the Seurat tutorial). 
+Overall, in this section, we saw that we get very similar estimated clusters when we use the training data obtained from count splitting compared to using the full data.
 
-# Finding differentially expressed features 
-
-## Manually
+# Finding differentially expressed features manually
 
 Now that we computed clusters from the training set, it is time to look for differentially expressed genes across the clusters. The "safest" way to perform this analysis is to extract the cluster labels from ``pbmc.train`` and write our own analysis functions to see how the columns of ``Xtestsubset`` (created above) vary across these clusters. This approach is the safest because we know for sure that the clusters were obtained using only the training data and that the differential expression analysis uses only the test data.
 
@@ -275,7 +279,7 @@ head(sort(pvals2.naive))
 
 We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). While the takeaways of the two analyses are similar in this case, as explained in [our preprint](XXXXX), the naive method used in the Seurat tutorial cannot reliably determine which genes are differentially expressed, whereas count splitting can (under a Poisson assumption). 
 
-## Using Seurat
+# Finding differentially expressed features using Seurat
 
 It would be nice to be able to make a ``Seurat`` object containing the training set clusters but the test set counts. This would allow us to use some of Seurat's nice visualization features for differential expression testing. We note that **care should be taken in this section**, as we are mixing-and-matching pieces of Seurat objects and Seurat functions not explicitly mentioned in this tutorial may have unexpected behavior. 
 
@@ -303,21 +307,23 @@ head(sort(pvals2.naive), n=10)
 head(FindMarkers(pbmc, ident.1=2), n=10)
 ```
 
+# Comparing visualizations on training set and test set
+
 The main reason it is useful to store the test matrix in a `Seurat` object is that it lets us use many visualization features from the `Seurat` package. 
 
 Consider the following sets of heatmaps. Each individual heatmap plots 500 randomly selected cells from the relevant dataset, ordered by its coordinates along the specified principal component. The genes with the highest positive loadings and the highest negative loadings are plotted for each principal component. As both ``pbmc.train`` and ``pbmc.test`` contain information on the principal components computed using the training set, both sets of heat maps plot the same principal components and display the same genes in each panel. 
 
-The first set of heatmaps displays expression counts from the training set. While the association between the genes and the principal components clearly decreases as we move from PC1 to PC15, PC15 still clearly shows association between the top 5 genes and the PC. This association is due to the fact that the training data itself was used to construct the PCs, and so there will always be some genes that appear to be associated with the PC. 
+The first set of heatmaps displays expression counts from the training set. While the association between the genes and the principal components clearly decreases as we move from PC1 to PC15, PC15 still clearly shows association between the top genes and the PC. This association is due to the fact that the training data itself was used to construct the PCs, and so there will always be some genes that appear to be associated with the PC. 
 
 ```{r,fig.height=15, fig.width=10}
-DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE)
+DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
 ```
 
 The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 10-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association
 seen in the initial heatmaps was due to overfitting; these PCs do not measure anything useful or interesting. 
 
 ```{r, fig.height=15, fig.width=10}
-DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE)
+DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
 ```
 
 Our results using count splitting line up with insights from the Seurat tutorial obtained using Jackstraw: the original Seurat tutorial suggested that it would be reasonable to keep 7-12 PCs, and chose to keep 10 PCs. However, Jackstraw requires re-computing PCs for many permuted versions of the data, while our heatmaps obtained using count splitting requires only a single principal component calculation.

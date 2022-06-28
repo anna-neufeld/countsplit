@@ -3,8 +3,7 @@
 \docType{data}
 \name{pbmc.counts}
 \alias{pbmc.counts}
-\title{This was downloaded using the instructions at the start of the Seurat clustering tutorial.
-It is included here for convenience.}
+\title{PBMC data from 10X Genomics.}
 \format{
 A matrix.
 }
@@ -12,8 +11,9 @@ A matrix.
 pbmc.counts
 }
 \description{
-This was downloaded using the instructions at the start of the Seurat clustering tutorial.
-It is included here for convenience.
+This dataset is downloaded at the start of the Seurat guided clustering tutorial (https://satijalab.org/seurat/articles/pbmc3k_tutorial.html).
+It is a dataset of Peripheral Blood Mononuclear Cells (PBMC) which has been made freely available by 10X Genomics.
+The dataset contains raw counts for 2,700 single cells that were sequenced on the Illumina NextSeq 500.
 }
 \examples{
 data(pbmc.counts)
