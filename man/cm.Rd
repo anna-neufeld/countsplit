@@ -5,7 +5,7 @@
 \alias{cm}
 \title{Cardiomyocyte data from Elorbany et al., 2022.}
 \format{
-A RDS object.
+A SingleCellExperiment object.
 }
 \usage{
 cm

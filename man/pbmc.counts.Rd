@@ -5,7 +5,7 @@
 \alias{pbmc.counts}
 \title{PBMC data from 10X Genomics.}
 \format{
-A matrix.
+A dgCMatrix.
 }
 \usage{
 pbmc.counts
