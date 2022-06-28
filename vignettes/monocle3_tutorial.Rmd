@@ -9,7 +9,6 @@ vignette: >
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 ```
 
@@ -68,13 +67,16 @@ cds_train <- align_cds(
   )
 ```
 
-The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data.
+The plot below shows that the cells cluster nicely by their cell type in reduced dimensions. This suggests that count splitting the data has not destroyed the signal in the data. 
 
 ```{r}
 cds_train <- reduce_dimension(cds_train)
 plot_cells(cds_train, 
-           label_groups_by_cluster=FALSE,  
-           color_cells_by = "cell.type")
+           color_cells_by = "cell.type",
+           label_groups_by_cluster=FALSE, 
+           label_cell_groups=FALSE,
+           graph_label_size=1.5
+)
 ```
 
 # Estimate pseudotime 
