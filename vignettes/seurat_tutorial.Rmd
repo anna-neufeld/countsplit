@@ -277,7 +277,7 @@ head(sort(pvals2.countsplit))
 head(sort(pvals2.naive))
 ```
 
-We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). While the takeaways of the two analyses are similar in this case, as explained in [our preprint](XXXXX), the naive method used in the Seurat tutorial cannot reliably determine which genes are differentially expressed, whereas count splitting can (under a Poisson assumption). 
+We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). While the takeaways of the two analyses are similar in this case, as explained in [our preprint](XXXXX), the naive method used in the Seurat tutorial leads to artificially low p-values and an inflated Type 1 error rate, whereas count splitting controls the Type 1 error rate (under a Poisson assumption). 
 
 # Finding differentially expressed features using Seurat
 
@@ -319,15 +319,12 @@ The first set of heatmaps displays expression counts from the training set. Whil
 DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
 ```
 
-The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 10-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association
-seen in the initial heatmaps was due to overfitting; these PCs do not measure anything useful or interesting. 
+The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 10-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association seen in the initial heatmaps was due to overfitting; these PCs do not measure anything useful or interesting. 
 
 ```{r, fig.height=15, fig.width=10}
 DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
 ```
 
-Our results using count splitting line up with insights from the Seurat tutorial obtained using Jackstraw: the original Seurat tutorial suggested that it would be reasonable to keep 7-12 PCs, and chose to keep 10 PCs. However, Jackstraw requires re-computing PCs for many permuted versions of the data, while our heatmaps obtained using count splitting requires only a single principal component calculation.
-
-While the rest of this tutorial focused on how count splitting and the naive method provided similar conclusions (i.e. count splitting does not cause us to miss true signal when it is present), these heatmaps are the first place in this tutorial where we have seen ad advantage of count splitting (apart from the fact that we know theoretically that the naive method fails to control the Type 1 error rate). 
+Our results using count splitting line up with insights from the Seurat tutorial obtained using Jackstraw (@chung2015statistical): the original Seurat tutorial suggested that it would be reasonable to keep 7-12 PCs, and chose to keep 10 PCs. However, Jackstraw requires re-computing PCs for many permuted versions of the data, while our heatmaps obtained using count splitting requires only a single principal component calculation. 
 
 # References

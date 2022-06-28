@@ -232,6 +232,11 @@
 <span class="va">p1</span><span class="op">+</span><span class="va">p1.train</span><span class="op">+</span><span class="va">p2</span><span class="op">+</span><span class="va">p2.train</span><span class="op">+</span><span class="fu"><a href="https://patchwork.data-imaginist.com/reference/plot_layout.html" class="external-link">plot_layout</a></span><span class="op">(</span>nrow<span class="op">=</span><span class="fl">2</span>, ncol<span class="op">=</span><span class="fl">2</span><span class="op">)</span></code></pre></div>
 <p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-20-1.png" width="960"></p>
 <p>We can see that we obtain very similar principal components on the training set to those obtained on the full data. On both datasets, PC_1 is dominated by the gene <code>MALAT1</code> in one direction and genes like <code>CST3</code> and <code>TYROBF</code> in the other direction. (The fact that <code>MALAT1</code> has a positive loading in <code>pbmc.train</code> and a negative loading in <code>pbmc</code> is simply due to a sign flip of the first principal component.) The second principal component is dominated by <code>CD79A</code> and <code>HLA-D0A1</code> and <code>HLA-DOB1</code>, with <code>NKG7</code> having a lot of importance with the opposite sign. (The sign flip between the two datasets is once again unimportant.)</p>
+</div>
+</div>
+<div class="section level2">
+<h2 id="clustering-the-data">Clustering the data<a class="anchor" aria-label="anchor" href="#clustering-the-data"></a>
+</h2>
 <p>Now that we have convinced ourselves that the training set is retaining a lot of the signal of the full dataset (and is thus able to estimate very similar principal components), we move on to clustering. We skip the next several visualizations and steps of the Seurat tutorial for brevity. We will return to the principal component heatmaps at the end of this document. As in the Seurat tutorial, we retain 10 principal components for clustering.</p>
 <div class="sourceCode" id="cb39"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pbmc</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://satijalab.org/seurat/reference/FindNeighbors.html" class="external-link">FindNeighbors</a></span><span class="op">(</span><span class="va">pbmc</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span>
@@ -270,7 +275,6 @@
 <span class="co">##              5   0   9   0   0   0 159   0   0   7</span>
 <span class="co">##              6   0   1   0   0   0   0   0  29   0</span></code></pre>
 <p>Overall, in this section, we saw that we get very similar estimated clusters when we use the training data obtained from count splitting compared to using the full data.</p>
-</div>
 </div>
 <div class="section level2">
 <h2 id="finding-differentially-expressed-features-manually">Finding differentially expressed features manually<a class="anchor" aria-label="anchor" href="#finding-differentially-expressed-features-manually"></a>
@@ -313,7 +317,7 @@
 <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/sort.html" class="external-link">sort</a></span><span class="op">(</span><span class="va">pvals2.naive</span><span class="op">)</span><span class="op">)</span>
 <span class="co">##         IL32          LTB         CD3D         IL7R         LDHB          CD2 </span>
 <span class="co">## 2.593535e-91 7.994465e-87 3.922451e-70 1.130870e-66 4.082189e-65 5.526492e-61</span></code></pre></div>
-<p>We identify <code>LTB</code>, <code>IL32</code>, <code>CD3D</code>, and <code>IL7R</code> as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). While the takeaways of the two analyses are similar in this case, as explained in <a href="XXXXX">our preprint</a>, the naive method used in the Seurat tutorial cannot reliably determine which genes are differentially expressed, whereas count splitting can (under a Poisson assumption).</p>
+<p>We identify <code>LTB</code>, <code>IL32</code>, <code>CD3D</code>, and <code>IL7R</code> as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). While the takeaways of the two analyses are similar in this case, as explained in <a href="XXXXX">our preprint</a>, the naive method used in the Seurat tutorial leads to artificially low p-values and an inflated Type 1 error rate, whereas count splitting controls the Type 1 error rate (under a Poisson assumption).</p>
 </div>
 <div class="section level2">
 <h2 id="finding-differentially-expressed-features-using-seurat">Finding differentially expressed features using Seurat<a class="anchor" aria-label="anchor" href="#finding-differentially-expressed-features-using-seurat"></a>
@@ -378,8 +382,7 @@
 <div class="sourceCode" id="cb59"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://satijalab.org/seurat/reference/DimHeatmap.html" class="external-link">DimHeatmap</a></span><span class="op">(</span><span class="va">pbmc.test</span>, dims <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">15</span>, cells <span class="op">=</span> <span class="fl">500</span>, balanced <span class="op">=</span> <span class="cn">TRUE</span>, nfeatures<span class="op">=</span><span class="fl">10</span><span class="op">)</span></code></pre></div>
 <p><img src="seurat_tutorial_files/figure-html/unnamed-chunk-33-1.png" width="960"></p>
-<p>Our results using count splitting line up with insights from the Seurat tutorial obtained using Jackstraw: the original Seurat tutorial suggested that it would be reasonable to keep 7-12 PCs, and chose to keep 10 PCs. However, Jackstraw requires re-computing PCs for many permuted versions of the data, while our heatmaps obtained using count splitting requires only a single principal component calculation.</p>
-<p>While the rest of this tutorial focused on how count splitting and the naive method provided similar conclusions (i.e. count splitting does not cause us to miss true signal when it is present), these heatmaps are the first place in this tutorial where we have seen ad advantage of count splitting (apart from the fact that we know theoretically that the naive method fails to control the Type 1 error rate).</p>
+<p>Our results using count splitting line up with insights from the Seurat tutorial obtained using Jackstraw (<span class="citation">Chung and Storey (2015)</span>): the original Seurat tutorial suggested that it would be reasonable to keep 7-12 PCs, and chose to keep 10 PCs. However, Jackstraw requires re-computing PCs for many permuted versions of the data, while our heatmaps obtained using count splitting requires only a single principal component calculation.</p>
 </div>
 <div class="section level2">
 <h2 class="unnumbered" id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
@@ -387,6 +390,9 @@
 <div id="refs" class="references csl-bib-body hanging-indent">
 <div id="ref-seurat3" class="csl-entry">
 Butler, Andrew, Paul Hoffman, Peter Smibert, Efthymia Papalexi, and Rahul Satija. 2018. <span>“Integrating Single-Cell Transcriptomic Data Across Different Conditions, Technologies, and Species.”</span> <em>Nature Biotechnology</em> 36: 411–20.
+</div>
+<div id="ref-chung2015statistical" class="csl-entry">
+Chung, Neo Christopher, and John D Storey. 2015. <span>“Statistical Significance of Variables Driving Systematic Variation in High-Dimensional Data.”</span> <em>Bioinformatics</em> 31 (4): 545–54.
 </div>
 <div id="ref-seurat1" class="csl-entry">
 Hao, Yuhan, Stephanie Hao, Erica Andersen-Nissen, William M. Mauck III, Shiwei Zheng, Andrew Butler, Maddie J. Lee, et al. 2021. <span>“Integrated Analysis of Multimodal Single-Cell Data.”</span> <em>Cell</em>.
