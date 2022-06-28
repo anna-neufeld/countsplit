@@ -52,7 +52,7 @@ results.naive <- t(apply(X, 2, function(u) summary(glm(u~as.factor(clusters.full
 head(results.naive)
 ```
 
-The first line clusters the cells by applying k-means clustering with k=2 on the log-transformed data with a pseudocount of 1, and saves the cluster assignments as clusters.full. The second line tests for differential gene expression using Poisson GLMs. For every gene X_j in X, we fit a Poisson GLM of X_j on clusters.full, and save the summary of the slope coefficient in results.naive. As shown in the output, we have saved a slope coefficient estimate, a standard error, a z-value, and a p-value for every gene in the dataset. 
+The first line clusters the cells by applying k-means clustering with k=2 on the log-transformed data with a pseudocount of 1, and saves the cluster assignments as `clusters.full`. The second line tests for differential gene expression using Poisson GLMs. For every gene $X_j$ in X, we fit a Poisson GLM of $X_j$ on `clusters.full`, and save the summary of the slope coefficient in `results.naive`. As shown in the output, we have saved a slope coefficient estimate, a standard error, a z-value, and a p-value for every gene in the dataset. 
 
 Even in these first 6 rows of results, we can see that the naive method assigns small p-values to many genes, despite the fact that no genes are truly differentially expressed in this data. We can make a uniform QQ-plot of the p-values for the naive method to see that they are not uniformly distributed and thus do not control the Type 1 error. 
 
@@ -64,7 +64,7 @@ ggplot(data=NULL, aes(sample=results.naive[,4]))+geom_qq(distribution="qunif")+g
 
 We now address the issue using count splitting. The key steps are (1) running the ``countsplit`` function to get ``Xtrain`` and ``Xtest`` and then (2) clustering the data using `Xtrain`, and then fitting a GLM to test for association between those clusters and each column of `Xtest`. The ``countsplit`` function returns a list, which we call ``split`` here, which contains the training set and the test set.
 
-The parameter epsilon, which must fall between 0 and 1, governs the relative amount of information from `X` that goes into the training set. When epislon is very close to 0, the training matrix will be extremely sparse and the test matrix will look a lot like `X`. When epsilon is very close to 1, the training matrix will be nearly identical to X, but the test matrix will be extremely sparse. The default in the `countsplit` function is to set epsilon=0.5. See [our preprint](XXXX) for more information.  
+The parameter `epsilon`, which must fall between 0 and 1, governs the relative amount of information from `X` that goes into the training set. When `epsilon` is very close to 0, the training matrix will be extremely sparse and the test matrix will look a lot like `X`. When epsilon is very close to 1, the training matrix will be nearly identical to `X`, but the test matrix will be extremely sparse. The default in the `countsplit` function is to set epsilon=0.5. See [our preprint](XXXX) for more information.  
 
 ```{r}
 set.seed(2)

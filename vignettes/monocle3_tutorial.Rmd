@@ -54,7 +54,7 @@ cds_train <- new_cell_data_set(
 ```
 
 
-# Preprocess and estimate pseudotime
+# Preprocess the data
 
 We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estimates. Everything in this section uses the training set only. 
 
@@ -77,16 +77,13 @@ plot_cells(cds_train,
            color_cells_by = "cell.type")
 ```
 
-Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the `use_partition=FALSE` argument to the `learn_graph` function to ensure that our graph is made up of a single connected trajectory.
+# Estimate pseudotime 
+
+In this section, we use the training dataset to learn the graph that will be used to estimate pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the `use_partition=FALSE` argument to the `learn_graph` function to ensure that our graph is made up of a single connected trajectory. 
 
 ```{r, results='hide'}
 cds_train <- cluster_cells(cds_train)
 cds_train <- learn_graph(cds_train, use_partition=FALSE)
-plot_cells(cds_train,
-           color_cells_by = "cell.type",
-           label_groups_by_cluster=FALSE,
-           label_leaves=FALSE,
-           label_branch_points=FALSE)
 ```
 
 Once the graph is learned, Monocle3 computes pseudotime with the `order_cells()` function. This function simply projects the cells onto the principal graph to get a one dimensional representation. The only additional step is picking a root node in the graph that will correspond to `0` in pseudotime space. To pick a root node for pseudotime, we use the same method as in the Monocle3 [vignette](https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/). We pick the cell from the first time bin that is closest to a graph vertex.
@@ -105,7 +102,7 @@ get_earliest_principal_node <- function(cds, time_bin="130-170"){
 cds_train <- order_cells(cds_train, root_pr_nodes=get_earliest_principal_node(cds_train))
 ```
 
-We now have estimated pseudotime, and we can color our cells by pseudotime in our plot.
+We now have estimated pseudotime, and we can plot our learned graph with cells colored by pseudotime. 
 
 ```{r}
 plot_cells(cds_train,
@@ -116,13 +113,13 @@ plot_cells(cds_train,
            graph_label_size=1.5)
 ```
 
-# Differential Expression
+# Finding genes that are differentially expressed across pseudotime
 
 Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we rely on the pseudotime from the training set but we rely on the test set counts for differential expression analysis.
 
 ## By hand
 
-First, we carry out differential expression testing "by hand". We fit a quasipoisson GLM of each test set gene onto the pseudotime computed from the training set. For computational efficiency, we only do this for the first 500 genes. We include the size factors estimated on the training as offsets in the regression.
+First, we carry out differential expression testing "by hand". We fit a quasipoisson GLM of each test set gene onto the pseudotime computed from the training set. (We choose quasipoisson since this is the default family for the `fit_models()` function in Monocle3.) For computational efficiency, we only do this for the first 500 genes. We include the size factors estimated on the training as offsets in the regression.
 
 ```{r}
 pseudotime.train <- pseudotime(cds_train)

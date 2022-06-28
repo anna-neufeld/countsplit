@@ -118,7 +118,7 @@
 <span class="op">)</span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="preprocess-and-estimate-pseudotime">Preprocess and estimate pseudotime<a class="anchor" aria-label="anchor" href="#preprocess-and-estimate-pseudotime"></a>
+<h2 id="preprocess-the-data">Preprocess the data<a class="anchor" aria-label="anchor" href="#preprocess-the-data"></a>
 </h2>
 <p>We now follow the preprocessing and pseudotime steps from the Monocle3 tutorial to come up with pseudotime estimates. Everything in this section uses the training set only.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -136,16 +136,14 @@
            label_groups_by_cluster<span class="op">=</span><span class="cn">FALSE</span>,  
            color_cells_by <span class="op">=</span> <span class="st">"cell.type"</span><span class="op">)</span></code></pre></div>
 <p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-5-1.png" width="700"></p>
-<p>Finally, we learn the graph that will be used to construct pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the <code>use_partition=FALSE</code> argument to the <code>learn_graph</code> function to ensure that our graph is made up of a single connected trajectory.</p>
+</div>
+<div class="section level2">
+<h2 id="estimate-pseudotime">Estimate pseudotime<a class="anchor" aria-label="anchor" href="#estimate-pseudotime"></a>
+</h2>
+<p>In this section, we use the training dataset to learn the graph that will be used to estimate pseudotime. For simplicity in this tutorial, we would like to only have one pseudotime trajectory with one root node. Thus, we add the <code>use_partition=FALSE</code> argument to the <code>learn_graph</code> function to ensure that our graph is made up of a single connected trajectory.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/cluster_cells.html" class="external-link">cluster_cells</a></span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span>
-<span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/learn_graph.html" class="external-link">learn_graph</a></span><span class="op">(</span><span class="va">cds_train</span>, use_partition<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span>
-<span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_cells.html" class="external-link">plot_cells</a></span><span class="op">(</span><span class="va">cds_train</span>,
-           color_cells_by <span class="op">=</span> <span class="st">"cell.type"</span>,
-           label_groups_by_cluster<span class="op">=</span><span class="cn">FALSE</span>,
-           label_leaves<span class="op">=</span><span class="cn">FALSE</span>,
-           label_branch_points<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
-<p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-6-1.png" width="700"></p>
+<span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/learn_graph.html" class="external-link">learn_graph</a></span><span class="op">(</span><span class="va">cds_train</span>, use_partition<span class="op">=</span><span class="cn">FALSE</span><span class="op">)</span></code></pre></div>
 <p>Once the graph is learned, Monocle3 computes pseudotime with the <code><a href="https://rdrr.io/pkg/monocle3/man/order_cells.html" class="external-link">order_cells()</a></code> function. This function simply projects the cells onto the principal graph to get a one dimensional representation. The only additional step is picking a root node in the graph that will correspond to <code>0</code> in pseudotime space. To pick a root node for pseudotime, we use the same method as in the Monocle3 <a href="https://cole-trapnell-lab.github.io/monocle3/docs/trajectories/" class="external-link">vignette</a>. We pick the cell from the first time bin that is closest to a graph vertex.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">get_earliest_principal_node</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">cds</span>, <span class="va">time_bin</span><span class="op">=</span><span class="st">"130-170"</span><span class="op">)</span><span class="op">{</span>
@@ -159,7 +157,7 @@
   <span class="va">root_pr_nodes</span>
 <span class="op">}</span>
 <span class="va">cds_train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/order_cells.html" class="external-link">order_cells</a></span><span class="op">(</span><span class="va">cds_train</span>, root_pr_nodes<span class="op">=</span><span class="fu">get_earliest_principal_node</span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span><span class="op">)</span></code></pre></div>
-<p>We now have estimated pseudotime, and we can color our cells by pseudotime in our plot.</p>
+<p>We now have estimated pseudotime, and we can plot our learned graph with cells colored by pseudotime.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/plot_cells.html" class="external-link">plot_cells</a></span><span class="op">(</span><span class="va">cds_train</span>,
            color_cells_by <span class="op">=</span> <span class="st">"pseudotime"</span>,
@@ -170,13 +168,13 @@
 <p><img src="monocle3_tutorial_files/figure-html/unnamed-chunk-8-1.png" width="700"></p>
 </div>
 <div class="section level2">
-<h2 id="differential-expression">Differential Expression<a class="anchor" aria-label="anchor" href="#differential-expression"></a>
+<h2 id="finding-genes-that-are-differentially-expressed-across-pseudotime">Finding genes that are differentially expressed across pseudotime<a class="anchor" aria-label="anchor" href="#finding-genes-that-are-differentially-expressed-across-pseudotime"></a>
 </h2>
 <p>Now that we have estimated pseudotime using the training set, we are ready to study differential expression along pseudotime. In this section, we rely on the pseudotime from the training set but we rely on the test set counts for differential expression analysis.</p>
 <div class="section level3">
 <h3 id="by-hand">By hand<a class="anchor" aria-label="anchor" href="#by-hand"></a>
 </h3>
-<p>First, we carry out differential expression testing “by hand.” We fit a quasipoisson GLM of each test set gene onto the pseudotime computed from the training set. For computational efficiency, we only do this for the first 500 genes. We include the size factors estimated on the training as offsets in the regression.</p>
+<p>First, we carry out differential expression testing “by hand.” We fit a quasipoisson GLM of each test set gene onto the pseudotime computed from the training set. (We choose quasipoisson since this is the default family for the <code><a href="https://rdrr.io/pkg/monocle3/man/fit_models.html" class="external-link">fit_models()</a></code> function in Monocle3.) For computational efficiency, we only do this for the first 500 genes. We include the size factors estimated on the training as offsets in the regression.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">pseudotime.train</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/monocle3/man/pseudotime.html" class="external-link">pseudotime</a></span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span>
 <span class="va">sf.train</span> <span class="op">&lt;-</span> <span class="fu">colData</span><span class="op">(</span><span class="va">cds_train</span><span class="op">)</span><span class="op">$</span><span class="va">Size_Factor</span>

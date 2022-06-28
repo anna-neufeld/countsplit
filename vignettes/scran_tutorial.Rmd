@@ -73,7 +73,7 @@ Xtest <- split$test
 We now wish to compute clusters on the training set. Unlike in our [introductory tuorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html), instead of simply running 
 ``kmeans()`` on ``log(Xtrain+1)``, we will use an existing scRNA-seq pipeline from the ``scran`` package that also involves preprocessing steps such as selecting highly variable genes. In order to do this, we need to store the training set count matrix `Xtrain` in a `SingleCellExperiment` object. 
 
-We could make a new `SingleCellExperiment` obect that contains only the `Xtrain` counts matrix. However, this would discard all of the metadata that was stored in the `cm` object, such as information regarding which cells where collected on which days and from which individuals. Thus, we chose to let `cm.train`  be a copy of `cm` where we only update the `counts()` attribute. This way, all metadata from `cm` is retained in `cm.train`. 
+We could make a new `SingleCellExperiment` object that contains only the `Xtrain` counts matrix. However, this would discard all of the metadata that was stored in the `cm` object, such as information regarding which cells where collected on which days and from which individuals. Thus, we chose to let `cm.train`  be a copy of `cm` where we only update the `counts()` attribute. This way, all metadata from `cm` is retained in `cm.train`. 
 
 ```{r}
 cm.train <- cm
@@ -81,7 +81,7 @@ counts(cm.train) <- Xtrain
 ```
 
 Now we are ready for our analysis. These steps were inspired by the [scran tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html).
-We first compute sum factors and then we perform log normalization. 
+We first compute sum factors and then we perform log normalization. Note that the `computeSumFactors()` function requires computing initial clusters of cells using `quickCluster()`; these are different from the clusters of cells that we will later analyze for differential expression. 
 
 ```{r}
 clusters <- quickCluster(cm.train)
@@ -153,7 +153,7 @@ sizeFactors(cm.test) <- sizeFactors(cm.train)
 cm.test <- logNormCounts(cm.test) 
 ```
 
-This first element in ``results`` shows marker genes that distinguish cluster 1 from all other clusters. We see that, even with count splitting, there are highly significant marker genes. 
+This first element in ``results`` shows marker genes that distinguish cluster 1 from all other clusters. 
 
 ```{r}
 results <- scran::findMarkers( 
