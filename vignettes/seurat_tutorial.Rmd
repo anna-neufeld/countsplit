@@ -18,7 +18,7 @@ The purpose of this tutorial is to reproduce the analysis from the Seurat [clust
 
 Throughout this tutorial, we refer to the June, 2022 version of the Seurat tutorial. In the event that the Seurat tutorial at the link above gets modified, we have also reproduced the relevant analyses below.
 
-We use the same data and carry out the same processes as in the Seurat tutorial, but we highlight the steps that should be performed on the training set as opposed to on the test set. We also point out some steps in the pipeline where count splitting could potentially cause confusion. For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
+In performing count splitting, we use the same data and carry out the same processes as in the Seurat tutorial, but we highlight the steps that should be performed on the training set as opposed to on the test set. We also point out some steps in the pipeline where count splitting could potentially cause confusion. For more information on the Seurat methodology, see the [website](https://satijalab.org/seurat/) or papers such as @seurat1, @seurat2, @seurat3. 
 
 # Install Seurat and countsplit
 
@@ -187,7 +187,7 @@ sort(top10.train)
 
 Next, we show that `pbmc` and `pbmc.train` have very similar principal components. This is comforting, as it suggests that we do not lose too much information when we count split and estimate principal components on only the training set. Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. 
 
-```{r,fig.height=9}
+```{r,fig.height=9, fig.width=5}
 p1 <- VizDimLoadings(pbmc, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=7))+ggtitle("pbmc")
 p2 <- VizDimLoadings(pbmc, dims = 2, reduction = "pca")+theme(axis.text = element_text(size=7))
 p1.train <- VizDimLoadings(pbmc.train, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=7))+ggtitle("pbmc.train")
@@ -324,13 +324,13 @@ Consider the following sets of heatmaps. Each individual heatmap plots 500 rando
 
 The first set of heatmaps displays expression counts from the training set. While the association between the genes and the principal components clearly decreases as we move from PC1 to PC15, PC15 still clearly shows association between the top genes and the PC. This association is due to the fact that the training data itself was used to construct the PCs, and so there will always be some genes that appear to be associated with the PC. 
 
-```{r,fig.height=9}
+```{r,fig.height=9, fig.width=5}
 DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
 ```
 
 The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 10-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association seen in the initial heatmaps was due to overfitting; these PCs do not measure anything useful or interesting. 
 
-```{r, fig.height=9}
+```{r, fig.height=9, fig.width=5}
 DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
 ```
 
