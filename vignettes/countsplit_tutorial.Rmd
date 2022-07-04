@@ -64,7 +64,7 @@ ggplot(data=NULL, aes(sample=results.naive[,4]))+geom_qq(distribution="qunif")+g
 
 We now address the issue using count splitting. The key steps are (1) running the ``countsplit`` function to get ``Xtrain`` and ``Xtest`` and then (2) clustering the data using `Xtrain`, and then fitting a GLM to test for association between those clusters and each column of `Xtest`. The ``countsplit`` function returns a list, which we call ``split`` here, which contains the training set and the test set.
 
-The parameter `epsilon`, which must fall between 0 and 1, governs the relative amount of information from `X` that goes into the training set. When `epsilon` is very close to 0, the training matrix will be extremely sparse and the test matrix will look a lot like `X`. When epsilon is very close to 1, the training matrix will be nearly identical to `X`, but the test matrix will be extremely sparse. The default in the `countsplit` function is to set epsilon=0.5. See [our preprint](XXXX) for more information.  
+The parameter `epsilon`, which must fall between 0 and 1, governs the relative amount of information from `X` that goes into the training set. When `epsilon` is very close to 0, the training matrix will be extremely sparse and the test matrix will look a lot like `X`. When epsilon is very close to 1, the training matrix will be nearly identical to `X`, but the test matrix will be extremely sparse. The default in the `countsplit` function is to set epsilon=0.5. See [our preprint](https://arxiv.org/abs/2207.00554) for more information.  
 
 ```{r}
 set.seed(2)
@@ -142,7 +142,7 @@ coeffs.X <- t(apply(X, 2, function(u) summary(glm(u~as.factor(clusters.true), fa
 coeffs.Xtest <- t(apply(Xtest, 2, function(u) summary(glm(u~as.factor(clusters.true), family="poisson"))$coefficients[,1]))
 ```
 
-The plot below shows that the slopes resulting from `X` and the slopes resulting from `Xtest` tend to fall on the diagonal line `y=x` and so tend to be approximately equal to eachother. The intercepts, on the other hand, get shifted by `log(0.5)` when we use the `Xtest` rather than `X`. This is as we would expect (see Section 4.1 of [our preprint](XXXXX)). 
+The plot below shows that the slopes resulting from `X` and the slopes resulting from `Xtest` tend to fall on the diagonal line `y=x` and so tend to be approximately equal to eachother. The intercepts, on the other hand, get shifted by `log(0.5)` when we use the `Xtest` rather than `X`. This is as we would expect (see Section 4.1 of [our preprint](https://arxiv.org/abs/2207.00554)). 
 
 ```{r}
 differentially_expressed = as.factor(c(rep(1,10), rep(0,190)))
@@ -185,7 +185,7 @@ p2 <- ggplot(data=NULL, aes(x=coeffs.ideal[,2], y=coeffs.countsplit[,2], col=dif
 p1 + p2 + plot_layout(guides="collect") & theme_bw()
 ```
 
-Overall, we see general agreement between the parameters estimated via countsplitting and those estimated via the ideal method. The slopes tend to be the same, whereas the intercepts are shifted by `log(0.5)`, as expected based on [our preprint](XXXXXX). The slopes are the quantities that we care to do inference on, as they measure differential expression across clusters. 
+Overall, we see general agreement between the parameters estimated via countsplitting and those estimated via the ideal method. The slopes tend to be the same, whereas the intercepts are shifted by `log(0.5)`, as expected based on [our preprint](https://arxiv.org/abs/2207.00554). The slopes are the quantities that we care to do inference on, as they measure differential expression across clusters. 
 
 
 
