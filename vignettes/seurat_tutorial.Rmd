@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 
 Before using this tutorial, we recommend that you read through our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) to understand our method in a simple example with simulated data. 
 
-The purpose of this tutorial is to reproduce the analysis from the Seurat [clustering tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) while using `countsplit`. The Seurat tutorial performs clustering and differential expression on the same dataset. As shown in our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html), this can lead to inflated Type 1 error rates during differential expression testing. For more information on why clustering and testing for differential expression on the same datasets creates problems, and why count splitting is needed, please see [our prepint](XXXXX). 
+The purpose of this tutorial is to reproduce the analysis from the Seurat [clustering tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) while using `countsplit`. The Seurat tutorial performs clustering and differential expression on the same dataset. As shown in our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html), this can lead to inflated Type 1 error rates during differential expression testing. For more information on why clustering and testing for differential expression on the same datasets creates problems, and why count splitting is needed, please see [our prepint](http://arxiv.org/abs/2207.00554). 
 
 Throughout this tutorial, we refer to the June, 2022 version of the Seurat tutorial. In the event that the Seurat tutorial at the link above gets modified, we have also reproduced the relevant analyses below.
 
@@ -286,7 +286,7 @@ head(sort(pvals2.countsplit))
 head(sort(pvals2.naive))
 ```
 
-We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). While the takeaways of the two analyses are similar in this case, as explained in [our preprint](XXXXX), the naive method used in the Seurat tutorial leads to artificially low p-values and an inflated Type 1 error rate, whereas count splitting controls the Type 1 error rate (under a Poisson assumption). 
+We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cluster 2, which is the same as in the Seurat tutorial (although the order is slightly different and the p-values are slightly different). While the takeaways of the two analyses are similar in this case, as explained in [our preprint](http://arxiv.org/abs/2207.00554), the naive method used in the Seurat tutorial leads to artificially low p-values and an inflated Type 1 error rate, whereas count splitting controls the Type 1 error rate (under a Poisson assumption). 
 
 ## Finding differentially expressed features using Seurat
 
