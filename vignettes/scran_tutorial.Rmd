@@ -16,6 +16,16 @@ Before using this tutorial, we recommend that you read through our [introductory
 
 In this tutorial, we use a real dataset from @elorbany2022single. The dataset contains 10,000 cells collected over 15 days of a directed differentiation protocol from induced pluripotent stem cells (IPSC) to cardiomyocytes (cm). 
 
+# Overview
+
+After loading the necessary software and performing count splitting, in this tutorial we carry out the following steps. 
+
+- **Preprocessing:** We preprocess the training data using the preprocessing steps suggested by the [scran tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html).
+
+- **Clustering:** We cluster the cells using `scran` using the preprocessed training data.
+
+- **Differential Expression Analysis:** Using the test data, we test to see which genes are associated with the estimated clusters. We do this both "by hand" using Poisson GLMs as well as using the built-in methods from the `scran` package. 
+
 # Install scran
 
 If you don't already have ``scran``, you will need to run:
@@ -68,7 +78,7 @@ Xtest <- split$test
 ```
 
 
-# Run preprocessing and clustering on the training set.
+# Preprocess the training set.
 
 We now wish to compute clusters on the training set. Unlike in our [introductory tuorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html), instead of simply running 
 ``kmeans()`` on ``log(Xtrain+1)``, we will use an existing scRNA-seq pipeline from the ``scran`` package that also involves preprocessing steps such as selecting highly variable genes. In order to do this, we need to store the training set count matrix `Xtrain` in a `SingleCellExperiment` object. 
@@ -95,10 +105,17 @@ We then compute the top 2000 highly variable genes. While this step does not alt
 top.hvgs <- getTopHVGs(modelGeneVar(cm.train), n=2000)
 ```
 
-Finally, we perform dimension reduction on the dataset (using only the highly variable genes), and then cluster the dimension-reduced dataset using scran's `clusterCells` function (which performs graph-based clustering). 
+Finally, we perform dimension reduction on the dataset (using only the highly variable genes). 
 
 ```{r}
 cm.train <- fixedPCA(cm.train, subset.row=top.hvgs)
+```
+
+# Cluster the training set
+
+We cluster the dimension-reduced dataset using scran's `clusterCells` function (which performs graph-based clustering). 
+
+```{r}
 clusters.train <- clusterCells(cm.train,use.dimred="PCA")
 ```
 
@@ -109,7 +126,9 @@ table(clusters.train)
 ggplot(as_tibble(reducedDim(cm.train)), aes(x=PC1, y=PC2, col=as.factor(clusters.train)))+geom_point()+labs(col="Cluster")
 ```
 
-# Differential expression testing with Poisson GLMs
+# Differential expression testing
+
+## Using Poisson GLMs
 
 We now consider fitting Poisson GLMs to test for differential expression between clusters 1 and 2. We can do this analysis "by hand", meaning that we do not need to store `Xtest` in a `SingleCellExperiment` object. 
 
@@ -136,7 +155,7 @@ We can view the names of these highly significant genes below.
 head(results[results[,4] < 0.01,], n=10)
 ```
 
-# Differential expression testing with scran
+## Using scran
 
 In this section, instead of testing for differential expression "by hand" using `glm()`, we use the `scoreMarkers()` function from the scran package. This is the method used in the [scran tutorial](https://bioconductor.org/packages/release/bioc/vignettes/scran/inst/doc/scran.html#6_Identifying_marker_genes), in the section titled "Find Marker Genes". 
 

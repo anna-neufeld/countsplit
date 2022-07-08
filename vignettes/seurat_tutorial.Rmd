@@ -14,7 +14,15 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 
 Before using this tutorial, we recommend that you read through our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html) to understand our method in a simple example with simulated data. 
 
-The purpose of this tutorial is to reproduce the analysis from the Seurat [clustering tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) while using `countsplit`. The Seurat tutorial performs clustering and differential expression on the same dataset. As shown in our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html), this can lead to inflated Type 1 error rates during differential expression testing. For more information on why clustering and testing for differential expression on the same datasets creates problems, and why count splitting is needed, please see [our prepint](http://arxiv.org/abs/2207.00554). 
+# Overview
+
+The purpose of this tutorial is to reproduce the analysis from the Seurat [clustering tutorial](https://satijalab.org/seurat/articles/pbmc3k_tutorial.html) while using `countsplit`. The Seurat tutorial performs clustering and differential expression on the same dataset. As shown in our [introductory tutorial](https://anna-neufeld.github.io/countsplit/articles/countsplit_tutorial.html), this can lead to inflated Type 1 error rates, and so we refer to this practice as the "naive" method. For each of the following tasks, we will demonstrate the proper application of count splitting and compare this approach to that used in the original Seurat tutorial:
+
+- **Preprocessing:** Count splitting applies preprocessing steps to the training dataset, whereas the naive method applies preprocessing steps to the full dataset. 
+- **Clustering:** Count splitting clusters the preprocessed training dataset, whereas the naive method clusters the preprocessed full dataset. We expect that count splitting will yield similar clusters to the naive method in the presence of strong clustering signal, but may disagree if this signal is weak.
+- **Differential Expression Analysis:** Count splitting tests for differential expression using the test set counts, whereas the naive method uses the full data counts. Count splitting is expected to mitigate inflation of the Type 1 error rate due to double dipping, which will change the DE p-values though not necessarily the rank of the DE genes.
+
+For more information on why count splitting is needed, please see please see [our prepint](http://arxiv.org/abs/2207.00554). 
 
 Throughout this tutorial, we refer to the June, 2022 version of the Seurat tutorial. In the event that the Seurat tutorial at the link above gets modified, we have also reproduced the relevant analyses below.
 
@@ -62,7 +70,7 @@ rownames(pbmc.counts) <- sapply(rownames(pbmc.counts), function(u) stringr::str_
 
 We now count split to obtain two raw count matrices. This is the only place in this tutorial where we use the `countsplit` package. 
 
-```{r}
+```{r, collapse=TRUE}
 set.seed(1)
 split <- countsplit(pbmc.counts, epsilon=0.5)
 Xtrain <- split$train
@@ -93,7 +101,7 @@ pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent
 
 We note that now the dimensions of `Xtrain` and `Xtest` do not match up with the dimensions of our new Seurat object.
 
-```{r}
+```{r, collapse=TRUE}
 dim(Xtrain)
 dim(Xtest)
 dim(pbmc.train)
@@ -101,7 +109,7 @@ dim(pbmc.train)
 
 To avoid any confusion later, we create `Xtestsubset`, which contains the same genes and the same cells as `pbmc.train`. 
 
-```{r}
+```{r, collapse=TRUE}
 rows <- rownames(pbmc.train)
 cols <- colnames(pbmc.train)
 Xtestsubset <- Xtest[rows,cols]
@@ -110,7 +118,7 @@ dim(Xtestsubset)
 
 We also note that `pbmc.train` and `pbmc` do not have the same dimensions, as the original requirement about the number of non-zero counts for each gene/cell was applied separately to the full data and the training set. Later, when it is needed to make comparisons, we will subset `pbmc` appropriately. 
 
-```{r}
+```{r, collapse=TRUE}
 dim(pbmc.train)
 dim(pbmc)
 ```
@@ -121,11 +129,8 @@ For our count splitting analysis, all steps in the preprocessing workflow are pe
 
 We take this time to point out some intricacies of the ``Seurat`` object that could become confusing in future analyses. A single assay within a ``Seurat`` object has three slots: ``counts``, ``data``, and ``scale.data``. At this point in the analysis, ``data`` and ``counts`` both store the raw counts, and ``scale.data`` is empty. 
 
-```{r}
+```{r, collapse=TRUE}
 all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
-```
-
-```{r}
 GetAssayData(pbmc.train, "scale.data")
 ```
 
@@ -138,7 +143,7 @@ all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
 
 Computing the set of highly variable features does not alter the dimension of the dataset. All features are retained, but these highly variable features are the ones that will be used downstream during dimension reduction. 
 
-```{r, collapse=TRUE}
+```{r, collapse=TRUE, results='hide'}
 dim(pbmc.train)
 pbmc.train <- FindVariableFeatures(pbmc.train, selection.method = "vst", nfeatures = 2000)
 dim(pbmc.train)
@@ -180,12 +185,12 @@ plot2 + plot2.train & guides(col="none")
 
 The analysis on `pbmc` and the analysis on `pbmc.train` identify similar sets of genes as the top 10 most highly variable genes. This is comforting, as it shows that the training set is retaining a lot of info compared to the full dataset. The overlapping genes are: ``PPBP, LYZ, FTL, S100A9, S100A8, GNLY, FTH1, IGLL5, PF4``. The only difference is that on the training set we selected ``HLA-DRA`` instead of ``GNG11``.  
 
-```{r}
+```{r, collapse=TRUE}
 sort(top10)
 sort(top10.train)
 ```
 
-Next, we show that `pbmc` and `pbmc.train` have very similar principal components. This is comforting, as it suggests that we do not lose too much information when we count split and estimate principal components on only the training set. Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. 
+Next, we show that `pbmc` and `pbmc.train` have very similar principal components. This is comforting, as it suggests that we do not lose too much information when we count split and estimate principal components on only the training set. Below, we compare loading plots for the first two principal components for `pbmc` and `pbmc.train`. Note that the `pbmc.train` plots have been flipped upside-down compared to the `pbmc` plots due to a sign flip of the principal components (which is unimportant). 
 
 ```{r,fig.height=9, fig.width=5}
 p1 <- VizDimLoadings(pbmc, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=7))+ggtitle("pbmc")
@@ -211,7 +216,7 @@ pbmc.train <- FindClusters(pbmc.train, resolution=0.5)
 
 We first visualize the clusters that we have computed on the training set. 
 
-```{r,}
+```{r, results='hide'}
 pbmc.train <- RunUMAP(pbmc.train, dims = 1:10)
 DimPlot(pbmc.train, reduction = "umap")
 ```
@@ -290,21 +295,21 @@ We identify ``LTB``, ``IL32``, ``CD3D``, and ``IL7R`` as the top 4 markers of cl
 
 ## Finding differentially expressed features using Seurat
 
-It would be nice to be able to make a ``Seurat`` object containing the training set clusters but the test set counts. This would allow us to use some of Seurat's nice visualization features for differential expression testing. We note that **care should be taken in this section**, as we are mixing-and-matching pieces of Seurat objects and Seurat functions not explicitly mentioned in this tutorial may have unexpected behavior. 
+It would be nice to store the test set counts inside of our Seurat object. This would allow us to use some of Seurat's nice visualization features for differential expression testing. To do this, we add the test counts to our `pbmc.train` object as an additional assay. We note that **care should be taken in this section**: Seurat functions not explicitly mentioned in this tutorial may have unexpected behavior. 
 
-We first let `pbmc.test` equal `pbmc.train`. This ensures that our test set object gets the same cluster information and UMAP information as the training set, such that we can still visualize the training set clusters. We then update the `counts` slow of this object to store the test set counts. Unfortunately, once we do this, the `data` and `scale.data` slots are not automatically updated to store the normalized or scaled counts. We run normalize and scale functions to remedy this.
+After adding the test counts to `pbmc.train` as a new assay, we run the run normalize and scale functions to ensure that we have appopriate values in the `counts`, `data`, and `scale.data` slots within the test set assay. 
 
-```{r}
-pbmc.test <- pbmc.train
-pbmc.test <- SetAssayData(object = pbmc.test, slot = "counts", new.data = Xtestsubset)
-pbmc.test <- NormalizeData(pbmc.test)
-pbmc.test <- ScaleData(pbmc.test, features = all.genes)
+```{r, results='hide'}
+pbmc.train[['test']] <- CreateAssayObject(counts=Xtestsubset)
+pbmc.train <- NormalizeData(pbmc.train, assay="test")
+pbmc.train <- ScaleData(pbmc.train, assay="test")
 ```
 
-We first verify that the Seurat ``FindMarkers`` function returns the same information as the manual differential expression test above. 
+We first verify that the Seurat ``FindMarkers`` function returns the same information as the manual differential expression test above. Note that the `FindMarkers()` function will automatically use the clusters computed previously on `Xtrain` but will now use the scaled counts within the `test` assay to test for differential expression. 
 
 ```{r, collapse=TRUE}
-cluster2.markers <- FindMarkers(pbmc.test, ident.1 = 2, min.pct = 0)
+cluster2.markers <- FindMarkers(pbmc.train, ident.1=2, min.pct=0, assay="test")
+
 head(sort(pvals2.countsplit), n=10)
 head(cluster2.markers, n = 10)
 ```
@@ -320,18 +325,18 @@ head(FindMarkers(pbmc, ident.1=2), n=10)
 
 One reason that it is useful to store the test matrix in a `Seurat` object is that it lets us use many visualization features from the `Seurat` package. 
 
-Consider the following sets of heatmaps. Each individual heatmap plots 500 randomly selected cells from the relevant dataset, ordered by its coordinates along the specified principal component. The genes with the highest positive loadings and the highest negative loadings are plotted for each principal component. As both ``pbmc.train`` and ``pbmc.test`` contain information on the principal components computed using the training set, both sets of heat maps plot the same principal components and display the same genes in each panel. 
+Consider the following sets of heatmaps. Each individual heatmap plots 500 randomly selected cells, ordered by their coordinates along the specified principal component. The colors in the heatmap represent expression values. The genes with the highest positive loadings and the highest negative loadings are plotted for each principal component. Both sets of heat maps use the principal components computed using the training set, but the expression counts reflected in the heat map are different. 
 
 The first set of heatmaps displays expression counts from the training set. While the association between the genes and the principal components clearly decreases as we move from PC1 to PC15, PC15 still clearly shows association between the top genes and the PC. This association is due to the fact that the training data itself was used to construct the PCs, and so there will always be some genes that appear to be associated with the PC. 
 
-```{r,fig.height=9, fig.width=5}
+```{r,fig.height=9, fig.width=6}
 DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
 ```
 
-The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 10-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association seen in the initial heatmaps was due to overfitting; these PCs do not measure anything useful or interesting. 
+The following plot still shows principal components computed on the training set, but the expression count values inside of the heat map are now test set counts. For the first 6 or so PCs, the association between test set counts and the PC seems almost as strong as the association between the training set counts and the PCs. This suggests that these PCs are measuring true signal in the data. On the other hand, consider the PCs 10-15. The patterns seen in the training set essentially disappear in the top genes plotted for the test set. This suggests that any association seen in the initial heatmaps was due to overfitting; these PCs are mostly driven by noise in the data. 
 
-```{r, fig.height=9, fig.width=5}
-DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
+```{r, fig.height=9, fig.width=6}
+DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10, assay="test")
 ```
 
 Our results using count splitting line up with insights from the Seurat tutorial obtained using Jackstraw (@chung2015statistical): the original Seurat tutorial suggested that it would be reasonable to keep 7-12 PCs, and chose to keep 10 PCs. However, Jackstraw requires re-computing PCs for many permuted versions of the data, while our heatmaps obtained using count splitting requires only a single principal component calculation. This highlights the fact that count splitting can be useful when determining how many principal components to retain for analysis. 
