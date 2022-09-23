@@ -3,8 +3,9 @@ pkgdown: 2.0.5
 pkgdown_sha: ~
 articles:
   countsplit_tutorial: countsplit_tutorial.html
+  demonstrating_problem: demonstrating_problem.html
   monocle3_tutorial: monocle3_tutorial.html
   scran_tutorial: scran_tutorial.html
   seurat_tutorial: seurat_tutorial.html
-last_built: 2022-07-08T22:14Z
+last_built: 2022-09-23T20:30Z
 
