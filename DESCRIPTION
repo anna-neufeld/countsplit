@@ -1,5 +1,5 @@
 Package: countsplit
-Title: Splitting a Poisson count matrix into independent training and testing matrices. 
+Title: Splitting a Poisson count matrix into independent training and testing matrices 
 Version: 1.0
 Authors@R: 
     person("Anna", "Neufeld", , "aneufeld@uw.edu", role = c("aut", "cre"))
