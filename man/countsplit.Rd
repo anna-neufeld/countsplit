@@ -2,16 +2,22 @@
 % Please edit documentation in R/countsplit.R
 \name{countsplit}
 \alias{countsplit}
-\title{Takes one matrix of counts and returns a list containing two matrices of counts: a training set and a test set.}
+\title{Poisson count splitting}
 \usage{
-countsplit(X, epsilon = 0.5)
+countsplit(X, epsilon = 0.5, folds = 2)
 }
 \arguments{
 \item{X}{A cell-by-gene matrix of integer counts}
 
 \item{epsilon}{The thinning parameter for count splitting. Must be between 0 and 1.}
+
+\item{folds}{The number of independent folds of data to return. Currently, the only option is 2.}
 }
 \description{
+Takes one matrix of counts and returns a list containing two matrices of counts: a training set and a test set.
+}
+\details{
+The training set and the test set are independent under the assumption that the original data follow a Poisson distribution.
 Be sure to see the countsplitting tutorial vignette for details of how to use this correctly with existing
 single cell RNA-seq pipelines.
 }

@@ -5,26 +5,10 @@ template:
 navbar:
   structure:
     left:
-    - tutorial
-    - seurat
-    - scran 
-    - monocle3
     - reference
     right:
     - github
   components:
-    tutorial:
-      text: Introductory tutorial
-      href: articles/countsplit_tutorial.html
-    seurat:
-      text: Seurat tutorial
-      href: articles/seurat_tutorial.html
-    scran:
-      text: Scran tutorial
-      href: articles/scran_tutorial.html
-    monocle3:
-      text: Monocle3 tutorial
-      href: articles/monocle3_tutorial.html
     reference:
       text: Reference
       href: reference/index.html
@@ -36,5 +20,4 @@ reference:
   desc: ~
   contents:
   - countsplit
-  - cm
-  - pbmc.counts
+  - nb.countsplit

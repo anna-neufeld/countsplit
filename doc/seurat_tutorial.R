@@ -6,8 +6,8 @@ knitr::opts_chunk$set(echo = TRUE, message=FALSE, warning=FALSE)
 #      install.packages("BiocManager")
 #  BiocManager::install("Seurat")
 
-## -----------------------------------------------------------------------------
-remotes::install_github("anna-neufeld/countsplit")
+## ---- eval=FALSE--------------------------------------------------------------
+#  remotes::install_github("anna-neufeld/countsplit")
 
 ## -----------------------------------------------------------------------------
 library(Seurat)
@@ -15,12 +15,14 @@ library(countsplit)
 library(ggplot2)
 library(patchwork)
 library(mclust)
+
+## -----------------------------------------------------------------------------
 data(pbmc.counts, package="countsplit")
 
 ## -----------------------------------------------------------------------------
 rownames(pbmc.counts) <- sapply(rownames(pbmc.counts), function(u) stringr::str_replace_all(u, "_","-"))
 
-## -----------------------------------------------------------------------------
+## ---- collapse=TRUE-----------------------------------------------------------
 set.seed(1)
 split <- countsplit(pbmc.counts, epsilon=0.5)
 Xtrain <- split$train
@@ -36,46 +38,48 @@ pbmc <- CreateSeuratObject(counts = pbmc.counts, min.cells = 3, min.features = 2
 # Apply to training object
 pbmc.train[["percent.mt"]] <- PercentageFeatureSet(pbmc.train, pattern = "^MT-")
 pbmc.train <- subset(pbmc.train, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
-
-# Apply to full object
 pbmc[["percent.mt"]] <- PercentageFeatureSet(pbmc, pattern = "^MT-")
 pbmc <- subset(pbmc, subset = nFeature_RNA > 200 & nFeature_RNA < 2500 & percent.mt < 5)
 
-## -----------------------------------------------------------------------------
+## ---- collapse=TRUE-----------------------------------------------------------
 dim(Xtrain)
 dim(Xtest)
 dim(pbmc.train)
 
-## -----------------------------------------------------------------------------
+## ---- collapse=TRUE-----------------------------------------------------------
 rows <- rownames(pbmc.train)
 cols <- colnames(pbmc.train)
 Xtestsubset <- Xtest[rows,cols]
 dim(Xtestsubset)
 
-## -----------------------------------------------------------------------------
+## ---- collapse=TRUE-----------------------------------------------------------
 dim(pbmc.train)
 dim(pbmc)
 
-## -----------------------------------------------------------------------------
+## ---- collapse=TRUE-----------------------------------------------------------
 all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
-
-## -----------------------------------------------------------------------------
 GetAssayData(pbmc.train, "scale.data")
 
 ## -----------------------------------------------------------------------------
 pbmc.train <- NormalizeData(pbmc.train)
 all.equal(GetAssayData(pbmc.train, "counts"), GetAssayData(pbmc.train, "data"))
 
-# Apply to pbmc, for the sake of comparison. 
-pbmc <- NormalizeData(pbmc)
-
-## -----------------------------------------------------------------------------
+## ---- collapse=TRUE, results='hide'-------------------------------------------
 dim(pbmc.train)
 pbmc.train <- FindVariableFeatures(pbmc.train, selection.method = "vst", nfeatures = 2000)
 dim(pbmc.train)
 
-# Apply to pbmc, for the sake of comparison. 
+## ---- results='hide'----------------------------------------------------------
+all.genes.train <- rownames(pbmc.train)
+pbmc.train <- ScaleData(pbmc.train,features = all.genes.train)
+pbmc.train <- RunPCA(pbmc.train, features = VariableFeatures(object = pbmc.train))
+
+## ---- results='hide'----------------------------------------------------------
+pbmc <- NormalizeData(pbmc)
 pbmc  <- FindVariableFeatures(pbmc, selection.method = "vst", nfeatures = 2000)
+all.genes <- rownames(pbmc)
+pbmc <- ScaleData(pbmc,features = all.genes)
+pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
 
 ## -----------------------------------------------------------------------------
 top10 <- head(VariableFeatures(pbmc), 10)
@@ -84,42 +88,38 @@ plot2 <- LabelPoints(plot = plot1, points = top10)
 top10.train <- head(VariableFeatures(pbmc.train), 10)
 plot1.train <- VariableFeaturePlot(pbmc.train) + ggtitle("pbmc.train")
 plot2.train <- LabelPoints(plot = plot1.train, points = top10.train)
-
-
 plot2 + plot2.train & guides(col="none")
 
+## ---- collapse=TRUE-----------------------------------------------------------
+sort(top10)
+sort(top10.train)
 
-
-## ----out.width="100%"---------------------------------------------------------
-all.genes <- rownames(pbmc)
-pbmc <- ScaleData(pbmc,features = all.genes)
-pbmc <- RunPCA(pbmc, features = VariableFeatures(object = pbmc))
-p1 <- VizDimLoadings(pbmc, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=10))+ggtitle("pbmc")
-p2 <- VizDimLoadings(pbmc, dims = 2, reduction = "pca")+theme(axis.text = element_text(size=10))
-
-all.genes.train <- rownames(pbmc.train)
-pbmc.train <- ScaleData(pbmc.train,features = all.genes.train)
-pbmc.train <- RunPCA(pbmc.train, features = VariableFeatures(object = pbmc.train))
-p1.train <- VizDimLoadings(pbmc.train, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=10))+ggtitle("pbmc.train")
-p2.train <- VizDimLoadings(pbmc.train, dims = 2, reduction = "pca")+theme(axis.text = element_text(size=10))
+## ----fig.height=9, fig.width=5------------------------------------------------
+p1 <- VizDimLoadings(pbmc, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=7))+ggtitle("pbmc")
+p2 <- VizDimLoadings(pbmc, dims = 2, reduction = "pca")+theme(axis.text = element_text(size=7))
+p1.train <- VizDimLoadings(pbmc.train, dims = 1, reduction = "pca")+theme(axis.text = element_text(size=7))+ggtitle("pbmc.train")
+p2.train <- VizDimLoadings(pbmc.train, dims = 2, reduction = "pca")+theme(axis.text = element_text(size=7))
 
 p1+p1.train+p2+p2.train+plot_layout(nrow=2, ncol=2)
 
-## -----------------------------------------------------------------------------
+## ---- results='hide'----------------------------------------------------------
 pbmc <- FindNeighbors(pbmc, dims = 1:10)
 pbmc <- FindClusters(pbmc, resolution=0.5)
 pbmc.train <- FindNeighbors(pbmc.train, dims = 1:10)
 pbmc.train <- FindClusters(pbmc.train, resolution=0.5)
 
-## -----------------------------------------------------------------------------
+## ---- results='hide'----------------------------------------------------------
 pbmc.train <- RunUMAP(pbmc.train, dims = 1:10)
 DimPlot(pbmc.train, reduction = "umap")
 
 ## -----------------------------------------------------------------------------
 clusters.train <- Idents(pbmc.train)
-clusters.full.subset <- Idents(pbmc)[colnames(pbmc.train)]
+clusters.full <- Idents(pbmc)
 length(clusters.train)
-length(clusters.full.subset)
+length(clusters.full)
+
+## -----------------------------------------------------------------------------
+clusters.full.subset <- clusters.full[colnames(pbmc.train)] 
 adjustedRandIndex(clusters.train, clusters.full.subset)
 
 ## -----------------------------------------------------------------------------
@@ -127,34 +127,52 @@ table(clusters.train, clusters.full.subset)
 
 ## -----------------------------------------------------------------------------
 clusters.train <- Idents(pbmc.train)
-table(clusters.train)
 length(clusters.train)
 NCOL(Xtestsubset)
 
 ## -----------------------------------------------------------------------------
-sf <- colSums(Xtestsubset)
-Xtestsubset_norm <- t(apply(Xtestsubset, 1, function(u) u/sf))
+## Log normalize the test set
+sf.test <- colSums(Xtestsubset)
+Xtestsubset_norm <- t(apply(Xtestsubset, 1, function(u) u/sf.test))
 Xtestsubset_lognorm <- log(Xtestsubset_norm +1)
 
-## -----------------------------------------------------------------------------
-cluster2 <- clusters.train==2
-pvals2 <- apply(Xtestsubset_lognorm, 1, function(u) wilcox.test(u~cluster2)$p.value)
-head(sort(pvals2))
+## Log normalize the full dataset
+Xsubset <- pbmc.counts[rownames(pbmc),colnames(pbmc)]
+sf.full <- colSums(Xsubset)
+Xsubset_norm <- t(apply(Xsubset, 1, function(u) u/sf.full))
+Xsubset_lognorm <- log(Xsubset_norm +1)
 
-## -----------------------------------------------------------------------------
-pbmc.test <- pbmc.train
-pbmc.test <- SetAssayData(object = pbmc.test, slot = "counts", new.data = Xtestsubset)
-pbmc.test <- NormalizeData(pbmc.test)
-pbmc.test <- ScaleData(pbmc.test, features = all.genes)
+## ---- collapse=TRUE-----------------------------------------------------------
+### Do the count splitting analysis
+cluster2.train <- clusters.train==2
+pvals2.countsplit <- apply(Xtestsubset_lognorm, 1, function(u) wilcox.test(u~cluster2.train)$p.value)
 
-## -----------------------------------------------------------------------------
-cluster2.markers <- FindMarkers(pbmc.test, ident.1 = 2, min.pct = 0)
-head(sort(pvals2), n=10)
+### Do the naive method analysis 
+clusters.full <- Idents(pbmc)
+cluster2.full <- clusters.full==2
+pvals2.naive <- apply(Xsubset_lognorm, 1, function(u) wilcox.test(u~cluster2.full)$p.value)
+
+head(sort(pvals2.countsplit))
+head(sort(pvals2.naive))
+
+## ---- results='hide'----------------------------------------------------------
+pbmc.train[['test']] <- CreateAssayObject(counts=Xtestsubset)
+pbmc.train <- NormalizeData(pbmc.train, assay="test")
+pbmc.train <- ScaleData(pbmc.train, assay="test")
+
+## ---- collapse=TRUE-----------------------------------------------------------
+cluster2.markers <- FindMarkers(pbmc.train, ident.1=2, min.pct=0, assay="test")
+
+head(sort(pvals2.countsplit), n=10)
 head(cluster2.markers, n = 10)
 
-## -----------------------------------------------------------------------------
-DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE)
+## ---- collapse=TRUE-----------------------------------------------------------
+head(sort(pvals2.naive), n=10)
+head(FindMarkers(pbmc, ident.1=2), n=10)
 
-## -----------------------------------------------------------------------------
-DimHeatmap(pbmc.test, dims = 1:15, cells = 500, balanced = TRUE)
+## ----fig.height=9, fig.width=6------------------------------------------------
+DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10)
+
+## ---- fig.height=9, fig.width=6-----------------------------------------------
+DimHeatmap(pbmc.train, dims = 1:15, cells = 500, balanced = TRUE, nfeatures=10, assay="test")
 
