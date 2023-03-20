@@ -11,8 +11,8 @@ nb.countsplit(X, epsilon = 0.5, overdisps = NULL, folds = 2)
 
 \item{epsilon}{The thinning parameter for count splitting. Must be between 0 and 1.}
 
-\item{overdisps}{A vector of length p, where p is the numver of columns in X. This vector stores the
-gene specific overdispersion parameters.}
+\item{overdisps}{A vector of length p, where p is the number of columns in X. This vector stores the
+gene specific overdispersion parameters. Note that a value of overdisp=infinity corresponds to the Poisson distribution.}
 
 \item{folds}{The number of independent folds of data to return. Currently, the only option is 2.}
 }

@@ -61,8 +61,8 @@ betaBinSample <- function(x, b,eps) {
 #'
 #' @param X A cell-by-gene matrix of integer counts
 #' @param epsilon The thinning parameter for count splitting. Must be between 0 and 1.
-#' @param overdisps A vector of length p, where p is the numver of columns in X. This vector stores the 
-#' gene specific overdispersion parameters. 
+#' @param overdisps A vector of length p, where p is the number of columns in X. This vector stores the 
+#' gene specific overdispersion parameters. Note that a value of overdisp=infinity corresponds to the Poisson distribution. 
 #' @param folds The number of independent folds of data to return. Currently, the only option is 2. 
 nb.countsplit <- function(X, epsilon=0.5, overdisps=NULL, folds=2) {
   if (epsilon <= 0 | epsilon >= 1) {
@@ -82,7 +82,7 @@ nb.countsplit <- function(X, epsilon=0.5, overdisps=NULL, folds=2) {
     ##### Overdisp_ij = b_j if X_ij is nonzero, and is 0 otherwise.
     ## sparse formulation
     Xtrain <- X
-    mapped_overdisps <- overdisps[which(Xtrain != 0, arr.ind=T)[,"row"]] # for only the non-zero entries in X, maps the associated (gene-specific) overdispersion param
+    mapped_overdisps <- overdisps[Matrix::which(Xtrain != 0, arr.ind=T)[,"row"]] # for only the non-zero entries in X, maps the associated (gene-specific) overdispersion param
     Xtrain@x <- as.numeric(betaBinSample(Xtrain@x, mapped_overdisps, epsilon))
     Xtrain <- drop0(Xtrain)
     Xtest <- drop0(X - Xtrain)
