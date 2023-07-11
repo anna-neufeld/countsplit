@@ -15,6 +15,7 @@
 #'
 #' @export
 #' @importFrom methods as
+#' @import Matrix
 #'
 #' @param X A cell-by-gene matrix of integer counts
 #' @param folds An integer specifying how many folds you would like to split your data into. 
