@@ -12,6 +12,8 @@ We have consolidated the functions in this package such that both Poisson and ne
 
 The vignettes and data associated with this package are stored in the associated ``countsplit.tutorials" package. To see the tutorials, please visit the updated tutorial website: [https://anna-neufeld.github.io/countsplit.tutorials/](https://anna-neufeld.github.io/countsplit.tutorials/). This change helps with overall package size and build time. *The negative binomial tutorials are still being updated, so most examples on the tutorial website use Poisson thinning only.* 
 
+As soon as the negative binomial vignettes are complete, we will be submitting this version of ``countsplit`` to CRAN. For now, please download on github!
+
 How can I get countsplit?
 -----
 
