@@ -2,22 +2,58 @@
 % Please edit documentation in R/countsplit.R
 \name{countsplit}
 \alias{countsplit}
-\title{Poisson count splitting}
+\title{Count splitting}
 \usage{
-countsplit(X, epsilon = 0.5, folds = 2)
+countsplit(X, folds = 2, epsilon = rep(1/folds, folds), overdisps = NULL)
 }
 \arguments{
 \item{X}{A cell-by-gene matrix of integer counts}
 
-\item{epsilon}{The thinning parameter for count splitting. Must be between 0 and 1.}
+\item{folds}{An integer specifying how many folds you would like to split your data into.}
 
-\item{folds}{The number of independent folds of data to return. Currently, the only option is 2.}
+\item{epsilon}{A vector, which has length "folds", that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
+The default and recommended setting is to allocate equal amounts of information to each fold, such that each element is \code{1/folds}.}
+
+\item{overdisps}{If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of X.
+These numbers are the overdispersion parameters for each column in X. If these are unknown, they can be estimated with a function such as
+\code{vst} in the package \code{sctransform}.}
+}
+\value{
+A list of length "folds". Each element in the list stores a sparse matrix with the same dimensions as the data X. Each list element is a fold of data.
 }
 \description{
-Takes one matrix of counts and returns a list containing two matrices of counts: a training set and a test set.
+Takes one matrix of counts and splits it into a specified number of folds. Each fold is a matrix of counts with the same dimension
+as the original matrix. Summing element-wise across the folds yields the original data matrix.
 }
 \details{
-The training set and the test set are independent under the assumption that the original data follow a Poisson distribution.
-Be sure to see the countsplitting tutorial vignette for details of how to use this correctly with existing
-single cell RNA-seq pipelines.
+When the argument \code{overdisps} is set to NULL, this function performs the Poisson count splitting methodology outlined in
+Neufeld et al. 2022. With this setting, the folds of data are independent only if the original data were drawn from a Poisson distribution.
+
+If the data are thought to be overdispersed relative to the Poisson, then we may instead model them as coming from a negative binomial distribution,
+If we assume that \eqn{X_{ij} \sim NB(\mu_{ij}, b_j)}, where this parameterization means that \eqn{ E[X_{ij}] = \mu_{ij}} and \eqn{ Var[X_{ij}] = \mu_{ij} + \mu_{ij}^2/b_j}, then
+we should pass in \code{overdisps} = \eqn{c(b_1, \ldots, b_j)}. If this is the correct assumption, then the resulting folds of data will be independent.
+This is the negative binomial count splitting funciton of Neufeld et al., 2023.
+
+Please see our tutorials and vignettes for more details.
+}
+\examples{
+library(countsplit)
+library(Matrix)
+# A Poisson count splitting example.
+n=400
+p=2
+X <- matrix(rpois(n*p, 7), nrow=n, ncol=p)
+split <- countsplit(X, folds=2)
+Xtrain <- split[[1]]
+Xtest <- split[[2]]
+cor(Xtrain[,1], Xtest[,1])
+cor(Xtrain[,2], Xtest[,2])
+
+# A negative binomial count splitting example. 
+X <- matrix(rnbinom(n*p, mu=7, size=7), nrow=n, ncol=p)
+split <- countsplit(X, folds=2, overdisps=c(7,7))
+Xtrain <- split[[1]]
+Xtest <- split[[2]]
+cor(Xtrain[,1], Xtest[,1])
+cor(Xtrain[,2], Xtest[,2])
 }

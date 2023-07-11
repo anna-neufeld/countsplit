@@ -8,9 +8,9 @@ test_that("Fake Data Poisson", {
   p <- 200
   X <- matrix(rpois(n*p, lambda=5), nrow=n)
   set.seed(2)
-  split <- countsplit(X, epsilon=0.5)
-  Xtrain <- split$train
-  Xtest <- split$test
+  split <- countsplit(X)
+  Xtrain <- split[[1]]
+  Xtest <- split[[2]]
   clusters.train <- kmeans(log(Xtrain+1), centers=2)$cluster
   
   expect_true(all.equal(dim(Xtrain), dim(Xtest)))
@@ -29,9 +29,9 @@ test_that("Fake Data NB", {
   p <- 200
   X <- matrix(rnbinom(n*p, mu=5, size=3), nrow=n)
   set.seed(2)
-  split <- nb.countsplit(X, epsilon=0.5, size=3)
-  Xtrain <- split$train
-  Xtest <- split$test
+  split <- countsplit(X, overdisps = rep(3,p))
+  Xtrain <- split[[1]]
+  Xtest <- split[[2]]
 
   expect_true(all.equal(dim(Xtrain), dim(Xtest)))
   expect_true(all.equal(rownames(X), rownames(Xtrain)))

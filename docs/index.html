@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">countsplit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.2.2</span>
       </span>
     </div>
 
@@ -66,34 +66,36 @@
 <div class="section level2">
 <h2 id="what-is-countsplit">What is countsplit?<a class="anchor" aria-label="anchor" href="#what-is-countsplit"></a>
 </h2>
-<p>The <code>countsplit</code> R package splits an integer-valued matrix into a training matrix and a test matrix using binomial thinning. Under a Poisson assumption, the training and test matrices are independent.</p>
-<p>The motivation for this method is described in Neufeld et al., 2022 <a href="http://arxiv.org/abs/2207.00554" class="external-link">(link to paper)</a> in the context of inference after latent variable estimation for single cell RNA sequencing data. Briefly, count splitting allows users to perform differential expression analysis to see which genes vary across estimated cell types (such as those obtained via clustering) or along an estimated cellular trajectory (pseudotime).</p>
+<p>The <code>countsplit</code> R package splits an integer-valued matrix into multiple folds of data with the same dimensions. These folds will be independent under certain modeling assumptions, and can thus be used for cross validation.</p>
+<p>The motivation for this method in the setting where the data are Poisson distributed is described in Neufeld et al., 2022 <a href="http://arxiv.org/abs/2207.00554" class="external-link">(link to paper)</a> in the context of inference after latent variable estimation for single cell RNA sequencing data. Briefly, count splitting allows users to perform differential expression analysis to see which genes vary across estimated cell types (such as those obtained via clustering) or along an estimated cellular trajectory (pseudotime). Neufeld et al., 2022 <a href="???">(link to preprint)</a> extends the method to the setting where the data follow a negative binomial distributed, and provides additional settings where count splitting is useful. For example, count splitting is useful broadly for evaluating low-rank representations of the data.</p>
 </div>
 <div class="section level2">
 <h2 id="recent-package-updates">Recent package updates<a class="anchor" aria-label="anchor" href="#recent-package-updates"></a>
 </h2>
-<p>We have improved the ability of the package to work with sparse matrices. We have added a negative binomial count splitting function, but the tutorials for this function are still a work in progress. This function implements the decomposition of the negative binomial described in Neufeld et al., 2022 <a href="https://arxiv.org/abs/2301.07276" class="external-link">(link to preprint)</a>.</p>
-<p>The vignettes and data associated with this package are stored in the associated ``countsplit.tutorials” package. To see the tutorials, please visit the updated tutorial website: <a href="https://anna-neufeld.github.io/countsplit.tutorials/" class="external-link">https://anna-neufeld.github.io/countsplit.tutorials/</a>. This change helps with overall package size and build time.</p>
+<p>We have consolidated the functions in this package such that both Poisson and negative binomial thinning can be performed using the same function; <code>countsplit</code>. This function can also be used to create an arbitrary number of folds of data, rather than just a single train/test split.</p>
+<p>The vignettes and data associated with this package are stored in the associated ``countsplit.tutorials” package. To see the tutorials, please visit the updated tutorial website: <a href="https://anna-neufeld.github.io/countsplit.tutorials/" class="external-link">https://anna-neufeld.github.io/countsplit.tutorials/</a>. This change helps with overall package size and build time. <em>The negative binomial tutorials are still being updated, so most examples on the tutorial website use Poisson thinning only.</em></p>
 </div>
 <div class="section level2">
 <h2 id="how-can-i-get-countsplit">How can I get countsplit?<a class="anchor" aria-label="anchor" href="#how-can-i-get-countsplit"></a>
 </h2>
 <p>Make sure that <code>remotes</code> is installed by running <code>install.packages("remotes")</code>, then type</p>
-<pre class="{r}"><code><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"anna-neufeld/countsplit"</span><span class="op">)</span></span></code></pre>
+<p><code>{r} remotes::install_github("anna-neufeld/countsplit")</code></p>
 <p>To also download the data needed to reproduce the package vignettes, be sure to also install the ``countsplit.tutorials” package.</p>
-<pre class="{r}"><code>remotes::install_github("anna-neufeld/countsplit.tutorials"). </code></pre>
+<p><code>{r} remotes::install_github("anna-neufeld/countsplit.tutorials").</code></p>
 </div>
 <div class="section level2">
 <h2 id="where-can-i-learn-more">Where can I learn more?<a class="anchor" aria-label="anchor" href="#where-can-i-learn-more"></a>
 </h2>
 <p>Please visit our tutorial website <a href="https://anna-neufeld.github.io/countsplit.tutorials/" class="external-link">https://anna-neufeld.github.io/countsplit.tutorials/</a> to see an introduction to our framework on simple simulated data, as well as tutorials for integrating the count splitting package with common scRNA-seq analysis pipelines (Seurat, scran, and Monocle3).</p>
-<p>Please visit <a href="https://github.com/anna-neufeld/countsplit_paper" class="external-link">https://github.com/anna-neufeld/countsplit_paper</a> for code to reproduce the figures and tables from our paper.</p>
+<p>Please visit <a href="https://github.com/anna-neufeld/countsplit_paper" class="external-link">https://github.com/anna-neufeld/countsplit_paper</a> for code to reproduce the figures and tables from our Poisson paper.</p>
+<p>Please visit <a href="https://github.com/anna-neufeld/nbcs_paper_simualations" class="external-link">https://github.com/anna-neufeld/nbcs_paper_simulations</a> for code to reproduce the figures and tables from our negative binomial paper.</p>
 </div>
 <div class="section level2">
 <h2 id="references">References<a class="anchor" aria-label="anchor" href="#references"></a>
 </h2>
 <p>Neufeld, A.,Gao, L., Popp, J., Battle, A. &amp; Witten, D. (2022), ‘Inference after latent variable estimation for single-cell RNA sequencing data’, arXiv.2207.00554</p>
 <p>Neufeld, A.,Dharamshi, A., Gao, L., &amp; Witten, D. (2023), ‘Data thinning for convolution-closed distributions’, <a href="https://arxiv.org/abs/2301.07276/" class="external-link uri">https://arxiv.org/abs/2301.07276/</a> .</p>
+<p>Neufeld, A., Popp, J., Gao, L., Battle, A. &amp; Witten, D. (2023), ‘Negative binomial count splitting for single-cell RNA sequencing data’.</p>
 </div>
 
   </div>
@@ -143,7 +145,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
       </footer>
