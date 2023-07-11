@@ -8,7 +8,7 @@ The motivation for this method in the setting where the data are Poisson distrib
 Recent package updates
 -----
 
-We have consolidated the functions in this package such that both Poisson and negative binomial thinning can be performed using the same function; `countsplit`. This function can also be used to create an arbitrary number of folds of data, rather than just a single train/test split. 
+We have consolidated the functions in this package such that both Poisson and negative binomial thinning can be performed using the same function; `countsplit`. This function can also be used to create an arbitrary number of folds of data, rather than just a single train/test split. If you are a previous user of countsplit, please be sure to read the documentation to see our recent changes!
 
 The vignettes and data associated with this package are stored in the associated ``countsplit.tutorials" package. To see the tutorials, please visit the updated tutorial website: [https://anna-neufeld.github.io/countsplit.tutorials/](https://anna-neufeld.github.io/countsplit.tutorials/). This change helps with overall package size and build time. *The negative binomial tutorials are still being updated, so most examples on the tutorial website use Poisson thinning only.* 
 
