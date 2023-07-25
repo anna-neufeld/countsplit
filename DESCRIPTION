@@ -1,9 +1,9 @@
 Package: countsplit
-Title: Splitting a Poisson or negative binomial count matrix into independent training and testing matrices 
+Title: Splitting a Count Matrix into Independent Folds
 Version: 3.0.0
 Authors@R: 
-    person("Anna", "Neufeld", , "aneufeld@fredhutch.org", role = c("aut", "cre"))
-Description: Implements the count splitting methodology from the papers "Inference after latent variable estimation for single-cell RNA sequencing data" (Neufeld et al., 2023) and "Negative binomial count splitting for single-cell RNA sequencing data" (Neufeld et al., 2023).
+    person("Anna", "Neufeld", , "aneufeld@fredhutch.org", role = c("aut", "cre", "cph"))
+Description: Implements the count splitting methodology from the papers "Inference after latent variable estimation for single-cell RNA sequencing data" (Neufeld et al., 2023) and "Negative binomial count splitting for single-cell RNA sequencing data" (Neufeld et al., 2023). Intended for turning a matrix of single-cell RNA sequencing counts, or similar count datasets, into independent folds that can be used for training/testing or cross validation. Requires assuming that the entries in the matrix are from a Poisson or a negative binomial distribution.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -19,3 +19,4 @@ URL: https://github.com/anna-neufeld/countsplit
 Depends: 
     R (>= 2.10)
 LazyData: true
+BugReports: https://github.com/anna-neufeld/countsplit/issues
