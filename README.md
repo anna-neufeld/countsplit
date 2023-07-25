@@ -5,7 +5,7 @@ The ``countsplit`` R package splits an integer-valued matrix into multiple folds
 
 For tutorials associated with this package, please visit [https://anna-neufeld.github.io/countsplit.tutorials/](https://anna-neufeld.github.io/countsplit.tutorials/). 
 
-The motivation for this method in the setting where the data are Poisson distributed is described in Neufeld et al., 2022 [(link to paper)](http://arxiv.org/abs/2207.00554) in the context of inference after latent variable estimation for single cell RNA sequencing data. Briefly, count splitting allows users to perform differential expression analysis to see which genes vary across estimated cell types (such as those obtained via clustering) or along an estimated cellular trajectory (pseudotime). Neufeld et al., 2023 [(link to preprint coming soon)](???) extends the method to the setting where the data follow a negative binomial distributed, and provides additional settings where count splitting is useful. For example, count splitting is useful broadly for evaluating low-rank representations of the data.  
+The motivation for this method in the setting where the data are Poisson distributed is described in Neufeld et al., 2022 [(link to paper)](http://arxiv.org/abs/2207.00554) in the context of inference after latent variable estimation for single cell RNA sequencing data. Briefly, count splitting allows users to perform differential expression analysis to see which genes vary across estimated cell types (such as those obtained via clustering) or along an estimated cellular trajectory (pseudotime). Neufeld et al., 2023 [(link to preprint)](https://arxiv.org/pdf/2307.12985.pdf) extends the method to the setting where the data follow a negative binomial distributed, and provides additional settings where count splitting is useful. For example, count splitting is useful broadly for evaluating low-rank representations of the data.  
 
 Recent package updates
 -----
@@ -47,7 +47,7 @@ Neufeld, A.,Gao, L., Popp, J., Battle, A. & Witten, D. (2022), ‘Inference afte
 
 Neufeld, A.,Dharamshi, A., Gao, L., & Witten, D. (2023), ‘Data thinning for convolution-closed distributions’, https://arxiv.org/abs/2301.07276/ . 
 
-Neufeld, A., Popp, J., Gao, L., Battle, A. & Witten, D. (2023), ‘Negative binomial count splitting for single-cell RNA sequencing data'. 
+Neufeld, A., Popp, J., Gao, L., Battle, A. & Witten, D. (2023), ‘Negative binomial count splitting for single-cell RNA sequencing data'. https://arxiv.org/pdf/2307.12985.pdf
 
 
 
