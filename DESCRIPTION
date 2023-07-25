@@ -1,9 +1,9 @@
 Package: countsplit
 Title: Splitting a Poisson or negative binomial count matrix into independent training and testing matrices 
-Version: 2.0.0
+Version: 3.0.0
 Authors@R: 
     person("Anna", "Neufeld", , "aneufeld@fredhutch.org", role = c("aut", "cre"))
-Description: Implements the count splitting methodology from the paper "Inference after latent variable estimation for single cell RNA sequencing data" (Neufeld et al., 2022). 
+Description: Implements the count splitting methodology from the papers "Inference after latent variable estimation for single-cell RNA sequencing data" (Neufeld et al., 2023) and "Negative binomial count splitting for single-cell RNA sequencing data" (Neufeld et al., 2023).
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

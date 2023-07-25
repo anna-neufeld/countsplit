@@ -12,24 +12,24 @@ Recent package updates
 
 We have consolidated the functions in this package such that both Poisson and negative binomial thinning can be performed using the same function; `countsplit`. This function can also be used to create an arbitrary number of folds of data, rather than just a single train/test split. If you are a previous user of countsplit, please be sure to read the documentation to see our recent changes!
 
-The vignettes and data associated with this package are stored in the associated ``countsplit.tutorials" package. To see the tutorials, please visit the updated tutorial website: [https://anna-neufeld.github.io/countsplit.tutorials/](https://anna-neufeld.github.io/countsplit.tutorials/). This change helps with overall package size and build time. *The negative binomial tutorials are still being updated, so most examples on the tutorial website use Poisson thinning only.* 
-
-As soon as the negative binomial vignettes are complete, we will be submitting this version of ``countsplit`` to CRAN. For now, please download on github!
+The vignettes and data associated with this package are stored in the associated ``countsplit.tutorials" package. To see the tutorials, please visit the updated tutorial website: [https://anna-neufeld.github.io/countsplit.tutorials/](https://anna-neufeld.github.io/countsplit.tutorials/). This change helps with overall package size and build time. Most of the tutorials currently make use of Poisson thinning, but we are in the process of adding more tutorials that use the negative binomial methodology. 
 
 How can I get countsplit?
 -----
 
 Make sure that ``remotes`` is installed by running ``install.packages("remotes")``, then type
 
-```{r}
+```
 remotes::install_github("anna-neufeld/countsplit")
 ```
 
 To also download the data needed to reproduce the package vignettes, be sure to also install the ``countsplit.tutorials" package.
 
-```{r}
+```
 remotes::install_github("anna-neufeld/countsplit.tutorials"). 
 ```
+
+Starting soon, we hope that the ``countsplit`` package will be available on CRAN. The ``countsplit.tutorials`` package will remain only on github, for size reasons. 
 
 Where can I learn more? 
 -----
@@ -47,7 +47,7 @@ Neufeld, A.,Gao, L., Popp, J., Battle, A. & Witten, D. (2022), ‘Inference afte
 
 Neufeld, A.,Dharamshi, A., Gao, L., & Witten, D. (2023), ‘Data thinning for convolution-closed distributions’, https://arxiv.org/abs/2301.07276/ . 
 
-Neufeld, A., Popp, J., Gao, L., Battle, A. & Witten, D. (2023), ‘Negative binomial count splitting for single-cell RNA sequencing data'. https://arxiv.org/pdf/2307.12985.pdf
+Neufeld, A., Popp, J., Gao, L., Battle, A. & Witten, D. (2023), ‘Negative binomial count splitting for single-cell RNA sequencing data'. https://arxiv.org/pdf/2307.12985.pdf . 
 
 
 
