@@ -19,12 +19,12 @@
 #'
 #' @param X A cell-by-gene matrix of integer counts
 #' @param folds An integer specifying how many folds you would like to split your data into. 
-#' @param epsilon A vector, which has length "folds", that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
+#' @param epsilon A vector, which has length `folds`, that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
 #' The default and recommended setting is to allocate equal amounts of information to each fold, such that each element is `1/folds`. 
 #' @param overdisps If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of X.
 #' These numbers are the overdispersion parameters for each column in X. If these are unknown, they can be estimated with a function such as
 #' `vst` in the package `sctransform`. 
-#' @return A list of length "folds". Each element in the list stores a sparse matrix with the same dimensions as the data X. Each list element is a fold of data. 
+#' @return A list of length `folds`. Each element in the list stores a sparse matrix with the same dimensions as the data X. Each list element is a fold of data. 
 #'
 #' @examples
 #' library(countsplit)
