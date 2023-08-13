@@ -2,6 +2,6 @@
 
 export(countsplit)
 import(Matrix)
+import(Rcpp)
 importFrom(methods,as)
-importFrom(stats,rgamma)
-importFrom(stats,rmultinom)
+useDynLib(countsplit)
