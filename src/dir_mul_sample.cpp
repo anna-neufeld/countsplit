@@ -40,7 +40,6 @@ IntegerMatrix dir_mul_sample_cpp(int &x, int folds, double b) {
 // [[Rcpp::export]]
 IntegerMatrix mapply_dir_mul_sample_cpp(IntegerVector x, int folds, NumericVector overdisps) {
     int n = x.size();
-    int N = overdisps.size();
     IntegerMatrix result(folds, n);
     IntegerMatrix sample(folds, 1);
 
