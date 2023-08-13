@@ -67,8 +67,8 @@ if (!(inherits(X,"dgCMatrix"))) {
 }
   
 mapped_overdisps <- overdisps[Matrix::which(X  != 0, arr.ind=T)[,"col"]] # for only the non-zero entries in X, maps the associated (gene-specific) overdispersion param
-results <- mapply(function(x,y) as.numeric(dirMulSample(x, folds, y, epsilon)), X@x, mapped_overdisps)
-  
+results <- mapply_dir_mul_sample_cpp(x = X@x, folds = folds, overdisps = mapped_overdisps) # use Rcpp function to increase the performance
+ 
 partition <- vector(mode = "list", length = folds)
   for (f in 1:folds) {
     Xfold <- X
