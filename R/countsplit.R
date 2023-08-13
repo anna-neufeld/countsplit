@@ -16,7 +16,8 @@
 #' @export
 #' @importFrom methods as
 #' @import Matrix
-#'
+#' @import Rcpp
+#' @useDynLib countsplit
 #' @param X A cell-by-gene matrix of integer counts
 #' @param folds An integer specifying how many folds you would like to split your data into. 
 #' @param epsilon A vector, which has length `folds`, that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
@@ -29,6 +30,7 @@
 #' @examples
 #' library(countsplit)
 #' library(Matrix)
+#' library(Rcpp)
 #' # A Poisson count splitting example.
 #' n=400
 #' p=2
@@ -77,19 +79,4 @@ partition <- vector(mode = "list", length = folds)
   }
   
   return(partition)
-}
-
-#' @importFrom stats rgamma
-#' @importFrom stats rmultinom
-dirMulSample <- function(x, folds,b, epsilon=1/folds) {
-  gammas <- rgamma(folds,epsilon*b,1)
-  if (sum(gammas)==0) {
-    gammas[sample(1:length(gammas),1)] <- 1
-  }
-  if (is.infinite(sum(gammas))) {
-    gammas <- rep(1, length(gammas))
-  }
-  ps <- gammas/sum(gammas)
-  x_partition <- rmultinom(1, x, ps)
-  return(x_partition)
 }

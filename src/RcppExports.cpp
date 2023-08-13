@@ -11,7 +11,7 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // dir_mul_sample_cpp
-IntegerMatrix dir_mul_sample_cpp(int& x, int folds, double b);
+Rcpp::IntegerMatrix dir_mul_sample_cpp(int& x, int folds, double b);
 RcppExport SEXP _countsplit_dir_mul_sample_cpp(SEXP xSEXP, SEXP foldsSEXP, SEXP bSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -24,14 +24,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // mapply_dir_mul_sample_cpp
-IntegerMatrix mapply_dir_mul_sample_cpp(IntegerVector x, int folds, NumericVector overdisps);
+Rcpp::IntegerMatrix mapply_dir_mul_sample_cpp(Rcpp::IntegerVector x, int folds, Rcpp::NumericVector overdisps);
 RcppExport SEXP _countsplit_mapply_dir_mul_sample_cpp(SEXP xSEXP, SEXP foldsSEXP, SEXP overdispsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< IntegerVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type folds(foldsSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type overdisps(overdispsSEXP);
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type overdisps(overdispsSEXP);
     rcpp_result_gen = Rcpp::wrap(mapply_dir_mul_sample_cpp(x, folds, overdisps));
     return rcpp_result_gen;
 END_RCPP
