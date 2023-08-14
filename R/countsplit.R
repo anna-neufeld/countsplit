@@ -47,7 +47,6 @@
 #' cor(Xtrain[,1], Xtest[,1])
 #' cor(Xtrain[,2], Xtest[,2])
 countsplit <- function(X, folds=2, overdisps = NULL) {
-  epsilon <- rep(1/folds, folds)
 
   if (is.null(overdisps)) {
     overdisps <- rep(Inf, ncol(X))

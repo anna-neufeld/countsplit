@@ -1,5 +1,7 @@
 #include <Rcpp.h>
 
+// the first two function were based on the Rcpp Gallery https://gallery.rcpp.org/articles/recreating-rmultinom-and-rpois-with-rcpp/
+// to mimic the R function rmultinom
 Rcpp::IntegerVector rmultinom_1(int &size, Rcpp::NumericVector &probs, int &N) {
     Rcpp::IntegerVector outcome(N);
     rmultinom(size, probs.begin(), N, outcome.begin());
