@@ -4,15 +4,12 @@
 \alias{countsplit}
 \title{Count splitting}
 \usage{
-countsplit(X, folds = 2, epsilons = rep(1/folds, folds), overdisps = NULL)
+countsplit(X, folds = 2, overdisps = NULL)
 }
 \arguments{
 \item{X}{A cell-by-gene matrix of integer counts}
 
 \item{folds}{An integer specifying how many folds you would like to split your data into.}
-
-\item{epsilons}{A vector, which has length \code{folds}, that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
-The default and recommended setting is to allocate equal amounts of information to each fold, such that each element is \code{1/folds}.}
 
 \item{overdisps}{If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of X.
 These numbers are the overdispersion parameters for each column in X. If these are unknown, they can be estimated with a function such as
