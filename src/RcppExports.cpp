@@ -11,35 +11,37 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // dir_mul_sample_cpp
-Rcpp::IntegerMatrix dir_mul_sample_cpp(int& x, int folds, double b);
-RcppExport SEXP _countsplit_dir_mul_sample_cpp(SEXP xSEXP, SEXP foldsSEXP, SEXP bSEXP) {
+Rcpp::IntegerMatrix dir_mul_sample_cpp(int& x, int folds, double b, double epsilon);
+RcppExport SEXP _countsplit_dir_mul_sample_cpp(SEXP xSEXP, SEXP foldsSEXP, SEXP bSEXP, SEXP epsilonSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int& >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type folds(foldsSEXP);
     Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(dir_mul_sample_cpp(x, folds, b));
+    Rcpp::traits::input_parameter< double >::type epsilon(epsilonSEXP);
+    rcpp_result_gen = Rcpp::wrap(dir_mul_sample_cpp(x, folds, b, epsilon));
     return rcpp_result_gen;
 END_RCPP
 }
 // mapply_dir_mul_sample_cpp
-Rcpp::IntegerMatrix mapply_dir_mul_sample_cpp(Rcpp::IntegerVector x, int folds, Rcpp::NumericVector overdisps);
-RcppExport SEXP _countsplit_mapply_dir_mul_sample_cpp(SEXP xSEXP, SEXP foldsSEXP, SEXP overdispsSEXP) {
+Rcpp::IntegerMatrix mapply_dir_mul_sample_cpp(Rcpp::IntegerVector x, int folds, Rcpp::NumericVector overdisps, Rcpp::NumericVector epsilons);
+RcppExport SEXP _countsplit_mapply_dir_mul_sample_cpp(SEXP xSEXP, SEXP foldsSEXP, SEXP overdispsSEXP, SEXP epsilonsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::IntegerVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< int >::type folds(foldsSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type overdisps(overdispsSEXP);
-    rcpp_result_gen = Rcpp::wrap(mapply_dir_mul_sample_cpp(x, folds, overdisps));
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type epsilons(epsilonsSEXP);
+    rcpp_result_gen = Rcpp::wrap(mapply_dir_mul_sample_cpp(x, folds, overdisps, epsilons));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_countsplit_dir_mul_sample_cpp", (DL_FUNC) &_countsplit_dir_mul_sample_cpp, 3},
-    {"_countsplit_mapply_dir_mul_sample_cpp", (DL_FUNC) &_countsplit_mapply_dir_mul_sample_cpp, 3},
+    {"_countsplit_dir_mul_sample_cpp", (DL_FUNC) &_countsplit_dir_mul_sample_cpp, 4},
+    {"_countsplit_mapply_dir_mul_sample_cpp", (DL_FUNC) &_countsplit_mapply_dir_mul_sample_cpp, 4},
     {NULL, NULL, 0}
 };
 

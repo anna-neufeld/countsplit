@@ -18,8 +18,7 @@ Rcpp::IntegerMatrix rmultinom_rcpp(int n, int size, Rcpp::NumericVector &probs) 
   }
 
 // [[Rcpp::export]]
-Rcpp::IntegerMatrix dir_mul_sample_cpp(int &x, int folds, double b) {
-  double epsilon = 1.0 / folds;
+Rcpp::IntegerMatrix dir_mul_sample_cpp(int &x, int folds, double b, double epsilon) {
   Rcpp::NumericVector gammas = Rcpp::rgamma(folds, epsilon * b, 1.0);
   double sum_gammas = std::accumulate(gammas.begin(), gammas.end(), 0.0);
 
@@ -39,13 +38,13 @@ Rcpp::IntegerMatrix dir_mul_sample_cpp(int &x, int folds, double b) {
 }
 
 // [[Rcpp::export]]
-Rcpp::IntegerMatrix mapply_dir_mul_sample_cpp(Rcpp::IntegerVector x, int folds, Rcpp::NumericVector overdisps) {
+Rcpp::IntegerMatrix mapply_dir_mul_sample_cpp(Rcpp::IntegerVector x, int folds, Rcpp::NumericVector overdisps, Rcpp::NumericVector epsilons) {
     int n = x.size();
     Rcpp::IntegerMatrix result(folds, n);
     Rcpp::IntegerMatrix sample(folds, 1);
 
     for (int i = 0; i < n; i++) {
-      sample = dir_mul_sample_cpp(x[i], folds, overdisps[i]);
+      sample = dir_mul_sample_cpp(x[i], folds, overdisps[i], epsilons[i]);
       for (int j = 0; j < folds; j++) {
         result(j, i) = sample(j, 0);
       }
