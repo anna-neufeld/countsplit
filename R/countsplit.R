@@ -20,6 +20,8 @@
 #' @useDynLib countsplit
 #' @param X A cell-by-gene matrix of integer counts
 #' @param folds An integer specifying how many folds you would like to split your data into. 
+#' @param epsilon A vector, which has length `folds`, that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
+#' The default and recommended setting is to allocate equal amounts of information to each fold, such that each element is `1/folds`. 
 #' @param overdisps If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of X.
 #' These numbers are the overdispersion parameters for each column in X. If these are unknown, they can be estimated with a function such as
 #' `vst` in the package `sctransform`. 
@@ -46,26 +48,30 @@
 #' Xtest <- split[[2]]
 #' cor(Xtrain[,1], Xtest[,1])
 #' cor(Xtrain[,2], Xtest[,2])
-countsplit <- function(X, folds=2, overdisps = NULL) {
-
-  if (is.null(overdisps)) {
-    overdisps <- rep(Inf, ncol(X))
-    message("As no overdispersion parameters were provided, Poisson count splitting will be performed.")
+countsplit <- function(X, folds=2, epsilon=rep(1/folds, folds), overdisps = NULL) {
+  
+if ( (sum(epsilon) != 1) | (sum(epsilon < 0) != 0)) {
+    stop('The elements of the epsilon vector must be non-zero and must sum to 1.')
   }
   
-  if (length(overdisps) != NCOL(X)) {
-    stop("You should proviude one overdispersion parameter for every column of X.")
-  }
+if (is.null(overdisps)) {
+  overdisps <- rep(Inf, ncol(X))
+  message("As no overdispersion parameters were provided, Poisson count splitting will be performed.")
+}
   
-  ### Do everything as sparse matrices, for speed.
-  if (!(inherits(X,"dgCMatrix"))) {
-    X <-  as(X, "sparseMatrix")
-  }
+if (length(overdisps) != NCOL(X)) {
+  stop("You should proviude one overdispersion parameter for every column of X.")
+}
   
-  mapped_overdisps <- overdisps[Matrix::which(X  != 0, arr.ind=T)[,"col"]] # for only the non-zero entries in X, maps the associated (gene-specific) overdispersion param
-  results <- mapply_dir_mul_sample_cpp(x = X@x, folds = folds, overdisps = mapped_overdisps) # use Rcpp function to increase the performance
-
-  partition <- vector(mode = "list", length = folds)
+### Do everything as sparse matrices, for speed. 
+if (!(inherits(X,"dgCMatrix"))) {
+  X <-  as(X, "sparseMatrix") 
+}
+  
+mapped_overdisps <- overdisps[Matrix::which(X  != 0, arr.ind=T)[,"col"]] # for only the non-zero entries in X, maps the associated (gene-specific) overdispersion param
+results <- mapply_dir_mul_sample_cpp(x = X@x, folds = folds, overdisps = mapped_overdisps) # use Rcpp function to increase the performance
+ 
+partition <- vector(mode = "list", length = folds)
   for (f in 1:folds) {
     Xfold <- X
     Xfold@x <- as.numeric(results[f,])
