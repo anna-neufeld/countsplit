@@ -12,7 +12,8 @@ countsplit(X, folds = 2, epsilon = rep(1/folds, folds), overdisps = NULL)
 \item{folds}{An integer specifying how many folds you would like to split your data into.}
 
 \item{epsilon}{A vector, which has length \code{folds}, that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
-The default and recommended setting is to allocate equal amounts of information to each fold, such that each element is \code{1/folds}.}
+When folds is not equal to 2, the recommended (and default) setting is to allocate equal amounts of information to each fold, such that each element is \code{1/folds}.
+When folds=2, the default is still (1/2, 1/2), but other values may be beneficial.}
 
 \item{overdisps}{If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of X.
 These numbers are the overdispersion parameters for each column in X. If these are unknown, they can be estimated with a function such as
@@ -39,6 +40,7 @@ Please see our tutorials and vignettes for more details.
 \examples{
 library(countsplit)
 library(Matrix)
+library(Rcpp)
 # A Poisson count splitting example.
 n=400
 p=2
@@ -49,7 +51,7 @@ Xtest <- split[[2]]
 cor(Xtrain[,1], Xtest[,1])
 cor(Xtrain[,2], Xtest[,2])
 
-# A negative binomial count splitting example. 
+# A negative binomial count splitting example.
 X <- matrix(rnbinom(n*p, mu=7, size=7), nrow=n, ncol=p)
 split <- countsplit(X, folds=2, overdisps=c(7,7))
 Xtrain <- split[[1]]
