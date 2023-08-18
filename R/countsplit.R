@@ -89,23 +89,3 @@ countsplit <- function(X, folds=2, epsilon=rep(1/folds, folds), overdisps = NULL
 }
 
 
-#' @importFrom stats rgamma
-#' @importFrom stats rmultinom
-#dirMulSample <- function(x, folds,b, epsilon=rep(1/folds, folds)) {
-
-#  ps <- epsilon
-
-#  if (!is.infinite(b)) {
-#    gammas <- rgamma(folds,epsilon*b,1)
-#    ps <-  gammas / sum(gammas);
-#  }
-#  if (b==0) {
-#    ps <- rep(0, folds)
-#    ps[sample(1:folds, size=1, prob=epsilon)] <- 1
- # }
-#  x_partition <- rmultinom(1, x, ps)
-#  return(x_partition)
-#}
-
-
-

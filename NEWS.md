@@ -1,3 +1,7 @@
+# countsplit 3.1.0
+
+Thanks to some Github contributions from Mischko Heming, this version of the package has been substantially sped up compared to version 3.0.0. This speedup added a dependency on Rcpp, as the main function is now implemented in C++. 
+
 # countsplit 3.0.0
 
 This is the initial CRAN submission for countsplit. Compared to previous versions we have:
