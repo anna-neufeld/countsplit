@@ -5,8 +5,8 @@ rmultinom_1 <- function(size, probs) {
     .Call('_countsplit_rmultinom_1', PACKAGE = 'countsplit', size, probs)
 }
 
-dir_mul_sample_cpp <- function(x, folds, b) {
-    .Call('_countsplit_dir_mul_sample_cpp', PACKAGE = 'countsplit', x, folds, b)
+dir_mul_sample_cpp <- function(size, folds, b) {
+    .Call('_countsplit_dir_mul_sample_cpp', PACKAGE = 'countsplit', size, folds, b)
 }
 
 beta_bin_sample_cpp <- function(x, eps, b) {

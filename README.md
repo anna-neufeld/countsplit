@@ -10,6 +10,8 @@ The motivation for this method in the setting where the data are Poisson distrib
 Recent package updates
 -----
 
+We recently sped up the performance of the package by re-implementing the main functions in C++. This is especially useful for real scRNA-seq datasets, which are quite large. We would like to acknowledge Mischko Heming (mheming.de) for implementing most of this speedup through a github contribution. 
+
 We have consolidated the functions in this package such that both Poisson and negative binomial thinning can be performed using the same function; `countsplit`. This function can also be used to create an arbitrary number of folds of data, rather than just a single train/test split. If you are a previous user of countsplit, please be sure to read the documentation to see our recent changes!
 
 The vignettes and data associated with this package are stored in the associated ``countsplit.tutorials" package. To see the tutorials, please visit the updated tutorial website: [https://anna-neufeld.github.io/countsplit.tutorials/](https://anna-neufeld.github.io/countsplit.tutorials/). This change helps with overall package size and build time. Most of the tutorials currently make use of Poisson thinning, but we are in the process of adding more tutorials that use the negative binomial methodology. 
@@ -17,7 +19,7 @@ The vignettes and data associated with this package are stored in the associated
 How can I get countsplit?
 -----
 
-Make sure that ``remotes`` is installed by running ``install.packages("remotes")``, then type
+Make sure that ``remotes`` is installed by running ``install.packages("remotes")``, then type:
 
 ```
 remotes::install_github("anna-neufeld/countsplit")
@@ -29,7 +31,12 @@ To also download the data needed to reproduce the package vignettes, be sure to 
 remotes::install_github("anna-neufeld/countsplit.tutorials"). 
 ```
 
-Starting soon, we hope that the ``countsplit`` package will be available on CRAN. The ``countsplit.tutorials`` package will remain only on github, for size reasons. 
+Starting soon, we hope that the ``countsplit`` package will be available on CRAN. The ``countsplit.tutorials`` package will remain only on github, for size reasons. Future versions of this package will be able to be downloaded with: 
+
+```
+install.packages("countsplit")
+```
+
 
 Where can I learn more? 
 -----

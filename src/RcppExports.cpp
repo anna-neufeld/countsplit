@@ -23,15 +23,15 @@ BEGIN_RCPP
 END_RCPP
 }
 // dir_mul_sample_cpp
-Rcpp::IntegerVector dir_mul_sample_cpp(int& x, int folds, double b);
-RcppExport SEXP _countsplit_dir_mul_sample_cpp(SEXP xSEXP, SEXP foldsSEXP, SEXP bSEXP) {
+Rcpp::IntegerVector dir_mul_sample_cpp(int& size, int folds, double b);
+RcppExport SEXP _countsplit_dir_mul_sample_cpp(SEXP sizeSEXP, SEXP foldsSEXP, SEXP bSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< int& >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int& >::type size(sizeSEXP);
     Rcpp::traits::input_parameter< int >::type folds(foldsSEXP);
     Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(dir_mul_sample_cpp(x, folds, b));
+    rcpp_result_gen = Rcpp::wrap(dir_mul_sample_cpp(size, folds, b));
     return rcpp_result_gen;
 END_RCPP
 }

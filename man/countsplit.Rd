@@ -12,15 +12,15 @@ countsplit(X, folds = 2, epsilon = rep(1/folds, folds), overdisps = NULL)
 \item{folds}{An integer specifying how many folds you would like to split your data into.}
 
 \item{epsilon}{A vector, which has length \code{folds}, that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
-When folds is not equal to 2, the recommended (and default) setting is to allocate equal amounts of information to each fold, such that each element is \code{1/folds}.
-When folds=2, the default is still (1/2, 1/2), but other values may be beneficial.}
+When \code{folds} is not equal to 2, the recommended (and default) setting is to allocate equal amounts of information to each fold, such that each element is \code{1/folds}.
+When \code{folds=2}, the default is still \verb{(1/2, 1/2)}, but other values may be beneficial.}
 
-\item{overdisps}{If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of X.
-These numbers are the overdispersion parameters for each column in X. If these are unknown, they can be estimated with a function such as
+\item{overdisps}{If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of \code{X}.
+These numbers are the overdispersion parameters for each column in \code{X}. If these are unknown, they can be estimated with a function such as
 \code{vst} in the package \code{sctransform}.}
 }
 \value{
-A list of length \code{folds}. Each element in the list stores a sparse matrix with the same dimensions as the data X. Each list element is a fold of data.
+A list of length \code{folds}. Each element in the list stores a sparse matrix with the same dimensions as the data \code{X}. Each list element is a fold of data.
 }
 \description{
 Takes one matrix of counts and splits it into a specified number of folds. Each fold is a matrix of counts with the same dimension
@@ -28,12 +28,12 @@ as the original matrix. Summing element-wise across the folds yields the origina
 }
 \details{
 When the argument \code{overdisps} is set to NULL, this function performs the Poisson count splitting methodology outlined in
-Neufeld et al. 2022. With this setting, the folds of data are independent only if the original data were drawn from a Poisson distribution.
+Neufeld et al. (2022) \url{doi:10.1093/biostatistics/kxac047}. With this setting, the folds of data are independent only if the original data were drawn from a Poisson distribution.
 
 If the data are thought to be overdispersed relative to the Poisson, then we may instead model them as coming from a negative binomial distribution,
 If we assume that \eqn{X_{ij} \sim NB(\mu_{ij}, b_j)}, where this parameterization means that \eqn{ E[X_{ij}] = \mu_{ij}} and \eqn{ Var[X_{ij}] = \mu_{ij} + \mu_{ij}^2/b_j}, then
 we should pass in \code{overdisps} = \eqn{c(b_1, \ldots, b_j)}. If this is the correct assumption, then the resulting folds of data will be independent.
-This is the negative binomial count splitting funciton of Neufeld et al., 2023.
+This is the negative binomial count splitting method of Neufeld et al. (2023) \url{arXiv:2307.12985}.
 
 Please see our tutorials and vignettes for more details.
 }
