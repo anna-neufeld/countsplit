@@ -28,12 +28,12 @@ as the original matrix. Summing element-wise across the folds yields the origina
 }
 \details{
 When the argument \code{overdisps} is set to NULL, this function performs the Poisson count splitting methodology outlined in
-Neufeld et al. (2022) \url{doi:10.1093/biostatistics/kxac047}. With this setting, the folds of data are independent only if the original data were drawn from a Poisson distribution.
+Neufeld et al. (2022). With this setting, the folds of data are independent only if the original data were drawn from a Poisson distribution.
 
 If the data are thought to be overdispersed relative to the Poisson, then we may instead model them as coming from a negative binomial distribution,
 If we assume that \eqn{X_{ij} \sim NB(\mu_{ij}, b_j)}, where this parameterization means that \eqn{ E[X_{ij}] = \mu_{ij}} and \eqn{ Var[X_{ij}] = \mu_{ij} + \mu_{ij}^2/b_j}, then
 we should pass in \code{overdisps} = \eqn{c(b_1, \ldots, b_j)}. If this is the correct assumption, then the resulting folds of data will be independent.
-This is the negative binomial count splitting method of Neufeld et al. (2023) \url{arXiv:2307.12985}.
+This is the negative binomial count splitting method of Neufeld et al. (2023).
 
 Please see our tutorials and vignettes for more details.
 }
@@ -58,4 +58,7 @@ Xtrain <- split[[1]]
 Xtest <- split[[2]]
 cor(Xtrain[,1], Xtest[,1])
 cor(Xtrain[,2], Xtest[,2])
+}
+\references{
+reference
 }
