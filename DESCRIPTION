@@ -1,6 +1,6 @@
 Package: countsplit
 Title: Splitting a Count Matrix into Independent Folds
-Version: 3.1.0
+Version: 4.0.0
 Authors@R: 
  c(person(given="Anna", family="Neufeld", email="aneufeld@fredhutch.org", role = c("aut", "cre", "cph")),
     person(given="Mischko", family="Heming", email="mhem@mailbox.org", role=c("ctb")),
