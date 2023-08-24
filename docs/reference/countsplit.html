@@ -18,7 +18,7 @@ as the original matrix. Summing element-wise across the folds yields the origina
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">countsplit</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">4.0.0</span>
       </span>
     </div>
 
@@ -66,13 +66,14 @@ as the original matrix. Summing element-wise across the folds yields the origina
 
 
 <dt>epsilon</dt>
-<dd><p>A vector, which has length "folds", that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
-The default and recommended setting is to allocate equal amounts of information to each fold, such that each element is <code>1/folds</code>.</p></dd>
+<dd><p>A vector, which has length <code>folds</code>, that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
+When <code>folds</code> is not equal to 2, the recommended (and default) setting is to allocate equal amounts of information to each fold, such that each element is <code>1/folds</code>.
+When <code>folds=2</code>, the default is still <code>(1/2, 1/2)</code>, but other values may be beneficial.</p></dd>
 
 
 <dt>overdisps</dt>
-<dd><p>If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of X.
-These numbers are the overdispersion parameters for each column in X. If these are unknown, they can be estimated with a function such as
+<dd><p>If NULL, then Poisson count splitting will be performed. Otherwise, this parameter should be a vector of non-negative numbers whose length is equal to the number of columns of <code>X</code>.
+These numbers are the overdispersion parameters for each column in <code>X</code>. If these are unknown, they can be estimated with a function such as
 <code>vst</code> in the package <code>sctransform</code>.</p></dd>
 
 </dl></div>
@@ -80,23 +81,28 @@ These numbers are the overdispersion parameters for each column in X. If these a
     <h2>Value</h2>
     
 
-<p>A list of length "folds". Each element in the list stores a sparse matrix with the same dimensions as the data X. Each list element is a fold of data.</p>
+<p>A list of length <code>folds</code>. Each element in the list stores a sparse matrix with the same dimensions as the data <code>X</code>. Each list element is a fold of data.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
     <p>When the argument <code>overdisps</code> is set to NULL, this function performs the Poisson count splitting methodology outlined in
-Neufeld et al. 2022. With this setting, the folds of data are independent only if the original data were drawn from a Poisson distribution.</p>
+Neufeld et al. (2022). With this setting, the folds of data are independent only if the original data were drawn from a Poisson distribution.</p>
 <p>If the data are thought to be overdispersed relative to the Poisson, then we may instead model them as coming from a negative binomial distribution,
 If we assume that \(X_{ij} \sim NB(\mu_{ij}, b_j)\), where this parameterization means that \( E[X_{ij}] = \mu_{ij}\) and \( Var[X_{ij}] = \mu_{ij} + \mu_{ij}^2/b_j\), then
 we should pass in <code>overdisps</code> = \(c(b_1, \ldots, b_j)\). If this is the correct assumption, then the resulting folds of data will be independent.
-This is the negative binomial count splitting funciton of Neufeld et al., 2023.</p>
+This is the negative binomial count splitting method of Neufeld et al. (2023).</p>
 <p>Please see our tutorials and vignettes for more details.</p>
+    </div>
+    <div id="references">
+    <h2>References</h2>
+    <p>reference</p>
     </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/anna-neufeld/countsplit" class="external-link">countsplit</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://Matrix.R-forge.R-project.org" class="external-link">Matrix</a></span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://www.rcpp.org" class="external-link">Rcpp</a></span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="co"># A Poisson count splitting example.</span></span></span>
 <span class="r-in"><span><span class="va">n</span><span class="op">=</span><span class="fl">400</span></span></span>
 <span class="r-in"><span><span class="va">p</span><span class="op">=</span><span class="fl">2</span></span></span>
@@ -106,19 +112,19 @@ This is the negative binomial count splitting funciton of Neufeld et al., 2023.<
 <span class="r-in"><span><span class="va">Xtrain</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">Xtest</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">Xtest</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.08316909</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.08364424</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="va">Xtest</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.01774501</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.04928503</span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># A negative binomial count splitting example. </span></span></span>
+<span class="r-in"><span><span class="co"># A negative binomial count splitting example.</span></span></span>
 <span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html" class="external-link">rnbinom</a></span><span class="op">(</span><span class="va">n</span><span class="op">*</span><span class="va">p</span>, mu<span class="op">=</span><span class="fl">7</span>, size<span class="op">=</span><span class="fl">7</span><span class="op">)</span>, nrow<span class="op">=</span><span class="va">n</span>, ncol<span class="op">=</span><span class="va">p</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">split</span> <span class="op">&lt;-</span> <span class="fu">countsplit</span><span class="op">(</span><span class="va">X</span>, folds<span class="op">=</span><span class="fl">2</span>, overdisps<span class="op">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">7</span>,<span class="fl">7</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">Xtrain</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">Xtest</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">Xtest</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.001676299</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.02722604</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="va">Xtest</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.02827121</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.05837078</span>
 </code></pre></div>
     </div>
   </div>
