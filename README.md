@@ -19,22 +19,22 @@ The vignettes and data associated with this package are stored in the associated
 How can I get countsplit?
 -----
 
-Make sure that ``remotes`` is installed by running ``install.packages("remotes")``, then type:
-
-```
-remotes::install_github("anna-neufeld/countsplit")
-```
-
-To also download the data needed to reproduce the package vignettes, be sure to also install the ``countsplit.tutorials" package.
-
-```
-remotes::install_github("anna-neufeld/countsplit.tutorials"). 
-```
-
-Starting soon, we hope that the ``countsplit`` package will be available on CRAN. The ``countsplit.tutorials`` package will remain only on github, for size reasons. Future versions of this package will be able to be downloaded with: 
+Countsplit 4.0.0 is now available on `CRAN`, and can be downloaded as follows. 
 
 ```
 install.packages("countsplit")
+```
+
+The latest development version can be downloaded from github as follows. In order to run this, you must first make sure that ``remotes`` is installed (and if it is not, run ``install.packages("remotes")``). 
+
+```
+remotes::install_github("anna-neufeld/countsplit", ref = 'develop')
+```
+
+To also download the data needed to reproduce the package vignettes, be sure to also install the ``countsplit.tutorials" package. This must be downloaded from github (it will not be added to CRAN due to package size and the time it takes to build the vignettes).  
+
+```
+remotes::install_github("anna-neufeld/countsplit.tutorials")
 ```
 
 
