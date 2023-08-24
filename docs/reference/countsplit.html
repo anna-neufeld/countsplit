@@ -112,9 +112,9 @@ This is the negative binomial count splitting method of Neufeld et al. (2023).</
 <span class="r-in"><span><span class="va">Xtrain</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">Xtest</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">Xtest</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.08364424</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.06657386</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="va">Xtest</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.04928503</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.02724683</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># A negative binomial count splitting example.</span></span></span>
 <span class="r-in"><span><span class="va">X</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/NegBinomial.html" class="external-link">rnbinom</a></span><span class="op">(</span><span class="va">n</span><span class="op">*</span><span class="va">p</span>, mu<span class="op">=</span><span class="fl">7</span>, size<span class="op">=</span><span class="fl">7</span><span class="op">)</span>, nrow<span class="op">=</span><span class="va">n</span>, ncol<span class="op">=</span><span class="va">p</span><span class="op">)</span></span></span>
@@ -122,9 +122,9 @@ This is the negative binomial count splitting method of Neufeld et al. (2023).</
 <span class="r-in"><span><span class="va">Xtrain</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="va">Xtest</span> <span class="op">&lt;-</span> <span class="va">split</span><span class="op">[[</span><span class="fl">2</span><span class="op">]</span><span class="op">]</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span>, <span class="va">Xtest</span><span class="op">[</span>,<span class="fl">1</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.02722604</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] -0.1417722</span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/stats/cor.html" class="external-link">cor</a></span><span class="op">(</span><span class="va">Xtrain</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span>, <span class="va">Xtest</span><span class="op">[</span>,<span class="fl">2</span><span class="op">]</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.05837078</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 0.02038857</span>
 </code></pre></div>
     </div>
   </div>
