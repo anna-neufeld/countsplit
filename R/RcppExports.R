@@ -25,3 +25,16 @@ mapply_betabin_sample_cpp <- function(x, eps1, overdisps) {
     .Call('_countsplit_mapply_betabin_sample_cpp', PACKAGE = 'countsplit', x, eps1, overdisps)
 }
 
+#'  modified Log normalization
+#'
+#' This is log normalization function based on Seurats normalization method and slightly altered for this package.
+#' Reference: https://github.com/satijalab/seurat/blob/763259d05991d40721dee99c9919ec6d4491d15e/src/data_manipulation.cpp#L113
+#'
+#' @param data A sparse gene-by-cell matrix of integer counts
+#' @param scale_factor a scale factor (usually 10000)
+#' @param eps_train A double that determines the proportion of information that is allocated to each fold. Default is 1 - 1/folds.
+#' @export
+LogNorm <- function(data, scale_factor, eps_train) {
+    .Call('_countsplit_LogNorm', PACKAGE = 'countsplit', data, scale_factor, eps_train)
+}
+
