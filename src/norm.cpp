@@ -1,26 +1,29 @@
-#include <RcppEigen.h>
+#define RCPP_ARMADILLO_RETURN_ANYVEC_AS_VECTOR
+#include <RcppArmadillo.h>
 
+// [[Rcpp::depends(RcppArmadillo)]]
 
-// [[Rcpp::depends(RcppEigen)]]
-
-
-
-//'  modified Log normalization
-//'
-//' This is log normalization function based on Seurats normalization method and slightly altered for this package.
-//' Reference: https://github.com/satijalab/seurat/blob/763259d05991d40721dee99c9919ec6d4491d15e/src/data_manipulation.cpp#L113
-//'
-//' @param data A sparse gene-by-cell matrix of integer counts
+//' @name LogNorm
+//' @title modified Log normalization
+//' @description This function performs log(x+1) normalization after divided by the total counts per cell and multiplied by a scale factor, as done in Seurat.
+//' The only difference is that we here multiply by 1/eps_train.
+//' Also this function has been rewritten in RcppArmadillo.
+//' @param mat A sparse gene-by-cell matrix of integer counts
 //' @param scale_factor a scale factor (usually 10000)
 //' @param eps_train A double that determines the proportion of information that is allocated to each fold. Default is 1 - 1/folds.
+//' @return A sparse matrix of log-normalized counts multiplied by 1/eps_train.
 //' @export
 // [[Rcpp::export]]
-Eigen::SparseMatrix<double> LogNorm(Eigen::SparseMatrix<double> data, int scale_factor, double eps_train){
-  Eigen::VectorXd colSums = data.transpose() * Eigen::VectorXd::Ones(data.rows());
-  for (int k=0; k < data.outerSize(); ++k){
-    for (Eigen::SparseMatrix<double>::InnerIterator it(data, k); it; ++it){
-      it.valueRef() = std::log1p((double(it.value())/ eps_train) / colSums[k] * scale_factor);
-    }
+arma::sp_mat LogNorm(arma::sp_mat mat, int scale_factor, double eps_train) {
+  arma::uword numCols = mat.n_cols;
+  arma::vec colSums(numCols);
+
+  for(arma::sp_mat::const_iterator it = mat.begin(); it != mat.end(); ++it) {
+    colSums(it.col()) += *it;
   }
-  return data;
+
+  for (arma::sp_mat::iterator it = mat.begin(); it != mat.end(); ++it) {
+    *it = std::log1p((*it / eps_train) / colSums[it.col()] * scale_factor);
+  }
+  return mat;
 }

@@ -4,16 +4,20 @@
 \alias{LogNorm}
 \title{modified Log normalization}
 \usage{
-LogNorm(data, scale_factor, eps_train)
+LogNorm(mat, scale_factor, eps_train)
 }
 \arguments{
-\item{data}{A sparse gene-by-cell matrix of integer counts}
+\item{mat}{A sparse gene-by-cell matrix of integer counts}
 
 \item{scale_factor}{a scale factor (usually 10000)}
 
 \item{eps_train}{A double that determines the proportion of information that is allocated to each fold. Default is 1 - 1/folds.}
 }
+\value{
+A sparse matrix of log-normalized counts multiplied by 1/eps_train.
+}
 \description{
-This is log normalization function based on Seurats normalization method and slightly altered for this package.
-Reference: https://github.com/satijalab/seurat/blob/763259d05991d40721dee99c9919ec6d4491d15e/src/data_manipulation.cpp#L113
+This function performs log(x+1) normalization after divided by the total counts per cell and multiplied by a scale factor, as done in Seurat.
+The only difference is that we here multiply by 1/eps_train.
+Also this function has been rewritten in RcppArmadillo.
 }

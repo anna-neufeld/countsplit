@@ -24,4 +24,4 @@ LazyData: true
 BugReports: https://github.com/anna-neufeld/countsplit/issues
 LinkingTo: 
     Rcpp,
-    RcppEigen
+    RcppArmadillo
