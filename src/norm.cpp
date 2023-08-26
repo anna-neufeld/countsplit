@@ -16,7 +16,7 @@
 // [[Rcpp::export]]
 arma::sp_mat LogNorm(arma::sp_mat mat, int scale_factor, double eps_train) {
   arma::uword numCols = mat.n_cols;
-  arma::vec colSums(numCols);
+  arma::vec colSums(numCols, arma::fill::zeros);
 
   for(arma::sp_mat::const_iterator it = mat.begin(); it != mat.end(); ++it) {
     colSums(it.col()) += *it;
