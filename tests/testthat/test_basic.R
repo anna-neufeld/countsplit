@@ -1,5 +1,23 @@
 library(countsplit)
 
+context("Error messages") 
+
+test_that("Error messages", {
+  n <- 50
+  p <- 20
+  X <- matrix(rpois(n*p, lambda=3), nrow=n)
+  
+
+  try1 <- try(countsplit(X, epsilon=0.5))
+  expect_equal(class(try1), "try-error")
+  
+  try1 <- try(countsplit(X, epsilon=c(-0.2, 1.2)))
+  expect_equal(class(try1), "try-error")
+  
+  try1 <- try(countsplit(X, epsilon=c(0.5, 1.5)))
+  expect_equal(class(try1), "try-error")
+})
+
 context("Poisson, 2, equal")
 
 test_that("Poisson, 2, equal", {

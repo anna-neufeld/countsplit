@@ -18,7 +18,7 @@
 #' @import Matrix
 #' @import Rcpp
 #' @useDynLib countsplit
-#' @param X A cell-by-gene matrix of integer counts
+#' @param X A cell-by-gene matrix of integer counts. Note that this differs from many scRNA-seq packages, where gene-by-cell is the convention. When Poisson count splitting is used (`overdisps=NULL`), the matrix can be either cell-by-gene or gene-by-cell.
 #' @param folds An integer specifying how many folds you would like to split your data into.
 #' @param epsilon A vector, which has length `folds`, that stores non-zero elements that sum to one. Determines the proportion of information from X that is allocated to each fold.
 #' When `folds` is not equal to 2, the recommended (and default) setting is to allocate equal amounts of information to each fold, such that each element is `1/folds`.
@@ -58,6 +58,11 @@ countsplit <- function(X, folds=2, epsilon=rep(1/folds, folds), overdisps = NULL
 
   if (length(overdisps) != NCOL(X)) {
     stop("You should provide one overdispersion parameter for every column of X. Make sure that your matrix X is cell-by-gene rather than gene-by-cell.")
+  }
+  
+  
+  if (length(epsilon) != folds | sum(epsilon) != 1 | sum(epsilon <= 0) > 0) {
+    stop("The parameter epsilon should be a vector with length folds with positive entries that sum to 1.")
   }
 
   ### Do everything as sparse matrices, for speed.

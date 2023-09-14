@@ -7,7 +7,7 @@
 countsplit(X, folds = 2, epsilon = rep(1/folds, folds), overdisps = NULL)
 }
 \arguments{
-\item{X}{A cell-by-gene matrix of integer counts}
+\item{X}{A cell-by-gene matrix of integer counts. Note that this differs from many scRNA-seq packages, where gene-by-cell is the convention. When Poisson count splitting is used (\code{overdisps=NULL}), the matrix can be either cell-by-gene or gene-by-cell.}
 
 \item{folds}{An integer specifying how many folds you would like to split your data into.}
 
