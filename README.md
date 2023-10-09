@@ -7,6 +7,8 @@ For tutorials associated with this package, please visit [https://anna-neufeld.g
 
 The motivation for this method in the setting where the data are Poisson distributed is described in Neufeld et al., 2022 [(link to paper)](https://arxiv.org/abs/2207.00554) in the context of inference after latent variable estimation for single cell RNA sequencing data. Briefly, count splitting allows users to perform differential expression analysis to see which genes vary across estimated cell types (such as those obtained via clustering) or along an estimated cellular trajectory (pseudotime). Neufeld et al., 2023 [(link to preprint)](https://arxiv.org/pdf/2307.12985.pdf) extends the method to the setting where the data follow a negative binomial distributed, and provides additional settings where count splitting is useful. For example, count splitting is useful broadly for evaluating low-rank representations of the data.  
 
+This material is based upon research supported in part by the Office of Naval Research under Award Number N000142312589 and the National Science Foundation under Award Number 2322920.
+
 Recent package updates
 -----
 
