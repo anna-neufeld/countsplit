@@ -1,3 +1,7 @@
+# countsplit 4.0.2
+
+The countsplit package now includes the est_overdispersions() function which returns a vector of overdispersion parameter estimates for each row of the expression matrix. This functions builds off of the sctransform package to obtain reasonable overdispersion estimates while also accounting for zero rows and other data imperfections. 
+
 # countsplit 4.0.1
 
 The countsplit package will now throw a helpful error message if the parameter "epsilon" is not passed in correctly.

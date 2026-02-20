@@ -4,7 +4,8 @@ Version: 4.0.1
 Authors@R: 
  c(person(given="Anna", family="Neufeld", email="aneufeld@fredhutch.org", role = c("aut", "cre", "cph")),
     person(given="Mischko", family="Heming", email="mhem@mailbox.org", role=c("ctb")),
-    person(given="Joshua", family="Popp", email="jpopp4@jhmi.edu",role=c("ctb")))
+    person(given="Joshua", family="Popp", email="jpopp4@jhmi.edu",role=c("ctb")),
+    person(given="Sebastian", family="Quadrini", email="saq1@williams.edu", role=c("ctb")))
 Description: Implements the count splitting methodology from Neufeld et al. (2022) <doi:10.1093/biostatistics/kxac047> and Neufeld et al. (2023) <arXiv:2307.12985>. Intended for turning a matrix of single-cell RNA sequencing counts, or similar count datasets, into independent folds that can be used for training/testing or cross validation. Assumes that the entries in the matrix are from a Poisson or a negative binomial distribution.
 License: MIT + file LICENSE
 Encoding: UTF-8

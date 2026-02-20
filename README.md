@@ -12,6 +12,8 @@ This material is based upon research supported in part by the Office of Naval Re
 Recent package updates
 -----
 
+A new function, est_overdispersions(), has been added to the countsplit package. This function uses vst() function from the sctransform package to estimate overdispersion parameters for each row of the expression matrix while also accounting for zero-rows and other discrepancies. 
+
 We recently sped up the performance of the package by re-implementing the main functions in C++. This is especially useful for real scRNA-seq datasets, which are quite large. We would like to acknowledge Mischko Heming (mheming.de) for implementing most of this speedup through a github contribution. 
 
 We have consolidated the functions in this package such that both Poisson and negative binomial thinning can be performed using the same function; `countsplit`. This function can also be used to create an arbitrary number of folds of data, rather than just a single train/test split. If you are a previous user of countsplit, please be sure to read the documentation to see our recent changes!
