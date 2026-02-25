@@ -1,4 +1,4 @@
-What is countsplit?
+\What is countsplit?
 -----
 
 The ``countsplit`` R package splits an integer-valued matrix into multiple folds of data with the same dimensions. These folds will be independent under certain modeling assumptions, and can thus be used for cross validation. 
